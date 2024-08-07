@@ -1,0 +1,91 @@
+/* Navbar in app */
+.navbar-toggler {
+    border: 3px solid transparent;
+    box-shadow: none;
+    outline: none;
+    transform: none;
+  }
+  
+.navbar-toggler:focus, .navbar-toggler:active {
+border-color: white; /* Color del borde cuando está en foco o activo */
+box-shadow: none;
+outline: none;
+transform: none;
+}
+
+.user-name-nav{
+font-size: 1.5rem;
+}
+
+.user-image-nav{
+font-size: 2.1rem;
+}
+
+.outside-search{
+    border: solid 1px #ffff;
+    border-radius: 8px 0 0 8px;
+    background-color: #ffff;
+}
+
+.search-icon{
+    font-size: 1.2rem;
+    color: black;
+    font-weight: bold;
+    align-self: center;
+    justify-content: center;
+}
+
+.search-button-nav{
+    border-radius:0 8px 8px 0;
+}
+
+.outside-search .form-select:focus{
+    border: none;
+    box-shadow: none;
+    box-shadow: none;
+    outline: none;
+    transform: none;
+}
+
+
+.outside-search .form-control:focus {
+    border: none;
+    box-shadow: none;
+    box-shadow: none;
+    outline: none;
+    transform: none;
+}
+
+.first-search{
+display: flex !important;
+}
+
+.second-search{
+    display: none !important;
+}
+
+.config-user{
+    color: #ffff;
+}
+
+.config-user:focus{
+    background-color: #ffff;
+}
+
+
+/* hide search bars */
+@media (max-width: 1132px) {
+    .first-search{
+      display: none !important;
+    }
+
+    .second-search{
+        display:flex !important;
+    }
+  }
+
+@media (max-width: 700px) {
+    .user-name-nav{
+        display: none;
+    }
+}

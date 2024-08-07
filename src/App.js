@@ -1,25 +1,38 @@
-import logo from './logo.svg';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
+// Import bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min';
 
-function App() {
+// import fontawesome
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+//import boostrap icons
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+// Import all components
+
+//import PublicNavbar from './components/PublicNavbar/PublicNavbar';
+import Homep from './components/Homep/Homep';
+import LogInSignUp from './components/LogInSignUp/LogInSignUp';
+import ShowEvent from './components/ShowEvent/ShowEvent';
+import UserRegister from './components/UserRegister/UserRegister';
+
+const App = () =>{
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    // Main app routes
+    <Router>
+      <main>
+        <Routes>
+          <Route path='/' element={<Homep/>}/>
+          <Route path='/signUp' element={<LogInSignUp/>}/>
+          <Route path='/event' element={<ShowEvent/>}/>
+          <Route path='/userRegister' element={<UserRegister/>}/>
+          {/* <Route path='*' element={<404page/>}/> */}
+        </Routes>
+      </main>
+    </Router>
   );
-}
+};
 
 export default App;

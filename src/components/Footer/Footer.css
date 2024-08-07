@@ -1,0 +1,59 @@
+/* Start footer styles */
+
+.footer-home {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+.element {
+    font-size: 2em;
+    margin: 0 20px;
+    align-self: flex-end;
+}
+
+.brand-footer {
+    margin: 0 30px;
+}
+
+.message {
+    font-size: 0.8em;
+    text-align: center;
+    padding-top: 30px;
+    margin: auto;
+}
+
+/* Estilos para pantallas pequeñas */
+.small-footer {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    /* Ocultar el contenedor original */
+    .original-footer {
+        display: none;
+    }
+
+    /* Mostrar el contenedor para pantallas pequeñas */
+    .small-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .social-icons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .element {
+        margin: 10px;
+    }
+}
+
+/* End footer styles */

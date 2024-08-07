@@ -1,0 +1,305 @@
+/* Carousel Styles*/
+
+.carousel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.30), rgba(0, 0, 0, 0.65));
+    display: flex;
+    flex-direction: column; /* Ajustar el layout para columna */
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+
+/* .bg-img-1 {
+    background-image: url('./img/carousel-1.jpg');
+}
+
+.bg-img-2 {
+    background-image: url('./img/carousel-2.jpg');
+}
+
+.bg-img-3 {
+    background-image: url('./img/carousel-3.jpg');
+} */
+
+.carousel-image {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 90vh;
+    position: relative;
+}
+
+
+.red-letter{
+    color: #A62145;
+}
+
+.custom-btn {
+    border: 2px solid white; /* Bordes blancos */
+    background-color: transparent; /* Fondo transparente */
+    color: white; /* Texto blanco */
+    height: 44px;
+  }
+
+  .custom-btn:hover{
+    background-color: white;
+    border: 2px solid white; /* Bordes blancos */
+    color: black;
+  }
+
+
+  .carousel-title {
+    font-size: 5.5em;
+    font-weight: lighter;
+    margin-top: 100px; /* Asegúrate de que el margen se aplique en todos los casos */
+
+    /* Ajustes para pantallas medianas y más pequeñas */
+    @media (max-width: 992px) {
+        font-size: 4em; /* Reducir tamaño de fuente para pantallas medianas */
+        margin-top: 80px; /* Ejemplo: Ajuste adicional para pantallas medianas */
+    }
+
+    /* Ajustes para pantallas pequeñas y extra pequeñas */
+    @media (max-width: 768px) {
+        font-size: 3em; /* Reducir tamaño de fuente para pantallas pequeñas */
+        margin-top: 60px; /* Ejemplo: Ajuste adicional para pantallas pequeñas */
+    }
+
+    /* Ajustes para pantallas extra grandes */
+    @media (min-width: 2000px) {
+        font-size: 6em; /* Aumentar tamaño de fuente para pantallas extra grandes */
+        margin-top: 120px; /* Ejemplo: Ajuste adicional para pantallas extra grandes */
+    }
+}
+
+.carousel-text {
+    margin-bottom: 10px; /* Espacio entre cada línea de texto */
+    width: 50%;
+    text-align: center;
+    font-weight: 100;
+    font-size: 1.7em;
+
+    /* Ajustes para pantallas medianas y más pequeñas */
+    @media (max-width: 992px) {
+        font-size: 1.3em; /* Reducir tamaño de fuente para pantallas medianas */
+    }
+
+    /* Ajustes para pantallas pequeñas y extra pequeñas */
+    @media (max-width: 768px) {
+        font-size: 1em; /* Reducir tamaño de fuente para pantallas pequeñas */
+    }
+
+    /* Ajustes para pantallas extra grandes */
+    @media (min-width: 2000px) {
+        font-size: 2em; /* Aumentar tamaño de fuente para pantallas extra grandes */
+    }
+}
+/* End styles Carousel */
+
+/* About styles */
+
+.about{
+    background-color: #2A4359;
+}
+
+/* Start styles first message about */
+#title-about {
+    font-size: 2.8em;
+    color: white;
+    font-weight: bold;
+}
+
+#text-about {
+    font-size: 1.8em;
+    color: white;
+    font-weight: 200;
+}
+
+.button-about {
+    background-color: #A62145;
+}
+
+/* Ajustes para pantallas medianas (hasta 989px) */
+@media (max-width: 989px) {
+    #title-about {
+        font-size: 2em;
+    }
+    #text-about {
+        font-size: 1.5em;
+    }
+    .img-about {
+        width: 60%;
+        height: auto;
+        margin: 0 auto; /* Centrar la imagen */
+        display: block;
+    }
+}
+
+/* Ajustes para pantallas pequeñas (hasta 767.98px) */
+@media (max-width: 767.98px) {
+    #title-about {
+        font-size: 1.8em;
+    }
+    #text-about {
+        font-size: 1.2em;
+    }
+    .img-about {
+        width: 80%;
+        height: auto;
+        margin: 0 auto; /* Centrar la imagen */
+        display: block;
+    }
+}
+
+/* End styles first message about */
+
+
+/* Start styles second message about */
+#second-title-about {
+    text-align: right;
+    color: white;
+    font-size: 2.8em;
+    font-weight: bold;
+}
+
+/* Dimensiones iniciales para content-info */
+.content-info {
+    height: 245px;
+    width: 478px;
+    background-color: #42708C;
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px; /* Espacio entre cuadros */
+}
+
+.info-father {
+    justify-content: end;
+}
+
+.icon-inline {
+    padding: 10px;
+    color: #2A4359;
+    font-size: 1.8em;
+    font-style: italic;
+}
+
+.title-info {
+    font-size: 1.5em;
+    font-weight: 800;
+    text-align: left;
+}
+
+.info-info {
+    font-size: 1em;
+    font-weight: 200;
+    text-align: left;
+    margin-top: 10px;
+}
+
+/* Ajustes para pantallas medianas (hasta 1202px) */
+@media (max-width: 1202px) {
+    #second-title-about {
+        font-size: 2em;
+    }
+    .title-info {
+        font-size: 1.3em;
+    }
+    .info-info {
+        font-size: 0.9em;
+    }
+    .content-info {
+        height: auto; /* Ajustar altura automáticamente */
+        width: auto; /* Ajustar ancho automáticamente */
+        padding: 15px;
+    }
+}
+
+/* Ajustes para pantallas pequeñas (hasta 767.98px) */
+@media (max-width: 767.98px) {
+    #second-title-about {
+        text-align: center; /* Alinear al centro en pantallas pequeñas */
+        font-size: 1.8em;
+    }
+    .content-info {
+        height: auto; /* Ajustar altura automáticamente */
+        width: 100%; /* Ocupa todo el ancho en pantallas pequeñas */
+        padding: 15px;
+    }
+    .title-info {
+        font-size: 1.2em;
+    }
+    .info-info {
+        font-size: 0.8em;
+    }
+    .info-father {
+        justify-content: center; /* Centrar los cuadros en pantallas pequeñas */
+    }
+}
+
+/* End styles second message about */
+
+/* Categories styles */
+
+.titles{
+    font-size: 2.8em;
+    color: white;
+    font-weight: bold;
+}
+
+.category-circle{
+    background-color: #F2E9D8;
+    border-radius: 100px;
+    width: 200px;
+    height: 200px;
+    align-content: center;
+    text-align: center;
+}
+
+.cat{
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.cir{
+    background-color: #F2E9D8;
+    border-radius: 100px;
+    width: 150px;
+    height: 150px;
+    margin-right: 30px;
+    margin-bottom: 18px;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* Ajustes para pantallas pequeñas y extra pequeñas */
+@media (max-width: 768px) {
+    .titles{
+        font-size: 1.8em;
+    }
+
+    .cir{
+        width: 100px;
+        height: 100px;
+        font-size: 1em;
+    }
+}
+
+.logo-cat{
+    font-size: 2em;
+}
+
+/* Categories End styles */
