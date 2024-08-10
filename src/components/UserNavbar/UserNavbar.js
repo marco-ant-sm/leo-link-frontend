@@ -1,8 +1,28 @@
-import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { useEffect, useState } from 'react';
+
 import './UserNavbar.css';
 
 function UserNavbar() {
+    const [userName, setUserName] = useState('');
+    const navigate = useNavigate();
+
+
+
     useEffect(() => {
+        const token = localStorage.getItem('access');
+
+        if (token) {
+            try {
+                const decodedToken = jwtDecode(token);
+                const fullName = `${decodedToken.nombre} ${decodedToken.apellidos}`; // Assuming the token has first_name and last_name
+                setUserName(fullName);
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
+        }
+
         // Function to handle keydown events
         const handleKeyDown = (event) => {
           // Check if the pressed key is 'a' or 'A'
@@ -80,7 +100,7 @@ function UserNavbar() {
                 </button>
                 </form>
                 <div className="align-self-end d-flex">
-                <p className="user-name-nav pt-3">Marco Antonio Sánchez Mercado</p>
+                <p className="user-name-nav pt-3">{userName}</p>
                 {/* Button user options */}
                 <div className="btn-group">
                     <button
@@ -101,7 +121,13 @@ function UserNavbar() {
                         </button>
                     </li>
                     <li>
-                        <button className="dropdown-item config-user" type="button">
+                        <button className="dropdown-item config-user" 
+                        type="button"
+                        onClick={() => {
+                            localStorage.removeItem('access'); // Elimina el token del localStorage
+                            navigate('/'); // Redirige al usuario a la página de login
+                        }}
+                        >
                         Cerrar Sesión
                         </button>
                     </li>

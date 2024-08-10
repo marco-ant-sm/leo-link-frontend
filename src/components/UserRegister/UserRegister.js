@@ -70,7 +70,7 @@ function UserRegister(){
                             </div>
                             <div className="mb-3">
                             <label htmlFor="apellidos" className="form-label">
-                                Apellidos
+                                Apellidos (Opcional)
                             </label>
                             <input
                                 type="text"
