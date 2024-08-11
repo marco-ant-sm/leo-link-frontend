@@ -4,6 +4,7 @@ import Footer from '../Footer/Footer';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function LogInSignUp() {
     const [formData, setFormData] = useState({
@@ -27,8 +28,22 @@ function LogInSignUp() {
             const response = await axios.post('http://localhost:8000/api/token/', formData);
             localStorage.setItem('access', response.data.access); // Almacenar el token
             localStorage.setItem('refresh', response.data.refresh); // Almacenar el token de refresco
-            console.log('Usuario autenticado:', response.data);
-            navigate('/event'); // Redirigir a la página principal o a donde desees
+
+            const token = localStorage.getItem('access');
+            if (token) {
+                try {
+                    const decodedToken = jwtDecode(token);
+                    localStorage.setItem('user', JSON.stringify({
+                        email: `${decodedToken.email}`,
+                        nombre: `${decodedToken.nombre}`,
+                        apellidos: `${decodedToken.apellidos}`
+                    }));
+                } catch (error) {
+                    console.error('Error decoding token:', error);
+                }
+            }
+
+            navigate('/event'); 
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
         }

@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
 
 import './UserNavbar.css';
@@ -11,15 +10,18 @@ function UserNavbar() {
 
 
     useEffect(() => {
-        const token = localStorage.getItem('access');
+        const user = localStorage.getItem('user');
 
-        if (token) {
+        if (user) {
             try {
-                const decodedToken = jwtDecode(token);
-                const fullName = `${decodedToken.nombre} ${decodedToken.apellidos}`; // Assuming the token has first_name and last_name
+                // Convierte la cadena JSON en un objeto JavaScript
+                const userObj = JSON.parse(user);
+                
+                // Accede a las propiedades del objeto
+                const fullName = `${userObj.nombre} ${userObj.apellidos}`;
                 setUserName(fullName);
             } catch (error) {
-                console.error('Error decoding token:', error);
+                console.error('Error getting user:', error);
             }
         }
 
@@ -125,7 +127,9 @@ function UserNavbar() {
                         type="button"
                         onClick={() => {
                             localStorage.removeItem('access'); // Elimina el token del localStorage
-                            navigate('/'); // Redirige al usuario a la página de login
+                            localStorage.removeItem('refresh');
+                            localStorage.removeItem('user'); // Elimina el usuario
+                            navigate('/'); // Redirige al usuario a la landing page
                         }}
                         >
                         Cerrar Sesión
