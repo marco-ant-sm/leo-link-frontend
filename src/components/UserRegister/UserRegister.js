@@ -32,11 +32,9 @@ function UserRegister(){
                 const data = await response.json();
                 console.log('Usuario registrado:', data);
                 alert("Usuario registrado");
-                // Aquí puedes redirigir al usuario o mostrar un mensaje de éxito
             } else {
                 console.error('Error al registrar usuario');
                 console.error(formData);
-                // Aquí puedes mostrar un mensaje de error
             }
         } catch (error) {
             console.error('Error:', error);

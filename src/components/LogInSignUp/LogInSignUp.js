@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LogInSignUp.css';
 import Footer from '../Footer/Footer';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 function LogInSignUp() {
+
+    const navigate = useNavigate(); // Para redirigir después del inicio de sesión
+
+
+    //Var to show password
+    const [showPassword, setShowPassword] = useState(false);
+
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
 
-    const navigate = useNavigate(); // Para redirigir después del inicio de sesión
+
+    const [alert, setAlert] = useState({ show: false, message: '', type: '' });
 
     const handleChange = (e) => {
         setFormData({
@@ -24,6 +32,17 @@ function LogInSignUp() {
     // standard login
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        //Empty fields validation
+        if (!formData.email || !formData.password) {
+            setAlert({
+                show: true,
+                message: 'Por favor ingrese todos los campos.',
+                type: 'danger'
+            });
+            return;
+        }
+
         try {
             const response = await axios.post('http://localhost:8000/api/token/', formData);
             localStorage.setItem('access', response.data.access); // Almacenar el token
@@ -34,7 +53,6 @@ function LogInSignUp() {
                 try {
                     const decodedToken = jwtDecode(token);
                     localStorage.setItem('user', JSON.stringify({
-                        email: `${decodedToken.email}`,
                         nombre: `${decodedToken.nombre}`,
                         apellidos: `${decodedToken.apellidos}`
                     }));
@@ -46,6 +64,11 @@ function LogInSignUp() {
             navigate('/event'); 
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
+            setAlert({
+                show: true,
+                message: 'Error al iniciar sesión, usuario o contraseña incorrectos.',
+                type: 'danger'
+            });
         }
     };
 
@@ -54,9 +77,11 @@ function LogInSignUp() {
     const onGoogleLoginSuccess = () => {
         const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
         
-        // Define tu client_id y redirect_uri directamente
-        const CLIENT_ID = '886400823646-j30fpmf338u33sp46dg8khvi27qn9mmc.apps.googleusercontent.com';
-        const REDIRECT_URI = 'http://localhost:8000/auth/api/login/google/'; // Cambia esto si es necesario
+        // Client_id and redirect_uri
+        const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;
+        console.log(CLIENT_ID);
+        console.log(REDIRECT_URI);
     
         const scope = [
             'https://www.googleapis.com/auth/userinfo.email',
@@ -75,6 +100,22 @@ function LogInSignUp() {
         const urlParams = new URLSearchParams(params).toString();
         window.location = `${GOOGLE_AUTH_URL}?${urlParams}`;
     };
+
+    //Validate domain
+    const location = useLocation(); // Para obtener parámetros de la URL
+
+    useEffect(() => {
+        const query = new URLSearchParams(location.search);
+        const error = query.get('error');
+        
+        if (error === 'invalid_domain') {
+            setAlert({
+                show: true,
+                message: 'Necesita logearse con un dominio de la red universitaria.',
+                type: 'danger'
+            });
+        }
+    }, [location.search]);
 
     return (
         <div className="container-fluid single-section bg-dark d-flex">
@@ -97,6 +138,12 @@ function LogInSignUp() {
                     </div>
                     <div className="col-12 bg-light p-5 form-login bg-dark">
                         <form className="m-auto p-5" onSubmit={handleSubmit}>
+                            {/* Show alert */}
+                            {alert.show && (
+                                            <div className={`alert alert-${alert.type} alert-dismissible fade show text-center px-1`} role="alert">
+                                                {alert.message}
+                                            </div>
+                                        )}
                             <div className="mb-3">
                                 <label htmlFor="exampleInputEmail1" className="form-label">
                                     Correo Electrónico
@@ -109,20 +156,36 @@ function LogInSignUp() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     aria-describedby="emailHelp"
+                                    required
                                 />
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="exampleInputPassword1" className="form-label">
                                     Contraseña
                                 </label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="exampleInputPassword1"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                />
+                                <div className="position-relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        className="form-control pe-5"
+                                        id="exampleInputPassword1"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-light position-absolute top-50 end-0 translate-middle-y border-0"
+                                        style={{ right: '10px', transform: 'translateY(-50%)' }}
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? (
+                                            <i className="bi bi-eye-slash"></i>
+                                        ) : (
+                                            <i className="bi bi-eye"></i>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" className="btn log-in me-2 mt-2 mt-md-0">
                                 Iniciar Sesión

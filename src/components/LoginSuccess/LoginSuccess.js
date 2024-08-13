@@ -8,7 +8,6 @@ const LoginSuccess = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const user = {
-            email: params.get('email'),
             nombre: params.get('nombre'),
             apellidos: params.get('apellidos'),
             access: params.get('access'),
@@ -16,9 +15,8 @@ const LoginSuccess = () => {
         };
 
         // Verifica los datos del usuario
-        if (user.email && user.nombre && user.apellidos && user.access && user.refresh) {
+        if (user.nombre && user.apellidos && user.access && user.refresh) {
             localStorage.setItem('user', JSON.stringify({
-                email: user.email,
                 nombre: user.nombre,
                 apellidos: user.apellidos
             }));

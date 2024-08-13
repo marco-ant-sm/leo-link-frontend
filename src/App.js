@@ -19,6 +19,7 @@ import ShowEvent from './components/ShowEvent/ShowEvent';
 import UserRegister from './components/UserRegister/UserRegister';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import LoginSuccess from './components/LoginSuccess/LoginSuccess';
+import UserProfile from './components/UserProfile/UserProfile';
 
 const App = () =>{
   return (
@@ -33,6 +34,7 @@ const App = () =>{
           <Route path='/event' element={<PrivateRoute element={<ShowEvent />} />}/>
           <Route path='/success' element={<LoginSuccess/>}/>
           <Route path='/userRegister' element={<UserRegister/>}/>
+          <Route path='/profile' element={<UserProfile/>}/>
           {/* <Route path='*' element={<404page/>}/> */}
         </Routes>
       </main>
