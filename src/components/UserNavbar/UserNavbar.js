@@ -1,8 +1,30 @@
-import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
 import './UserNavbar.css';
 
 function UserNavbar() {
+    const [userName, setUserName] = useState('');
+    const navigate = useNavigate();
+
+
+
     useEffect(() => {
+        const user = localStorage.getItem('user');
+
+        if (user) {
+            try {
+                // Convierte la cadena JSON en un objeto JavaScript
+                const userObj = JSON.parse(user);
+                
+                // Accede a las propiedades del objeto
+                const fullName = `${userObj.nombre} ${userObj.apellidos}`;
+                setUserName(fullName);
+            } catch (error) {
+                console.error('Error getting user:', error);
+            }
+        }
+
         // Function to handle keydown events
         const handleKeyDown = (event) => {
           // Check if the pressed key is 'a' or 'A'
@@ -80,7 +102,7 @@ function UserNavbar() {
                 </button>
                 </form>
                 <div className="align-self-end d-flex">
-                <p className="user-name-nav pt-3">Marco Antonio Sánchez Mercado</p>
+                <p className="user-name-nav pt-3">{userName}</p>
                 {/* Button user options */}
                 <div className="btn-group">
                     <button
@@ -101,7 +123,15 @@ function UserNavbar() {
                         </button>
                     </li>
                     <li>
-                        <button className="dropdown-item config-user" type="button">
+                        <button className="dropdown-item config-user" 
+                        type="button"
+                        onClick={() => {
+                            localStorage.removeItem('access'); // Elimina el token del localStorage
+                            localStorage.removeItem('refresh');
+                            localStorage.removeItem('user'); // Elimina el usuario
+                            navigate('/'); // Redirige al usuario a la landing page
+                        }}
+                        >
                         Cerrar Sesión
                         </button>
                     </li>

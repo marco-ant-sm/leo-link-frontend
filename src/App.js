@@ -17,6 +17,9 @@ import Homep from './components/Homep/Homep';
 import LogInSignUp from './components/LogInSignUp/LogInSignUp';
 import ShowEvent from './components/ShowEvent/ShowEvent';
 import UserRegister from './components/UserRegister/UserRegister';
+import PrivateRoute from './components/PrivateRoute/PrivateRoute';
+import LoginSuccess from './components/LoginSuccess/LoginSuccess';
+import UserProfile from './components/UserProfile/UserProfile';
 
 const App = () =>{
   return (
@@ -26,8 +29,12 @@ const App = () =>{
         <Routes>
           <Route path='/' element={<Homep/>}/>
           <Route path='/signUp' element={<LogInSignUp/>}/>
-          <Route path='/event' element={<ShowEvent/>}/>
+          {/* <Route path='/event' element={<ShowEvent/>}/> */}
+          {/* Private Route */}
+          <Route path='/event' element={<PrivateRoute element={<ShowEvent />} />}/>
+          <Route path='/success' element={<LoginSuccess/>}/>
           <Route path='/userRegister' element={<UserRegister/>}/>
+          <Route path='/profile' element={<UserProfile/>}/>
           {/* <Route path='*' element={<404page/>}/> */}
         </Routes>
       </main>
