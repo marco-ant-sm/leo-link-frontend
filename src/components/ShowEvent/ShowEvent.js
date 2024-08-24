@@ -1,8 +1,79 @@
 import './ShowEvent.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
-import Footer from '../Footer/Footer';
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useNavigate} from 'react-router-dom';
 
 function ShowEvent() {
+    const { id } = useParams();  // Captura el ID del evento desde la URL
+    const [eventData, setEventData] = useState({});
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const [comments, setComments] = useState([]);
+
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/events/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+                setEventData(response.data);
+            } catch (error) {
+                setError('Error fetching event');
+                console.error(error.response.data);
+                navigate('/showAllEvents');
+            }
+        };
+
+        const fetchComments = async (eventId) => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/eventos/${eventId}/comentarios/`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+                setComments(response.data);
+            } catch (error) {
+                console.error('Error fetching comments', error);
+            }
+        };
+
+        fetchEvent();
+        fetchComments(id);
+    }, [id]);
+
+    const [newComment, setNewComment] = useState('');
+
+    const handleCommentChange = (e) => {
+        setNewComment(e.target.value);
+    };
+
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+        if(newComment.trim() === ''){
+            console.log("Ingresa un comentario");
+            return;
+        }
+        try {
+            const response = await axios.post(`http://localhost:8000/api/eventos/${eventData.id}/comentarios/`, {
+                comentario: newComment,
+                evento: id
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+            setComments([...comments, response.data]);
+            setNewComment('');
+        } catch (error) {
+            console.error('Error posting comment', error);
+        }
+    };
+    
+
     return (
         <>
             <UserNavbar/>
@@ -13,13 +84,14 @@ function ShowEvent() {
                 <div className="container">
                     <div className="row">
                     {/* Title */}
+                    {/* Aqui en Nombre del evento va el nombre del evento*/}
                     <div className="col-12 pb-3 pb-lg-5">
-                        <h1 className="main-title-event">Nombre del evento</h1>
+                        <h1 className="main-title-event">{eventData.nombre}</h1>
                     </div>
                     {/* Item image */}
                     <div className="col-lg-8 col-xl-7 order-2 order-lg-1">
                         <img
-                        src="./img/event-1.jpg"
+                        src="/img/event-1.jpg"
                         alt="imagen del item"
                         className="img-item"
                         />
@@ -51,30 +123,21 @@ function ShowEvent() {
                             <span className="badge bg-info text-dark">Quimica</span>
                         </p>
                         <p className="main-info-title">Autor</p>
+                        {/* Aqui en Nombre autor va el nombre del usuario que creo el evento */}
                         <p>
                             {" "}
                             <span>
                             <i className="bi bi-person-circle" />
                             </span>{" "}
-                            Nombre del autor
+                            {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
                         </div>
                     </div>
                     {/* item description */}
                     <div className="col-lg-8 col-xl-7 order-3 mt-4 mt-lg-5 justify-text">
+                        {/* Aqui debajo va la descripcion del evento */}
                         <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam quae
-                        temporibus aut consequuntur, eum recusandae, ex optio deleniti ipsum
-                        eius excepturi distinctio consectetur consequatur cupiditate quis
-                        ipsam! Officiis tempore minima architecto aliquid hic voluptates,
-                        dolorem tempora iusto minus aperiam. Obcaecati explicabo quos ipsam,
-                        quidem, temporibus sint magni voluptas nam rem dolor blanditiis
-                        laudantium ad. Veniam modi, laboriosam doloremque eaque assumenda ea
-                        nemo, nam, illo fuga voluptatem cum itaque? Fugiat est officiis hic
-                        nisi aliquid, doloremque, nostrum accusamus assumenda voluptate
-                        veniam nesciunt optio corrupti amet facere possimus ad iste
-                        aspernatur quasi quod quo, dolores libero odio molestiae esse!
-                        Aperiam, minima mollitia.
+                        {eventData.descripcion}
                         </p>
                     </div>
                     </div>
@@ -82,137 +145,68 @@ function ShowEvent() {
                 </section>
                 {/* Comments section */}
                 <div className="container mt-4">
-                <div className="row">
-                    <div className="col-12 col-lg-10">
-                    <div className="border p-3 comments overflow-auto">
-                        <h4>
-                        {" "}
-                        <i className="fa-solid fa-comment" /> Comentarios
-                        </h4>
-                        {/* Form to make a comment */}
-                        <form className="form-floating mb-3 mt-4">
-                        <div className="row">
-                            <div className="col-lg-11 col-10 form-floating">
-                            <input
-                                type="text"
-                                className="form-control custom-input"
-                                id="floatingInput"
-                                placeholder="name@example.com"
-                            />
-                            <label htmlFor="floatingInput">
-                                {" "}
-                                <span>
-                                <i className="bi bi-person-circle" />
-                                </span>{" "}
-                                Añadir un comentario
-                            </label>
-                            </div>
-                            <div className="col-lg-1 col-2 m-0 p-0 d-flex">
-                            <button
-                                type="submit"
-                                className="btn btn-outline-dark align-self-end border-2 send"
-                            >
-                                <i className="fa-regular fa-paper-plane" />
-                            </button>
-                            </div>
-                        </div>
-                        </form>
-                        {/* All comments section */}
-                        {/* One comment block */}
-                        <div className="mt-5">
-                        <div className="row">
-                            <div className="col-auto">
-                            <span className="m-0 p-0">
-                                <i className="bi bi-person-circle" />
-                            </span>
-                            </div>
-                            <div className="col">
-                            <div className="row">
-                                <div className="col-12 name-user-comment">
-                                <p className=" mt-0 mb-1">David Alejandro Villa González</p>
-                                </div>
-                                <div className="col-12 mt-0 mb-0 pt-0 pb-0">
-                                <p className="mt-0 mb-0 pt-0 pb-0">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                    Alias, dolores.
-                                </p>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-                        {/* One comment block */}
-                        <div className="mt-4">
-                        <div className="row">
-                            <div className="col-auto">
-                            <span className="m-0 p-0">
-                                <i className="bi bi-person-circle" />
-                            </span>
-                            </div>
-                            <div className="col">
-                            <div className="row">
-                                <div className="col-12 name-user-comment">
-                                <p className=" mt-0 mb-1">Javier Sántillan Hernández</p>
-                                </div>
-                                <div className="col-12 mt-0 mb-0 pt-0 pb-0">
-                                <p className="mt-0 mb-0 pt-0 pb-0">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                    Alias, dolores.
-                                </p>
+                    <div className="row">
+                        <div className="col-12 col-lg-10">
+                            <div className="border p-3 comments overflow-auto">
+                                <h4><i className="fa-solid fa-comment" /> Comentarios</h4>
+
+                                {/* Form to make a comment */}
+                                <form className="form-floating mb-3 mt-4" onSubmit={handleCommentSubmit}>
+                                    <div className="row">
+                                        <div className="col-lg-11 col-10 form-floating">
+                                            <input
+                                                type="text"
+                                                className="form-control custom-input"
+                                                id="floatingInput"
+                                                placeholder="Añadir un comentario"
+                                                value={newComment}
+                                                onChange={handleCommentChange}
+                                                required
+                                            />
+                                            <label htmlFor="floatingInput">
+                                                <span><i className="bi bi-person-circle" /></span> Añadir un comentario
+                                            </label>
+                                        </div>
+                                        <div className="col-lg-1 col-2 m-0 p-0 d-flex">
+                                            <button
+                                                type="submit"
+                                                className="btn btn-outline-dark align-self-end border-2 send"
+                                            >
+                                                <i className="fa-regular fa-paper-plane" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                {/* All comments section */}
+                                <div className="mt-5">
+                                    {comments.length === 0 ? (
+                                        <p>No hay comentarios sobre este evento.</p>
+                                    ) : (
+                                        comments.map((comment) => (
+                                            <div className="row mb-2" key={comment.id}>
+                                                <div className="col-auto">
+                                                    <span className="m-0 p-0">
+                                                        <i className="bi bi-person-circle" />
+                                                    </span>
+                                                </div>
+                                                <div className="col">
+                                                    <div className="row">
+                                                        <div className="col-12 name-user-comment">
+                                                            <p className="mt-0 mb-1">{comment.usuario.nombre} {comment.usuario.apellidos}</p>
+                                                        </div>
+                                                        <div className="col-12 mt-0 mb-0 pt-0 pb-0">
+                                                            <p className="mt-0 mb-0 pt-0 pb-0">{comment.comentario}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
-                            </div>
-                        </div>
-                        </div>
-                        {/* One comment block */}
-                        <div className="mt-4">
-                        <div className="row">
-                            <div className="col-auto">
-                            <span className="m-0 p-0">
-                                <i className="bi bi-person-circle" />
-                            </span>
-                            </div>
-                            <div className="col">
-                            <div className="row">
-                                <div className="col-12 name-user-comment">
-                                <p className=" mt-0 mb-1">Rebecca Cuevas Armas</p>
-                                </div>
-                                <div className="col-12 mt-0 mb-0 pt-0 pb-0">
-                                <p className="mt-0 mb-0 pt-0 pb-0">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                    Alias, dolores.
-                                </p>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-                        {/* One comment block */}
-                        <div className="mt-4">
-                        <div className="row">
-                            <div className="col-auto">
-                            <span className="m-0 p-0">
-                                <i className="bi bi-person-circle" />
-                            </span>
-                            </div>
-                            <div className="col">
-                            <div className="row">
-                                <div className="col-12 name-user-comment">
-                                <p className=" mt-0 mb-1">Kenya Sánchez Mercado</p>
-                                </div>
-                                <div className="col-12 mt-0 mb-0 pt-0 pb-0">
-                                <p className="mt-0 mb-0 pt-0 pb-0">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                    Alias, dolores.
-                                </p>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
                         </div>
                     </div>
-                    </div>
-                </div>
                 </div>
                 {/* Upcoming events */}
                 <div className="container mt-5 upcoming-events">
@@ -223,7 +217,7 @@ function ShowEvent() {
                 <div className="container mt-3 d-flex gap-5 flex-wrap justify-content-center">
                 {/* Event */}
                 <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="./img/event-2.jpg" className="card-img-top" alt="..." />
+                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
                     <div className="card-body">
                     <h5 className="card-title">Carrera Cucei</h5>
                     <p className="card-text">
@@ -237,7 +231,7 @@ function ShowEvent() {
                 </div>
                 {/* Event */}
                 <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="./img/event-2.jpg" className="card-img-top" alt="..." />
+                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
                     <div className="card-body">
                     <h5 className="card-title">Carrera Cucei</h5>
                     <p className="card-text">
@@ -251,7 +245,7 @@ function ShowEvent() {
                 </div>
                 {/* Event */}
                 <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="./img/event-2.jpg" className="card-img-top" alt="..." />
+                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
                     <div className="card-body">
                     <h5 className="card-title">Carrera Cucei</h5>
                     <p className="card-text">
@@ -265,7 +259,7 @@ function ShowEvent() {
                 </div>
                 {/* Event */}
                 <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="./img/event-2.jpg" className="card-img-top" alt="..." />
+                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
                     <div className="card-body">
                     <h5 className="card-title">Carrera Cucei</h5>
                     <p className="card-text">
@@ -279,7 +273,6 @@ function ShowEvent() {
                 </div>
                 </div>
             </div>
-            <Footer/>
         </>
       
     );

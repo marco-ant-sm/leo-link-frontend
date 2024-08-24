@@ -44,6 +44,7 @@ const UserProfile = () => {
             <p>Email: {userData.email}</p>
             <p>Nombre: {userData.nombre}</p>
             <p>Apellidos: {userData.apellidos}</p>
+            <p>Permisos: {userData.permiso_u}</p>
         </div>
     );
 };

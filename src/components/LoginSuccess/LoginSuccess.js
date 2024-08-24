@@ -22,8 +22,8 @@ const LoginSuccess = () => {
             }));
             localStorage.setItem('access', user.access);
             localStorage.setItem('refresh', user.refresh);
-            if (window.location.pathname !== '/event') {
-                navigate('/event');
+            if (window.location.pathname !== '/home') {
+                navigate('/home');
             }
         } else {
             if (window.location.pathname !== '/signUp') {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './LogInSignUp.css';
-import Footer from '../Footer/Footer';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,7 +9,13 @@ function LogInSignUp() {
 
     const navigate = useNavigate(); // Para redirigir después del inicio de sesión
 
-
+    useEffect(() => {
+        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        return () => {
+            document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
+        };
+    }, []);
+    
     //Var to show password
     const [showPassword, setShowPassword] = useState(false);
 
@@ -61,7 +66,7 @@ function LogInSignUp() {
                 }
             }
 
-            navigate('/event'); 
+            navigate('/home'); 
         } catch (error) {
             console.error('Error al iniciar sesión:', error);
             setAlert({
@@ -92,7 +97,7 @@ function LogInSignUp() {
             response_type: 'code',
             client_id: CLIENT_ID,
             redirect_uri: REDIRECT_URI,
-            prompt: 'select_account',
+            prompt: 'consent',
             access_type: 'offline',
             scope
         };
@@ -236,7 +241,6 @@ function LogInSignUp() {
                     </div>
                 </div>
             </div>
-            <Footer/>
         </div>
     );
 }

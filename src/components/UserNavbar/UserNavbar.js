@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import './UserNavbar.css';
 
@@ -7,7 +8,30 @@ function UserNavbar() {
     const [userName, setUserName] = useState('');
     const navigate = useNavigate();
 
+    const showEvents = () => {
+        navigate('/showAllevents');
+    };
 
+    useEffect(() => {
+        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        return () => {
+            document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
+        };
+    }, []);
+
+    useEffect(() => {
+        // Limpia el padding-right y overflow en el body
+        const originalPaddingRight = document.body.style.paddingRight;
+        const originalOverflow = document.body.style.overflow;
+        
+        document.body.style.paddingRight = '0';
+        document.body.style.overflow = 'auto';
+
+        return () => {
+            document.body.style.paddingRight = originalPaddingRight;
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -66,12 +90,14 @@ function UserNavbar() {
             {/* In app navbar */}
             <nav className="navbar navbar-dark bg-dark sticky-top text-light">
             <div className="container-fluid d-flex">
+                <Link to='/home'>
                 <img
-                src="./img/Logo-Universidad.png"
+                src="/img/Logo-Universidad.png"
                 alt="logo universidad de guadalajara"
                 width={182}
                 height={84}
                 />
+                </Link>
                 <form
                 className="d-flex mt-3 justify-content-center align-self-center first-search"
                 role="search"
@@ -184,56 +210,60 @@ function UserNavbar() {
                 <div className="offcanvas-body">
                     <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
                     <li className="nav-item">
-                        <a className="nav-link active" aria-current="page" href="#">
-                        Inicio
-                        </a>
+                        <Link className="nav-link active" aria-current="page" to='/home'>
+                        <span><i class="fa-solid fa-house"></i></span> Inicio
+                        </Link>
                     </li>
                     <li className="nav-item dropdown">
                         <a
                         className="nav-link active dropdown-toggle"
-                        href="#"
                         role="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                         >
-                        Eventos
+                        <span><i class="fa-solid fa-calendar-days"></i></span> Eventos
                         </a>
                         <ul className="dropdown-menu dropdown-menu-dark">
-                        <li>
-                            <a className="dropdown-item" href="#">
-                            Crecimiento laboral
-                            </a>
-                        </li>
-                        <li>
-                            <a className="dropdown-item" href="#">
-                            Deportivo
-                            </a>
-                        </li>
-                        <li>
-                            <a className="dropdown-item" href="#">
-                            Recreativo
-                            </a>
-                        </li>
+                            <li>
+                                <button className="dropdown-item" onClick={showEvents}>
+                                Todos los eventos
+                                </button>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                Crecimiento laboral
+                                </a>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                Deportivo
+                                </a>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                Recreativo
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
-                        Descuentos
+                        <span><i class="fa-solid fa-percent"></i></span> Descuentos
                         </a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
-                        Beneficios
+                        <span><i class="fa-brands fa-google-scholar"></i></span> Beneficios
                         </a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
-                        Prácticas Profesionales
+                        <span><i class="fa-solid fa-business-time"></i></span> Prácticas Profesionales
                         </a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
-                        Servicios Escolares IA
+                        <span><i class="fa-solid fa-circle-info"></i></span> Servicios Escolares IA
                         </a>
                     </li>
                     </ul>

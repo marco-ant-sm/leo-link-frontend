@@ -1,11 +1,17 @@
 import './Homep.css';
 import { useEffect, useRef } from 'react';
 import PublicNavbar from '../PublicNavbar/PublicNavbar';
-import Footer from '../Footer/Footer';
 import { Helmet } from 'react-helmet';
 
 function Homep() {
     const carouselRef = useRef(null);
+
+    useEffect(() => {
+        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        return () => {
+            document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
+        };
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -227,7 +233,6 @@ function Homep() {
                 </div>
                 {/* END About section */}
             </main>
-            <Footer/>
         </>
 
     );

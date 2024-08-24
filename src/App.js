@@ -20,6 +20,10 @@ import UserRegister from './components/UserRegister/UserRegister';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import LoginSuccess from './components/LoginSuccess/LoginSuccess';
 import UserProfile from './components/UserProfile/UserProfile';
+import CreateEvent from './components/CreateEvent/CreateEvent';
+import HomeUser from './components/HomeUser/HomeUser';
+import ShowAllEvents from './components/ShowAllEvents/ShowAllEvents';
+import Footer from './components/Footer/Footer';
 
 const App = () =>{
   return (
@@ -29,14 +33,20 @@ const App = () =>{
         <Routes>
           <Route path='/' element={<Homep/>}/>
           <Route path='/signUp' element={<LogInSignUp/>}/>
-          {/* <Route path='/event' element={<ShowEvent/>}/> */}
-          {/* Private Route */}
-          <Route path='/event' element={<PrivateRoute element={<ShowEvent />} />}/>
+
+          {/* Private Routes */}
+          <Route path='/event/:id' element={<PrivateRoute element={<ShowEvent />} />}/>
+          <Route path='/home' element={<PrivateRoute element={<HomeUser />} />}/>
+          <Route path='/showAllEvents' element={<PrivateRoute element={<ShowAllEvents />} />}/>
+          {/* Private Routes */}
+          
           <Route path='/success' element={<LoginSuccess/>}/>
           <Route path='/userRegister' element={<UserRegister/>}/>
           <Route path='/profile' element={<UserProfile/>}/>
+          <Route path='/createEvent' element={<CreateEvent/>}/>
           {/* <Route path='*' element={<404page/>}/> */}
         </Routes>
+        <Footer/>
       </main>
     </Router>
   );
