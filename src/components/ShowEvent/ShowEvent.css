@@ -94,3 +94,9 @@ box-shadow: none; /* Eliminar sombra del borde al enfocarse */
     z-index: 1;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+.delete-comment{
+    border-radius: 150px;
+    width: 10px;
+    height: 10px;
+}

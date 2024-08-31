@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate} from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function ShowEvent() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
@@ -103,14 +104,148 @@ function ShowEvent() {
         }
     };
 
+    //Funcion para ir a editar el evento
     const handleEdit = () => {
         navigate(`/updateEvent/${eventData.id}`);
     }
 
-    const handleDelete = () => {
-        console.log('eliminando...');
-    }
+    //Funcion para eliminar el evento
+    const deleteEvent = async () => {
+        const token = localStorage.getItem('access');
+        if (!token) {
+          Swal.fire({
+            title: 'Error',
+            icon: 'error',
+            text: 'No token found',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
     
+        try {
+          await axios.delete(`http://localhost:8000/api/events/${id}/`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          return true;  // Indica que la eliminación fue exitosa
+        } catch (error) {
+          Swal.fire({
+            title: 'Error',
+            icon: 'error',
+            text: 'Error deleting event',
+            confirmButtonText: 'OK'
+          });
+          return false;  // Indica que hubo un error
+        }
+      };
+
+    
+    const [initialUrl, setInitialUrl] = useState(window.location.href);
+    
+    // Funcion para mostrar el mensaje de confirmacion y dirigir el flujo de eliminacion de eventos
+    const handleDelete = async () => {
+        // Guardar la URL actual
+        setInitialUrl(window.location.href);
+    
+        // Mostrar el cuadro de diálogo de confirmación
+        const result = await Swal.fire({
+          title: '¿Estás seguro que deseas eliminar este evento?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí',
+          cancelButtonText: 'No',
+          reverseButtons: true
+        });
+    
+        // Verificar la URL después de la confirmación
+        if (result.isConfirmed) {
+          if (initialUrl === window.location.href) {
+            // La URL no ha cambiado, proceder con la eliminación
+            const success = await deleteEvent();
+            if (success) {
+              await Swal.fire({
+                title: 'Eliminado',
+                icon: 'success',
+                text: 'El evento ha sido eliminado.',
+                timer: 1700,
+                showConfirmButton: false
+              });
+              navigate('/showAllEvents');  // Redirige después de eliminar
+            }
+          } else {
+            // La URL ha cambiado, no realizar la acción
+            console.log('La URL ha cambiado, acción no realizada');
+            await Swal.fire({
+                title: 'Cancelado',
+                icon: 'info',
+                text: 'La URL ha cambiado, la acción no se realizó.',
+            });
+          }
+        } else {
+          // Acción si el usuario cancela
+          return
+        }
+      }
+
+    const handleDeleteCommentWithConfirmation = async (commentId) => {
+        // Guardar la URL actual
+        setInitialUrl(window.location.href);
+        
+        // Mostrar el cuadro de diálogo de confirmación
+        const result = await Swal.fire({
+            title: '¿Estás seguro que deseas eliminar este comentario?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        });
+
+        // Verificar la URL después de la confirmación
+        if (result.isConfirmed) {
+            if (initialUrl === window.location.href) {
+                try {
+                    // Envía una solicitud DELETE para eliminar el comentario
+                    await axios.delete(`http://localhost:8000/api/eventos/${id}/comentarios/${commentId}/`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access')}`
+                        }
+                    });
+
+                    // Actualiza el estado eliminando el comentario eliminado
+                    setComments(comments.filter(comment => comment.id !== commentId));
+
+                    // Muestra mensaje de éxito
+                    await Swal.fire({
+                        title: 'Eliminado',
+                        icon: 'success',
+                        text: 'El comentario ha sido eliminado.',
+                        timer: 1700,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    console.error('Error deleting comment', error);
+                    await Swal.fire({
+                        title: 'Error',
+                        icon: 'error',
+                        text: 'Hubo un problema al eliminar el comentario.',
+                    });
+                }
+            } else {
+                // La URL ha cambiado, no realizar la acción
+                console.log('La URL ha cambiado, acción no realizada');
+                await Swal.fire({
+                    title: 'Cancelado',
+                    icon: 'info',
+                    text: 'La URL ha cambiado, la acción no se realizó.',
+                });
+            }
+        } else {
+            // Acción si el usuario cancela
+            return
+        }
+     }
 
     return (
         <>
@@ -172,8 +307,8 @@ function ShowEvent() {
                         {/* Botones para editar y borrar */}
                         {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
                             <div>
-                                <button class="btn btn-warning btn-sm me-1"><i class="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
-                                <button class="btn btn-danger btn-sm"><i class="fa-solid fa-trash" onClick={handleDelete}></i></button>
+                                <button class="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
+                                <button class="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
                             </div>
                         )}
                         </div>
@@ -238,7 +373,11 @@ function ShowEvent() {
                                                 <div className="col">
                                                     <div className="row">
                                                         <div className="col-12 name-user-comment">
-                                                            <p className="mt-0 mb-1">{comment.usuario.nombre} {comment.usuario.apellidos}</p>
+                                                            <p className="mt-0 mb-1">{comment.usuario.nombre} {comment.usuario.apellidos}
+                                                            {currentUserData && comment.usuario && currentUserData.id === comment.usuario.id && (
+                                                                <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                            )}
+                                                            </p>
                                                         </div>
                                                         <div className="col-12 mt-0 mb-0 pt-0 pb-0">
                                                             <p className="mt-0 mb-0 pt-0 pb-0">{comment.comentario}</p>

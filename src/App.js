@@ -25,6 +25,7 @@ import HomeUser from './components/HomeUser/HomeUser';
 import ShowAllEvents from './components/ShowAllEvents/ShowAllEvents';
 import Footer from './components/Footer/Footer';
 import UpdateEvent from './components/UpdateEvent/UpdateEvent';
+import PrivateRouteAfterLogin from './components/PrivateRouteAfterLogin/PrivateRouteAfterLogin';
 
 const App = () =>{
   return (
@@ -32,10 +33,12 @@ const App = () =>{
     <Router>
       <main>
         <Routes>
-          <Route path='/' element={<Homep/>}/>
-          <Route path='/signUp' element={<LogInSignUp/>}/>
+          {/* <Route path='/' element={<Homep/>}/>
+          <Route path='/signUp' element={<LogInSignUp/>}/> */}
 
           {/* Private Routes */}
+          <Route path='/' element={<PrivateRouteAfterLogin element={<Homep />} />}/>
+          <Route path='/signUp' element={<PrivateRouteAfterLogin element={<LogInSignUp />} />}/>
           <Route path='/event/:id' element={<PrivateRoute element={<ShowEvent />} />}/>
           <Route path='/updateEvent/:id' element={<PrivateRoute element={<UpdateEvent />} />}/>
           <Route path='/home' element={<PrivateRoute element={<HomeUser />} />}/>
