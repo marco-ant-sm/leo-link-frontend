@@ -7,9 +7,32 @@ import './UserNavbar.css';
 function UserNavbar() {
     const [userName, setUserName] = useState('');
     const navigate = useNavigate();
+    //Fake
+    const [showNotification, setShowNotification] = useState(true);
+
+    // Función para manejar el clic en el botón
+    const handleButtonClick = () => {
+        setShowNotification(false);
+    };
+
+    //Fake
 
     const showEvents = () => {
         navigate('/showAllevents');
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault(); // Evita el envío del formulario y la recarga de la página
+    
+        const searchInput = e.target.elements.search.value;
+        const category = e.target.elements.category.value;
+    
+        if (category === '1') {
+            navigate(`/showAllEvents?search=${encodeURIComponent(searchInput)}`);
+        }else{
+            console.log("No se");
+            return;
+        }
     };
 
     useEffect(() => {
@@ -98,35 +121,41 @@ function UserNavbar() {
                 height={84}
                 />
                 </Link>
+                {/* Search bar */}
                 <form
                 className="d-flex mt-3 justify-content-center align-self-center first-search"
                 role="search"
+                onSubmit={handleSearchSubmit}
                 >
-                <div className="outside-search d-flex">
-                    <div className="search-icon d-flex ms-2">
-                    <i className="fa-solid fa-magnifying-glass" />
+                    <div className="outside-search d-flex">
+                        <div className="search-icon d-flex ms-2">
+                        <i className="fa-solid fa-magnifying-glass" />
+                        </div>
+                        <input
+                        name='search'
+                        className="form-control me-2 border-0"
+                        type="search"
+                        placeholder="Buscar"
+                        aria-label="Search"
+                        required
+                        />
+                        <div className="vr bg-dark" />
+                        <select
+                        name='category'
+                        className="form-select border-0"
+                        aria-label="Default select example"
+                        >
+                        <option selected="">Categoria</option>
+                        <option value={1}>Evento</option>
+                        <option value={2}>Descuento</option>
+                        <option value={3}>Beneficio</option>
+                        </select>
                     </div>
-                    <input
-                    className="form-control me-2 border-0"
-                    type="search"
-                    placeholder="Buscar"
-                    aria-label="Search"
-                    />
-                    <div className="vr bg-dark" />
-                    <select
-                    className="form-select border-0"
-                    aria-label="Default select example"
-                    >
-                    <option selected="">Categoria</option>
-                    <option value={1}>Evento</option>
-                    <option value={2}>Descuento</option>
-                    <option value={3}>Beneficio</option>
-                    </select>
-                </div>
-                <button className="btn btn-danger search-button-nav" type="submit">
-                    <i className="fa-solid fa-magnifying-glass" />
-                </button>
+                    <button className="btn btn-danger search-button-nav" type="submit">
+                        <i className="fa-solid fa-magnifying-glass" />
+                    </button>
                 </form>
+                {/* End search bar */}
                 <div className="align-self-end d-flex">
                 <p className="user-name-nav pt-3">{userName}</p>
                 {/* Button user options */}
@@ -164,21 +193,29 @@ function UserNavbar() {
                     </ul>
                 </div>
                 {/* Notifications */}
+
                 {/* <div class="btn-group">
-            <button type="button" class="btn text-light dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                <span class="user-image-nav position-relative">
-                <i class="bi bi-bell align-self-center"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
-                    <span class="visually-hidden">New alerts</span>
-                </span>
-                </span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-start dropdown-menu-lg-end bg-dark">
-                <li><button class="dropdown-item config-user" type="button">Recomendación: Club de algoritmia!</button></li>
-                <li><button class="dropdown-item config-user" type="button">Recomendación: Feria del empleo!</button></li>
-                <li><button class="dropdown-item config-user" type="button">Recomendación: Nuevo beneficio Jira Premium!</button></li>
-            </ul>
-            </div> */}
+                    <button type="button" 
+                    class="btn text-light dropdown-toggle" 
+                    data-bs-toggle="dropdown" data-bs-display="static" 
+                    aria-expanded="false"
+                    onClick={handleButtonClick}
+                    >
+                        <span class="user-image-nav position-relative">
+                        <i class="bi bi-bell align-self-center"></i>
+                        <span className="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                        <span className="visually-hidden">New alerts</span>
+                        </span>
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-start dropdown-menu-lg-end bg-dark">
+                        <li><button class="dropdown-item config-user" type="button">Recomendación: Club de algoritmia!</button></li>
+                        <li><button class="dropdown-item config-user" type="button">Recomendación: Feria del empleo!</button></li>
+                        <li><button class="dropdown-item config-user" type="button">Recomendación: Nuevo beneficio Jira Premium!</button></li>
+                    </ul>
+                </div> */}
+
+            {/* Hasta aqui las notificaciones */}
                 <button
                     className="navbar-toggler"
                     type="button"
@@ -252,9 +289,9 @@ function UserNavbar() {
                         </a>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link active" href="#">
+                        <Link className="nav-link active" to={'/'}>
                         <span><i class="fa-brands fa-google-scholar"></i></span> Beneficios
-                        </a>
+                        </Link>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
@@ -268,12 +305,13 @@ function UserNavbar() {
                     </li>
                     </ul>
                     {/* hidden search bar */}
-                    <form className="d-flex mt-3 second-search" role="search">
+                    <form className="d-flex mt-3 second-search" role="search" onSubmit={handleSearchSubmit}>
                     <div className="outside-search d-flex">
                         <div className="search-icon d-flex ms-2">
                         <i className="fa-solid fa-magnifying-glass" />
                         </div>
                         <input
+                        name='search'
                         className="form-control me-2 border-0"
                         type="search"
                         placeholder="Buscar"
@@ -281,6 +319,7 @@ function UserNavbar() {
                         />
                         <div className="vr bg-dark" />
                         <select
+                        name='category'
                         className="form-select border-0"
                         aria-label="Default select example"
                         >
@@ -294,6 +333,41 @@ function UserNavbar() {
                         <i className="fa-solid fa-magnifying-glass" />
                     </button>
                     </form>
+                    <hr/>
+                    {/* Nav item */}
+                    <li className="nav-item dropdown">
+                        <a
+                        className="nav-link active dropdown-toggle"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        >
+                        <span><i class="bi bi-plus-circle-fill"></i></span> Crear Publicación
+                        </a>
+                        <ul className="dropdown-menu dropdown-menu-dark">
+                            <li>
+                                <button className="dropdown-item" onClick={showEvents}>
+                                Evento
+                                </button>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                Descuento
+                                </a>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                Beneficio
+                                </a>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                Prácticas Profesionales
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {/* End Nav item */}
                 </div>
                 </div>
             </div>

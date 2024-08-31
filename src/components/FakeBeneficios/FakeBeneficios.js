@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ShowAllEvents.css';
+import './FakeBeneficios.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import { Link, useLocation } from 'react-router-dom';
 
 
-function ShowAllEvents() {
+function FakeBeneficios() {
     const [events, setEvents] = useState([]);
     const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
     const [error, setError] = useState(null);
@@ -26,39 +26,13 @@ function ShowAllEvents() {
         }
     }, [location.search]);
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/api/events/', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('access')}`
-                    }
-                });
-                setEvents(response.data);
-            } catch (error) {
-                setError('Error fetching events');
-                console.error(error.response.data);
-            }
-        };
-
-        fetchEvents();
-    }, []);
-
-    // Filtrar eventos basado en el término de búsqueda
-    const filteredEvents = events.filter((event) =>
-        event.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (error) {
-        return <div>{error}</div>;
-    }
 
     return (
         <div>
             <UserNavbar/>
             <section className="container my-5">
                 {/* INICIO - Título, barra y botón de filtro */}
-                <h1 className="mb-4">Eventos</h1>
+                <h1 className="mb-4">Beneficios de estudiante</h1>
                 <div className="d-flex justify-content-between mb-4">
                     <div className="input-group w-50">
                         <input 
@@ -103,35 +77,57 @@ function ShowAllEvents() {
             {/* Recomendadas */}
             <section className="container my-5">
                 <div className="d-flex align-items-center w-100 mb-4">
-                    <h2>Eventos disponibles</h2>
+                    <h2>Beneficios activos</h2>
                     <div className="flex-grow-1 ms-2">
                         <hr />
                     </div>
                 </div>
                 <div className="row">
-                    {filteredEvents.length > 0 ? (
-                        filteredEvents.map((event) => (
-                            <div className="col-md-4 mb-4" key={event.id}>
-                                <Link to={`/event/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <div className="card preview-event-allevents">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">{event.nombre}</h5>
-                                            <p className="card-text">{event.descripcion}</p>
-                                        </div>
-                                    </div>
-                                </Link>
+                    <div className="col-md-4 mb-4">
+                        <Link to={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <div className="card preview-event-allevents">
+                                <div className="ratio ratio-16x9">
+                                    <img src="./img/fakeEvents/coursera.png" alt="event" className="w-100 h-100 object-fit-cover" />
+                                </div>
+                                <div className="card-body">
+                                    <h5 className="card-title">Cursera Academy</h5>
+                                    <p className="card-text">Obten tu cuenta de cursera por ser estudiante activo!</p>
+                                </div>
                             </div>
-                        ))
-                    ) : (
-                        <p>No se encontraron eventos</p>
-                    )}
+                        </Link>
+                    </div>
+
+                    <div className="col-md-4 mb-4">
+                        <Link to={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <div className="card preview-event-allevents">
+                                <div className="ratio ratio-16x9">
+                                    <img src="./img/fakeEvents/office.jpg" alt="event" className="w-100 h-100 object-fit-cover" />
+                                </div>
+                                <div className="card-body">
+                                    <h5 className="card-title">Microsoft Office 365</h5>
+                                    <p className="card-text">Activa Office 365 gratis por ser estudiante activo!</p>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <div className="col-md-4 mb-4">
+                        <Link to={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <div className="card preview-event-allevents">
+                                <div className="ratio ratio-16x9">
+                                    <img src="./img/fakeEvents/matlab.png" alt="event" className="w-100 h-100 object-fit-cover" />
+                                </div>
+                                <div className="card-body">
+                                    <h5 className="card-title">Matlab</h5>
+                                    <p className="card-text">Obten tu licencia de Matlab por ser estudiante activo!</p>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
                 </div>
             </section>
         </div>
     );
 }
 
-export default ShowAllEvents;
+export default FakeBeneficios;

@@ -24,6 +24,7 @@ import CreateEvent from './components/CreateEvent/CreateEvent';
 import HomeUser from './components/HomeUser/HomeUser';
 import ShowAllEvents from './components/ShowAllEvents/ShowAllEvents';
 import Footer from './components/Footer/Footer';
+import UpdateEvent from './components/UpdateEvent/UpdateEvent';
 
 const App = () =>{
   return (
@@ -36,6 +37,7 @@ const App = () =>{
 
           {/* Private Routes */}
           <Route path='/event/:id' element={<PrivateRoute element={<ShowEvent />} />}/>
+          <Route path='/updateEvent/:id' element={<PrivateRoute element={<UpdateEvent />} />}/>
           <Route path='/home' element={<PrivateRoute element={<HomeUser />} />}/>
           <Route path='/showAllEvents' element={<PrivateRoute element={<ShowAllEvents />} />}/>
           {/* Private Routes */}

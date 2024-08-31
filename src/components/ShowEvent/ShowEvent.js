@@ -11,6 +11,7 @@ function ShowEvent() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [comments, setComments] = useState([]);
+    const [currentUserData, setCurrentUserData] = useState(null);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -43,7 +44,36 @@ function ShowEvent() {
 
         fetchEvent();
         fetchComments(id);
-    }, [id]);
+    }, [id, navigate]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+      }, []);
+
+    useEffect(() => {
+    const fetchUserProfile = async () => {
+        const token = localStorage.getItem('access');
+
+        if (!token) {
+            setError('No token found');
+            return;
+        }
+
+        try {
+            const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            setCurrentUserData(response.data);
+        } catch (error) {
+            setError('Error fetching user profile');
+            console.error(error);
+        }
+    };
+
+    fetchUserProfile();
+    }, []);
 
     const [newComment, setNewComment] = useState('');
 
@@ -72,6 +102,14 @@ function ShowEvent() {
             console.error('Error posting comment', error);
         }
     };
+
+    const handleEdit = () => {
+        navigate(`/updateEvent/${eventData.id}`);
+    }
+
+    const handleDelete = () => {
+        console.log('eliminando...');
+    }
     
 
     return (
@@ -131,6 +169,13 @@ function ShowEvent() {
                             </span>{" "}
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
+                        {/* Botones para editar y borrar */}
+                        {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
+                            <div>
+                                <button class="btn btn-warning btn-sm me-1"><i class="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
+                                <button class="btn btn-danger btn-sm"><i class="fa-solid fa-trash" onClick={handleDelete}></i></button>
+                            </div>
+                        )}
                         </div>
                     </div>
                     {/* item description */}

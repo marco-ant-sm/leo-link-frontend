@@ -72,6 +72,9 @@ display: flex !important;
     background-color: #ffff;
 }
 
+li{
+    list-style-type: none;
+}
 
 /* hide search bars */
 @media (max-width: 1132px) {

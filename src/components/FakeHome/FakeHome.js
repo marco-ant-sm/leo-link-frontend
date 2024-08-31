@@ -1,10 +1,10 @@
 import React from 'react';
-import './HomeUser.css';
+import './FakeHome.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import { Helmet } from 'react-helmet';
 import { useEffect } from 'react';
 
-function HomeUser() {
+function FakeHome() {
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
         return () => {
@@ -70,33 +70,33 @@ function HomeUser() {
                                 <div className="col-md-4 mb-4">
                                     <div className="card preview-event-home">
                                         <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
+                                            <img src="./img/fakeEvents/carrera.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
+                                            <h5 className="card-title">Carrera Cucei</h5>
+                                            <p className="card-text">No esperes más e inscribete a la carrera!</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-4">
                                     <div className="card preview-event-home">
                                         <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
+                                            <img src="./img/fakeEvents/feria_empleo.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
+                                            <h5 className="card-title">Feria del empleo 2024</h5>
+                                            <p className="card-text">Descubre tus oportunidades!</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-4">
                                     <div className="card preview-event-home">
                                         <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
+                                            <img src="./img/fakeEvents/vacunacion.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
+                                            <h5 className="card-title">Campaña de vacunacion 2024</h5>
+                                            <p className="card-text">Ya estas vacunado contra la influenza?</p>
                                         </div>
                                     </div>
                                 </div>
@@ -172,30 +172,30 @@ function HomeUser() {
                                             <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
+                                            <h5 className="card-title">Eclipse total 2024</h5>
+                                            <p className="card-text">Acompañanos a vivir este evento único.</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-4">
                                     <div className="card preview-event-home">
                                         <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
+                                            <img src="./img/event-2.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
+                                            <h5 className="card-title">Premiación carrera cucei 2024</h5>
+                                            <p className="card-text">Acompañanos a conocer a los ganadores de la carrera</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-4">
                                     <div className="card preview-event-home">
                                         <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
+                                            <img src="./img/carousel-3.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
+                                            <h5 className="card-title">Proyecto Marte</h5>
+                                            <p className="card-text">Conoce de que trata este interesante proyecto.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -279,4 +279,4 @@ function HomeUser() {
     );
 }
 
-export default HomeUser;
+export default FakeHome;

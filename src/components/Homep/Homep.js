@@ -64,8 +64,7 @@ function Homep() {
                             </div>
                             <div className="carousel-text">
                                 <p>
-                                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum
-                                inventore ullam cum consectetur laborum.
+                                Nuestra plataforma te conecta con recursos valiosos para maximizar tu experiencia universitaria y alcanzar tus metas.
                                 </p>
                             </div>
                             <div className="carousel-text">
@@ -84,8 +83,7 @@ function Homep() {
                             </div>
                             <div className="carousel-text">
                                 <p>
-                                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum
-                                inventore ullam cum consectetur laborum.
+                                Descubre cómo nuestra red puede enriquecer tu trayectoria profesional y aprovecha al máximo cada etapa de tu carrera.
                                 </p>
                             </div>
                             <div className="carousel-text">
