@@ -26,6 +26,7 @@ import ShowAllEvents from './components/ShowAllEvents/ShowAllEvents';
 import Footer from './components/Footer/Footer';
 import UpdateEvent from './components/UpdateEvent/UpdateEvent';
 import PrivateRouteAfterLogin from './components/PrivateRouteAfterLogin/PrivateRouteAfterLogin';
+import { Toaster } from 'react-hot-toast';
 
 const App = () =>{
   return (
@@ -53,6 +54,7 @@ const App = () =>{
         </Routes>
         <Footer/>
       </main>
+      <Toaster/>
     </Router>
   );
 };

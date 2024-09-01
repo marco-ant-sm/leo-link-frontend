@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate} from 'react-router-dom';
 import Swal from 'sweetalert2';
+import {toast} from 'react-hot-toast';
 
 function ShowEvent() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
@@ -13,6 +14,8 @@ function ShowEvent() {
     const navigate = useNavigate();
     const [comments, setComments] = useState([]);
     const [currentUserData, setCurrentUserData] = useState(null);
+    const [asistido, setAsistido] = useState(false);
+    const [totalAsistentes, setTotalAsistentes] = useState(0);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -23,6 +26,8 @@ function ShowEvent() {
                     }
                 });
                 setEventData(response.data);
+                setAsistido(response.data.asistido_por_usuario);
+                setTotalAsistentes(response.data.numero_asistentes || 0);
             } catch (error) {
                 setError('Error fetching event');
                 console.error(error.response.data);
@@ -245,7 +250,55 @@ function ShowEvent() {
             // Acción si el usuario cancela
             return
         }
-     }
+    }
+
+    // Confirmar asistencia
+    const handleAsistir = async () => {
+        try {
+          await axios.post(`http://localhost:8000/api/events/${id}/asistencia/`, {}, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access')}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          setAsistido(true);
+          setTotalAsistentes(prev => prev + 1);
+          toast.success('Asistencia confirmada', { position: 'bottom-right',style: {
+            background:"#101010",
+            color:"#fff",
+            bordeRadius:"5px"
+        }
+        });
+
+        } catch (error) {
+          setError('Error confirming attendance');
+          console.error(error.response.data);
+        }
+      }
+    
+    
+    // Quitar asistencia
+    const handleNoAsistir = async () => {
+    try {
+        await axios.delete(`http://localhost:8000/api/events/${id}/asistencia/`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`,
+            'Content-Type': 'application/json'
+        }
+        });
+        setAsistido(false);
+        setTotalAsistentes(prev => Math.max(0, prev - 1));
+        toast.success('Asistencia Eliminada', { position: 'bottom-right',style: {
+            background:"#101010",
+            color:"#fff",
+            bordeRadius:"5px"
+        }
+        });
+    } catch (error) {
+        setError('Error removing attendance');
+        console.error(error.response.data);
+    }
+    }
 
     return (
         <>
@@ -271,7 +324,7 @@ function ShowEvent() {
                     </div>
                     {/* Item main info */}
                     <div className="col-lg-4 col-xl-3 ps-lg-5 order-1 order-lg-2 mb-4 mb-lg-0">
-                        <div className="main-info p-lg-3 p-3 p-lg-0">
+                        <div className="main-info p-lg-3 p-3 p-lg-0 overflow-y-auto overflow-x-hidden">
                         <p className="main-info-title">Fecha</p>
                         <p>
                             {" "}
@@ -304,13 +357,22 @@ function ShowEvent() {
                             </span>{" "}
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
+
+                        {/* Botones de asistencia y no asistencia */}
+                        {asistido ? (
+                            <button className="btn btn-danger btn-sm me-3" onClick={handleNoAsistir}><i class="fa-solid fa-user-minus"></i> No Asistiré</button>
+                        ) : (
+                            <button className="btn btn-success btn-sm me-3" onClick={handleAsistir}><i class="fa-solid fa-user-plus"></i> Asistiré</button>
+                        )}
+
                         {/* Botones para editar y borrar */}
                         {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
-                            <div>
-                                <button class="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
-                                <button class="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
+                            <div className='d-inline'>
+                                <button className="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
+                                <button className="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
                             </div>
                         )}
+                        
                         </div>
                     </div>
                     {/* item description */}
@@ -319,6 +381,7 @@ function ShowEvent() {
                         <p>
                         {eventData.descripcion}
                         </p>
+                        <p>Asistencia:{totalAsistentes}</p>
                     </div>
                     </div>
                 </div>

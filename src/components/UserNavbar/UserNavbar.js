@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {toast} from 'react-hot-toast';
 
 import './UserNavbar.css';
 
@@ -21,6 +22,7 @@ function UserNavbar() {
         navigate('/showAllevents');
     };
 
+    //Funcion para buscar en la barra de busqueda
     const handleSearchSubmit = (e) => {
         e.preventDefault(); // Evita el envío del formulario y la recarga de la página
     
@@ -30,7 +32,12 @@ function UserNavbar() {
         if (category === '1') {
             navigate(`/showAllEvents?search=${encodeURIComponent(searchInput)}`);
         }else{
-            console.log("No se");
+            toast.error('Elige una categoria para buscar', { style: {
+                background:"#101010",
+                color:"#fff",
+                bordeRadius:"5px"
+            }
+            });
             return;
         }
     };
