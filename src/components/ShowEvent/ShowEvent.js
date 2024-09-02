@@ -16,6 +16,7 @@ function ShowEvent() {
     const [currentUserData, setCurrentUserData] = useState(null);
     const [asistido, setAsistido] = useState(false);
     const [totalAsistentes, setTotalAsistentes] = useState(0);
+    const defaultImage = '/img/default-logo.jpg';
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -317,9 +318,9 @@ function ShowEvent() {
                     {/* Item image */}
                     <div className="col-lg-8 col-xl-7 order-2 order-lg-1">
                         <img
-                        src="/img/event-1.jpg"
+                        src={eventData.imagen ? eventData.imagen : defaultImage}
                         alt="imagen del item"
-                        className="img-item"
+                        className="img-item w-100 h-100 object-fit-cover"
                         />
                     </div>
                     {/* Item main info */}

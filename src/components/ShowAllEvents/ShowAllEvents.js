@@ -10,6 +10,7 @@ function ShowAllEvents() {
     const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
     const [error, setError] = useState(null);
     const location = useLocation();
+    const defaultImage = '/img/default-logo.jpg';
 
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
@@ -115,7 +116,7 @@ function ShowAllEvents() {
                                 <Link to={`/event/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <div className="card preview-event-allevents">
                                         <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="event" className="w-100 h-100 object-fit-cover" />
+                                            <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
                                             <h5 className="card-title">{event.nombre}</h5>

@@ -1,19 +1,18 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function UpdateEvent() {
-    const { id } = useParams();  // Captura el ID del evento desde la URL
+    const { id } = useParams();
     const [eventData, setEventData] = useState({});
-    const navigate = useNavigate();
-    // Campos del evento
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    // Campos del usuario
-    const [currentUserData, setCurrentUserData] = useState(null);
-    const [error, setError] = useState(null);
+    const [imagen, setImagen] = useState(null);
+    const [eliminarImagen, setEliminarImagen] = useState(false);
     const [success, setSuccess] = useState(null);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -24,58 +23,18 @@ function UpdateEvent() {
                     }
                 });
                 setEventData(response.data);
+                setNombre(response.data.nombre || '');
+                setDescripcion(response.data.descripcion || '');
             } catch (error) {
                 setError('Error fetching event');
-                console.error(error.response.data);
+                console.error(error);
                 navigate('/showAllEvents');
             }
         };
 
-        const fetchUserProfile = async () => {
-            const token = localStorage.getItem('access');
-    
-            if (!token) {
-                setError('No token found');
-                return;
-            }
-    
-            try {
-                const response = await axios.get('http://localhost:8000/api/user/profile/', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                setCurrentUserData(response.data);
-            } catch (error) {
-                setError('Error fetching user profile');
-                console.error(error);
-            }
-        };
-    
         fetchEvent();
-        fetchUserProfile();
     }, [id, navigate]);
 
-    useEffect(() => {
-        if (eventData.usuario && currentUserData) {
-            if (currentUserData.id !== eventData.usuario.id) {
-                navigate('/showAllEvents');
-            } else {
-                console.log('User is authorized');
-                console.log(currentUserData.id);
-                console.log(eventData.usuario.id);
-            }
-        }
-    }, [eventData, currentUserData, navigate]);
-
-    useEffect(() => {
-        if (eventData.nombre && eventData.descripcion) {
-            setNombre(eventData.nombre || '');
-            setDescripcion(eventData.descripcion || '');
-        }
-    }, [eventData]);
-
-    // Este handle submit ahora debe editar
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -85,27 +44,32 @@ function UpdateEvent() {
             return;
         }
 
+        const formData = new FormData();
+        formData.append('nombre', nombre);
+        formData.append('descripcion', descripcion);
+
+        if (eliminarImagen && !imagen) {
+            formData.append('eliminar_imagen', true); // Mandar una señal al backend de que se debe eliminar la imagen
+        } else if (imagen) {
+            formData.append('imagen', imagen); // Subir nueva imagen si está presente
+        }
+
         try {
-            await axios.put(`http://localhost:8000/api/events/${id}/`, {
-                nombre,
-                descripcion,
-            }, {
+            await axios.put(`http://localhost:8000/api/events/${id}/`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'multipart/form-data'
                 },
             });
             setSuccess('Event updated successfully');
-            setNombre('');
-            setDescripcion('');
             navigate('/showAllEvents');
         } catch (error) {
             setError('Error updating event');
         }
     };
 
-  return (
-    <div>   
+    return (
+        <div>
             <h1>Update Event</h1>
             <form onSubmit={handleSubmit}>
                 <div>
@@ -125,12 +89,31 @@ function UpdateEvent() {
                         required
                     />
                 </div>
+                <div>
+                    <label>Imagen:</label>
+                    <input
+                        type="file"
+                        onChange={(e) => setImagen(e.target.files[0])}
+                    />
+                </div>
+                {eventData.imagen && (
+                    <div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={eliminarImagen}
+                                onChange={(e) => setEliminarImagen(e.target.checked)}
+                            />
+                            Eliminar imagen actual
+                        </label>
+                    </div>
+                )}
                 <button type="submit">Actualizar Evento</button>
                 {error && <div>{error}</div>}
                 {success && <div>{success}</div>}
             </form>
         </div>
-  )
+    );
 }
 
-export default UpdateEvent
+export default UpdateEvent;
