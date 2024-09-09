@@ -180,7 +180,7 @@ function UserNavbar() {
                     </button>
                     <ul className="dropdown-menu dropdown-menu-end bg-dark">
                     <li>
-                        <button className="dropdown-item config-user" type="button">
+                        <button className="dropdown-item config-user" type="button" data-bs-toggle="modal" data-bs-target="#configModal">
                         Configuración
                         </button>
                     </li>
@@ -380,6 +380,84 @@ function UserNavbar() {
             </div>
             </nav>
             {/* End in app navbar */}
+
+            {/* User configuration modal */}
+            <style>
+                {`
+                    .btn-close {
+                        color: white;
+                        filter: invert(1);
+                    }
+                    /* Cambia el color del texto de las pestañas no activas a blanco */
+                    .nav-tabs .nav-link {
+                        color: #ffffff; /* Blanco para el texto de las pestañas inactivas */
+                    }
+                    .nav-tabs .nav-link.active {
+                        color: #ffffff; /* Blanco para el texto de la pestaña activa también, para mantener consistencia */
+                        background-color: #212529;
+                    }
+                    .content-box {
+                        border-radius: 3px;
+                    }
+                `}
+            </style>
+
+            {/* Modal */}
+            <div className="modal fade" id="configModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered modal-lg"> {/* Modal más grande */}
+                    <div className="modal-content bg-dark text-light">
+                    {/* Encabezado del Modal */}
+                    <div className="modal-header">
+                        <h5 className="modal-title" id="exampleModalLabel">Configuración de Usuario</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    {/* Cuerpo del Modal */}
+                    <div className="modal-body">
+                        {/* Pestañas */}
+                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                        <li className="nav-item" role="presentation">
+                            <a className="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Notificaciones</a>
+                        </li>
+                        <li className="nav-item" role="presentation">
+                            <a className="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Perfil del Usuario</a>
+                        </li>
+                        </ul>
+                        {/* Contenido de las Pestañas */}
+                        <div className="tab-content mt-3" id="myTabContent">
+                        <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <div className="p-3 border border-light bg-light text-dark content-box" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                            <h5>Categorías</h5>
+                            <p>Selecciona las categorias por cada sección de las que te gustaría recibir notificaciones.</p>
+                            <hr />
+                            <h5>Eventos</h5>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum in euismod orci, nec feugiat urna. Praesent et vehicula mi. Ut fringilla odio eu mi elementum, ac dictum dolor scelerisque. Integer feugiat purus eget sapien blandit tincidunt. Mauris vel eros est. Suspendisse ac scelerisque velit. Aliquam erat volutpat. Sed id diam nec justo bibendum cursus.</p>
+                            <p>Curabitur volutpat magna sit amet sapien luctus, a fringilla lacus pellentesque. Ut commodo interdum risus, vel sodales enim fermentum nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tempor eros vel sapien tempor lacinia. Phasellus a justo ac sem euismod tincidunt.</p>
+                            <p>Vestibulum nec sapien ac risus tempor gravida. Phasellus convallis nisl eget est congue, sed facilisis nisi tincidunt. Integer facilisis ligula sed velit facilisis varius. Aenean a libero a est tempus ullamcorper. Mauris ut est nec ante varius congue eget ac elit.</p>
+                            <hr />
+                            <h5>Beneficios</h5>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum in euismod orci, nec feugiat urna. Praesent et vehicula mi. Ut fringilla odio eu mi elementum, ac dictum dolor scelerisque. Integer feugiat purus eget sapien blandit tincidunt. Mauris vel eros est. Suspendisse ac scelerisque velit. Aliquam erat volutpat. Sed id diam nec justo bibendum cursus.</p>
+                            <p>Curabitur volutpat magna sit amet sapien luctus, a fringilla lacus pellentesque. Ut commodo interdum risus, vel sodales enim fermentum nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tempor eros vel sapien tempor lacinia. Phasellus a justo ac sem euismod tincidunt.</p>
+                            <p>Vestibulum nec sapien ac risus tempor gravida. Phasellus convallis nisl eget est congue, sed facilisis nisi tincidunt. Integer facilisis ligula sed velit facilisis varius. Aenean a libero a est tempus ullamcorper. Mauris ut est nec ante varius congue eget ac elit.</p>
+                            </div>
+                        </div>
+                        <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                            <div className="p-3 border border-light bg-light text-dark content-box" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                            <h5>Perfil del Usuario</h5>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum in euismod orci, nec feugiat urna. Praesent et vehicula mi. Ut fringilla odio eu mi elementum, ac dictum dolor scelerisque. Integer feugiat purus eget sapien blandit tincidunt. Mauris vel eros est. Suspendisse ac scelerisque velit. Aliquam erat volutpat. Sed id diam nec justo bibendum cursus.</p>
+                            <p>Curabitur volutpat magna sit amet sapien luctus, a fringilla lacus pellentesque. Ut commodo interdum risus, vel sodales enim fermentum nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tempor eros vel sapien tempor lacinia. Phasellus a justo ac sem euismod tincidunt.</p>
+                            <p>Vestibulum nec sapien ac risus tempor gravida. Phasellus convallis nisl eget est congue, sed facilisis nisi tincidunt. Integer facilisis ligula sed velit facilisis varius. Aenean a libero a est tempus ullamcorper. Mauris ut est nec ante varius congue eget ac elit.</p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    {/* Pie del Modal */}
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button> {/* Botón de cerrar rojo */}
+                    </div>
+                    </div>
+                </div>
+            </div>
+            {/* End Modal */}
         </>
     );
   }
