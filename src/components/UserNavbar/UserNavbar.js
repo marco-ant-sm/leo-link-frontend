@@ -2,12 +2,16 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {toast} from 'react-hot-toast';
-
+import axios from 'axios';
 import './UserNavbar.css';
 
 function UserNavbar() {
     const [userName, setUserName] = useState('');
     const navigate = useNavigate();
+    //Categorias de eventos
+    const [categorias, setCategorias] = useState([]);
+    const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
+
     //Fake
     const [showNotification, setShowNotification] = useState(true);
 
@@ -114,6 +118,66 @@ function UserNavbar() {
           document.removeEventListener('keydown', handleKeyDown);
         };
       }, []); // Empty dependency array ensures this effect runs only once on mount
+
+    
+    // Fetch categories
+    const fetchCategorias = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/categories/', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+            setCategorias(response.data);
+        } catch (error) {
+            console.error('Error fetching categories', error);
+        }
+    };
+
+    // Fetch user categories
+    const fetchUserCategories = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/user/categories/', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+            setCategoriasSeleccionadas(response.data.categorias_preferidas_ids || []);
+        } catch (error) {
+            console.error('Error fetching user categories', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategorias();
+        fetchUserCategories();
+    }, []);
+
+    // Update user categories
+    const updateUserCategories = async (categorias) => {
+        try {
+            await axios.patch('http://localhost:8000/api/user/update-categories/', {
+                categorias_ids: categorias
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+        } catch (error) {
+            console.error('Error updating user categories', error);
+        }
+    };
+
+    // Handle category click
+    const handleCategoriaClick = async (categoriaId) => {
+        const nuevaSeleccion = categoriasSeleccionadas.includes(categoriaId)
+            ? categoriasSeleccionadas.filter(id => id !== categoriaId)
+            : [...categoriasSeleccionadas, categoriaId];
+
+        setCategoriasSeleccionadas(nuevaSeleccion);
+        await updateUserCategories(nuevaSeleccion);
+        console.log("Categorias actualizadas");
+    };
     
     return (
         <>
@@ -430,14 +494,17 @@ function UserNavbar() {
                             <p>Selecciona las categorias por cada sección de las que te gustaría recibir notificaciones.</p>
                             <hr />
                             <h5>Eventos</h5>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum in euismod orci, nec feugiat urna. Praesent et vehicula mi. Ut fringilla odio eu mi elementum, ac dictum dolor scelerisque. Integer feugiat purus eget sapien blandit tincidunt. Mauris vel eros est. Suspendisse ac scelerisque velit. Aliquam erat volutpat. Sed id diam nec justo bibendum cursus.</p>
-                            <p>Curabitur volutpat magna sit amet sapien luctus, a fringilla lacus pellentesque. Ut commodo interdum risus, vel sodales enim fermentum nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tempor eros vel sapien tempor lacinia. Phasellus a justo ac sem euismod tincidunt.</p>
-                            <p>Vestibulum nec sapien ac risus tempor gravida. Phasellus convallis nisl eget est congue, sed facilisis nisi tincidunt. Integer facilisis ligula sed velit facilisis varius. Aenean a libero a est tempus ullamcorper. Mauris ut est nec ante varius congue eget ac elit.</p>
+                            {categorias.map(categoria => (
+                                <button
+                                    key={categoria.id}
+                                    className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
+                                    onClick={() => handleCategoriaClick(categoria.id)}
+                                >
+                                    {categoria.nombre}
+                                </button>
+                            ))}
                             <hr />
-                            <h5>Beneficios</h5>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum in euismod orci, nec feugiat urna. Praesent et vehicula mi. Ut fringilla odio eu mi elementum, ac dictum dolor scelerisque. Integer feugiat purus eget sapien blandit tincidunt. Mauris vel eros est. Suspendisse ac scelerisque velit. Aliquam erat volutpat. Sed id diam nec justo bibendum cursus.</p>
-                            <p>Curabitur volutpat magna sit amet sapien luctus, a fringilla lacus pellentesque. Ut commodo interdum risus, vel sodales enim fermentum nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tempor eros vel sapien tempor lacinia. Phasellus a justo ac sem euismod tincidunt.</p>
-                            <p>Vestibulum nec sapien ac risus tempor gravida. Phasellus convallis nisl eget est congue, sed facilisis nisi tincidunt. Integer facilisis ligula sed velit facilisis varius. Aenean a libero a est tempus ullamcorper. Mauris ut est nec ante varius congue eget ac elit.</p>
+                            <h5>Siguiente tipo de publicacion</h5>
                             </div>
                         </div>
                         <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
