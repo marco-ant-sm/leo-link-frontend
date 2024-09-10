@@ -17,6 +17,9 @@ function ShowEvent() {
     const [asistido, setAsistido] = useState(false);
     const [totalAsistentes, setTotalAsistentes] = useState(0);
     const defaultImage = '/img/default-logo.jpg';
+    //categorias
+    const [categoriaPrincipal, setCategoriaPrincipal] = useState('');
+    const [categoriasAsociadas, setCategoriasAsociadas] = useState([]);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -29,6 +32,8 @@ function ShowEvent() {
                 setEventData(response.data);
                 setAsistido(response.data.asistido_por_usuario);
                 setTotalAsistentes(response.data.numero_asistentes || 0);
+                setCategoriaPrincipal(response.data.categoria_p || '');
+                setCategoriasAsociadas(response.data.categorias || []);
             } catch (error) {
                 setError('Error fetching event');
                 console.error(error.response.data);
@@ -344,11 +349,22 @@ function ShowEvent() {
                         </p>
                         <p className="main-info-title">Categorias</p>
                         <p>
-                            <span className="badge bg-info text-dark">Emprendimiento</span>{" "}
-                            <span className="badge bg-info text-dark">Comida</span>{" "}
-                            <span className="badge bg-info text-dark">Público</span>{" "}
-                            <span className="badge bg-info text-dark">Quimica</span>
+                        <span className="badge bg-primary text-light me-1">{categoriaPrincipal}</span>
+
+                        {categoriasAsociadas.filter(categoria => categoria.nombre !== categoriaPrincipal).length > 0 && (
+                        <div className='d-inline'>
+                            {categoriasAsociadas
+                                .filter(categoria => categoria.nombre !== categoriaPrincipal)
+                                .map(categoria => (
+                                <span key={categoria.id} className="badge bg-info text-dark me-1">
+                                    {categoria.nombre}
+                                </span>
+                                ))}
+                        </div>
+                        )}
+
                         </p>
+
                         <p className="main-info-title">Autor</p>
                         {/* Aqui en Nombre autor va el nombre del usuario que creo el evento */}
                         <p>
