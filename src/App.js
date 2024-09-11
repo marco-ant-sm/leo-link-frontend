@@ -27,6 +27,7 @@ import Footer from './components/Footer/Footer';
 import UpdateEvent from './components/UpdateEvent/UpdateEvent';
 import PrivateRouteAfterLogin from './components/PrivateRouteAfterLogin/PrivateRouteAfterLogin';
 import { Toaster } from 'react-hot-toast';
+import Notificaciones from './components/Notificaciones/Notificaciones';
 
 const App = () =>{
   return (
@@ -50,6 +51,7 @@ const App = () =>{
           <Route path='/userRegister' element={<UserRegister/>}/>
           <Route path='/profile' element={<UserProfile/>}/>
           <Route path='/createEvent' element={<CreateEvent/>}/>
+          <Route path='/not' element={<Notificaciones/>}/>
           {/* <Route path='*' element={<404page/>}/> */}
         </Routes>
         <Footer/>
