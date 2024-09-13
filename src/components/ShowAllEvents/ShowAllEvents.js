@@ -11,6 +11,10 @@ function ShowAllEvents() {
     const [error, setError] = useState(null);
     const location = useLocation();
     const defaultImage = '/img/default-logo.jpg';
+    const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [myEventsFilter, setMyEventsFilter] = useState(false);
+    const [currentUserData, setCurrentUserData] = useState(null);
 
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
@@ -42,17 +46,74 @@ function ShowAllEvents() {
             }
         };
 
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/categories/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+                setCategories(response.data);
+            } catch (error) {
+                setError('Error fetching categories');
+                console.error(error.response.data);
+            }
+        };
+
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+
+            if (!token) {
+                setError('No token found');
+                return;
+            }
+
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setCurrentUserData(response.data);
+            } catch (error) {
+                setError('Error fetching user profile');
+                console.error(error);
+            }
+        };
+
         fetchEvents();
+        fetchCategories();
+        fetchUserProfile();
     }, []);
 
-    // Filtrar eventos basado en el término de búsqueda
-    const filteredEvents = events.filter((event) =>
-        event.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
-    if (error) {
-        return <div>{error}</div>;
-    }
+    //Filtro de categorias agregar y eliminar categorias
+    const handleCategoryChange = (event) => {
+        const { value, checked } = event.target;
+        setSelectedCategories(prev =>
+            checked
+                ? [...prev, value]
+                : prev.filter(category => category !== value)
+        );
+    };
+
+
+    // Filtrar eventos basado en el término de búsqueda y las categorías seleccionadas
+    const filteredEvents = events.filter((event) => {
+        const matchesSearchTerm = event.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategories = selectedCategories.length === 0 || event.categorias_ids.some(categoryId => selectedCategories.includes(String(categoryId)));
+        const matchesUserFilter = !myEventsFilter || event.usuario.id === currentUserData?.id;
+        return matchesSearchTerm && matchesCategories && matchesUserFilter;
+    });
+
+    // Filtrar eventos basado en el término de búsqueda
+    // const filteredEvents = events.filter((event) =>
+    //     event.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+
+    // if (error) {
+    //     return <div>{error}</div>;
+    // }
 
     return (
         <div>
@@ -70,6 +131,7 @@ function ShowAllEvents() {
                             onChange={(e) => setSearchTerm(e.target.value)} // Actualizar el estado al escribir
                         />
                     </div>
+                    {/* Filtros de categorias para los eventos */}
                     <div className="dropdown">
                         <button
                             className="btn btn-outline-secondary dropdown-toggle"
@@ -88,15 +150,45 @@ function ShowAllEvents() {
                             >
                                 <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z" />
                             </svg>
-                            {/* Icono Filtro */}
                             Filtros
                         </button>
                         <ul className="dropdown-menu" aria-labelledby="filtrosDropdown">
-                            <li><a className="dropdown-item">Filtro 1</a></li>
-                            <li><a className="dropdown-item">Filtro 2</a></li>
-                            <li><a className="dropdown-item">Filtro 3</a></li>
+                            {/* Filtro para mis eventos */}
+                            <li>
+                                <div className="form-check m-2">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="myEventsFilter"
+                                        checked={myEventsFilter}
+                                        onChange={(e) => setMyEventsFilter(e.target.checked)}
+                                    />
+                                    <label className="form-check-label" htmlFor="myEventsFilter">
+                                        Mis eventos
+                                    </label>
+                                </div>
+                            </li>
+                            {/* Fin de filtro para mis eventos */}
+
+                            {categories.map(category => (
+                                <li key={category.id}>
+                                    <div className="form-check m-2">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            value={category.id}
+                                            onChange={handleCategoryChange}
+                                        />
+                                        <label className="form-check-label">
+                                            {category.nombre}
+                                        </label>
+                                    </div>
+                                </li>
+                            ))}
                         </ul>
                     </div>
+                    {/* Fin de filtros de categorias para los eventos */}
+
                 </div>
             </section>
             {/* FIN - Título, barra y botón de filtro */}

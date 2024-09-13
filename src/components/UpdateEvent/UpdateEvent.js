@@ -12,6 +12,7 @@ function UpdateEvent() {
     const [eliminarImagen, setEliminarImagen] = useState(false);
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
+    const [currentUserData, setCurrentUserData] = useState(null);
     const navigate = useNavigate();
     
     //categorias
@@ -48,44 +49,43 @@ function UpdateEvent() {
             }
         };
 
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+
+            if (!token) {
+                setError('No token found');
+                return;
+            }
+
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setCurrentUserData(response.data);
+            } catch (error) {
+                setError('Error fetching user profile');
+                console.error(error);
+            }
+        };
+
         fetchEvent();
         fetchCategories();
+        fetchUserProfile();
     }, [id, navigate]);
 
+    //Validamos que el usuario sea el dueño del evento
+    useEffect(() => {
+        if (eventData.usuario && currentUserData) {
+            if (currentUserData.id !== eventData.usuario.id) {
+                navigate('/showAllEvents');
+            } else {
+                return;
+            }
+        }
+    }, [eventData, currentUserData, navigate]);
 
-
-    // const handleSubmit = async (event) => {
-    //     event.preventDefault();
-
-    //     const token = localStorage.getItem('access');
-    //     if (!token) {
-    //         setError('No token found');
-    //         return;
-    //     }
-
-    //     const formData = new FormData();
-    //     formData.append('nombre', nombre);
-    //     formData.append('descripcion', descripcion);
-
-    //     if (eliminarImagen && !imagen) {
-    //         formData.append('eliminar_imagen', true); // Mandar una señal al backend de que se debe eliminar la imagen
-    //     } else if (imagen) {
-    //         formData.append('imagen', imagen); // Subir nueva imagen si está presente
-    //     }
-
-    //     try {
-    //         await axios.put(`http://localhost:8000/api/events/${id}/`, formData, {
-    //             headers: {
-    //                 'Authorization': `Bearer ${token}`,
-    //                 'Content-Type': 'multipart/form-data'
-    //             },
-    //         });
-    //         setSuccess('Event updated successfully');
-    //         navigate('/showAllEvents');
-    //     } catch (error) {
-    //         setError('Error updating event');
-    //     }
-    // };
 
     const handleSubmit = async (event) => {
         event.preventDefault();

@@ -11,13 +11,26 @@ function UserNavbar() {
     //Categorias de eventos
     const [categorias, setCategorias] = useState([]);
     const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
+    const [notificaciones, setNotificaciones] = useState([]);
 
     //Fake
-    const [showNotification, setShowNotification] = useState(true);
+    const [showNotification, setShowNotification] = useState(false);
 
     // Función para manejar el clic en el botón
-    const handleButtonClick = () => {
-        setShowNotification(false);
+    const handleNotificationButtonClick = async () => {
+        try {
+            await axios.post('http://localhost:8000/api/notificaciones/marcar-leidas/', {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+            // Después de marcar las notificaciones como leídas, actualiza el estado para que no se muestre el indicador
+            setShowNotification(false);
+            // Actualiza las notificaciones
+            fetchNotificaciones();
+        } catch (error) {
+            console.error('Error marcando notificaciones como leídas', error);
+        }
     };
 
     //Fake
@@ -88,7 +101,7 @@ function UserNavbar() {
           // Check if the pressed key is 'a' or 'A'
           if (event.key === 'a' || event.key === 'A') {
             // Ignore the action if the focus is on an input field
-            if (document.activeElement.tagName === 'INPUT') {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
               return;
             }
             
@@ -178,7 +191,78 @@ function UserNavbar() {
         await updateUserCategories(nuevaSeleccion);
         console.log("Categorias actualizadas");
     };
+
+
+    //Fetch notifications
+    const fetchNotificaciones = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/notificaciones/`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+            const notificacionesData = response.data;
+            setNotificaciones(notificacionesData);
+            // Verifica si hay notificaciones no leídas
+            const tieneNotificacionesNoLeidas = notificacionesData.some(notificacion => !notificacion.leida);
+            setShowNotification(tieneNotificacionesNoLeidas);
+        } catch (error) {
+            Error('Error obteniendo las notificaciones');
+        }
+    };
+
+    useEffect(() => {
+        fetchNotificaciones();
+    }, []);
     
+    //Cerrar modal de notificaciones
+    const closeNotificationsModal = () =>{
+        const closeNotificationsButton = document.querySelector('.btn-close-notifications');
+        closeNotificationsButton?.click();
+    }
+
+    
+    //Conectar con el socket de notificaciones
+    // useEffect(() => {
+    //     let socket;
+
+    //     const connectWebSocket = () => {
+    //         const token = localStorage.getItem('access');
+    //         socket = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+        
+    //         socket.onopen = () => {
+    //             console.log('WebSocket conectado');
+    //         };
+        
+    //         socket.onmessage = (event) => {
+    //             const data = JSON.parse(event.data);
+    //             toast.success(data.message);
+    //             fetchNotificaciones(); // Volver a cargar las notificaciones
+    //         };
+        
+    //         socket.onerror = () => {
+    //             console.error('Error en WebSocket:');
+    //         };
+        
+    //         socket.onclose = () => {
+    //             console.log('WebSocket desconectado. Intentando reconectar...');
+    //             setTimeout(connectWebSocket, 3000);
+    //         };
+    //     };
+
+    //     connectWebSocket();
+
+    //     return () => {
+    //         if (socket) {
+    //             socket.close();
+    //         }
+    //     };
+    // }, []);
+
+    const goCreateEvent = () => {
+        navigate('/crearEvento');
+    }
+
     return (
         <>
             {/* In app navbar */}
@@ -265,26 +349,21 @@ function UserNavbar() {
                 </div>
                 {/* Notifications */}
 
-                {/* <div class="btn-group">
-                    <button type="button" 
-                    class="btn text-light dropdown-toggle" 
-                    data-bs-toggle="dropdown" data-bs-display="static" 
-                    aria-expanded="false"
-                    onClick={handleButtonClick}
-                    >
-                        <span class="user-image-nav position-relative">
-                        <i class="bi bi-bell align-self-center"></i>
-                        <span className="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
-                        <span className="visually-hidden">New alerts</span>
-                        </span>
-                        </span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-start dropdown-menu-lg-end bg-dark">
-                        <li><button class="dropdown-item config-user" type="button">Recomendación: Club de algoritmia!</button></li>
-                        <li><button class="dropdown-item config-user" type="button">Recomendación: Feria del empleo!</button></li>
-                        <li><button class="dropdown-item config-user" type="button">Recomendación: Nuevo beneficio Jira Premium!</button></li>
-                    </ul>
-                </div> */}
+                <button type="button" 
+                class="btn text-light" 
+                onClick={handleNotificationButtonClick}
+                data-bs-toggle="modal"
+                data-bs-target="#notificationsModal"
+                >
+                    <span class="user-image-nav position-relative">
+                    <i class="bi bi-bell align-self-center"></i>
+                    {showNotification && (
+                    <span className="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                    <span className="visually-hidden">New alerts</span>
+                    </span>
+                    )}
+                    </span>
+                </button>
 
             {/* Hasta aqui las notificaciones */}
                 <button
@@ -322,37 +401,11 @@ function UserNavbar() {
                         <span><i class="fa-solid fa-house"></i></span> Inicio
                         </Link>
                     </li>
-                    <li className="nav-item dropdown">
-                        <a
-                        className="nav-link active dropdown-toggle"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        >
+                    
+                    <li className="nav-item">
+                        <a className="nav-link active" onClick={showEvents} style={{ cursor: 'pointer' }}>
                         <span><i class="fa-solid fa-calendar-days"></i></span> Eventos
                         </a>
-                        <ul className="dropdown-menu dropdown-menu-dark">
-                            <li>
-                                <button className="dropdown-item" onClick={showEvents}>
-                                Todos los eventos
-                                </button>
-                            </li>
-                            <li>
-                                <a className="dropdown-item" href="#">
-                                Crecimiento laboral
-                                </a>
-                            </li>
-                            <li>
-                                <a className="dropdown-item" href="#">
-                                Deportivo
-                                </a>
-                            </li>
-                            <li>
-                                <a className="dropdown-item" href="#">
-                                Recreativo
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
@@ -417,7 +470,7 @@ function UserNavbar() {
                         </a>
                         <ul className="dropdown-menu dropdown-menu-dark">
                             <li>
-                                <button className="dropdown-item" onClick={showEvents}>
+                                <button className="dropdown-item" onClick={goCreateEvent}>
                                 Evento
                                 </button>
                             </li>
@@ -466,7 +519,7 @@ function UserNavbar() {
                 `}
             </style>
 
-            {/* Modal */}
+            {/* Modal User configuration*/}
             <div className="modal fade" id="configModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered modal-lg"> {/* Modal más grande */}
                     <div className="modal-content bg-dark text-light">
@@ -524,7 +577,77 @@ function UserNavbar() {
                     </div>
                 </div>
             </div>
-            {/* End Modal */}
+            {/* End Modal User configuration*/}
+
+            {/* Modal notifications */}
+            <div className="modal fade custom-modal" id="notificationsModal" tabIndex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="notificationsModalLabel">Mis Notificaciones</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div className="modal-body">
+                            {/* Lista de notificaciones */}
+
+                            {notificaciones.length === 0 ? (
+                                <div className="no-notifications-message">
+                                    Actualmente no tienes notificaciones.
+                                </div>
+                            ) : (
+                                notificaciones.map((notificacion, index) => (
+                                    <Link
+                                        to={`/event/${notificacion.evento.id}`}
+                                        style={{ textDecoration: 'none', color: 'inherit' }}
+                                        onClick={closeNotificationsModal}
+                                        key={index}
+                                    >
+                                        <div className="list-group">
+                                            <div className="list-group-item">
+                                                <div className="notification-title">Nuevo evento</div>
+                                                <div className="notification-body">{notificacion.mensaje}</div>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-danger btn-close-notifications" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* End Modal notifications */}
+
+            {/* Css notifications */}
+            <style>
+                {`
+                    .custom-modal .modal-content {
+                        border-radius: 1rem;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    }
+                    .custom-modal .list-group-item {
+                        border: 1px solid #dee2e6;
+                        border-radius: .75rem;
+                        margin-bottom: .5rem;
+                        padding: 1rem;
+                        background-color: #f8f9fa;
+                        transition: background-color 0.2s ease-in-out;
+                    }
+                    .custom-modal .list-group-item:hover {
+                        background-color: #e9ecef;
+                        cursor: pointer;
+                    }
+                    .custom-modal .notification-title {
+                        font-weight: 500;
+                        margin-bottom: .5rem;
+                    }
+                    .custom-modal .notification-body {
+                        color: #6c757d;
+                    }
+                `}
+        </style>
         </>
     );
   }
