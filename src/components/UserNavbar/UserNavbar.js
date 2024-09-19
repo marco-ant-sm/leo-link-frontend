@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {toast} from 'react-hot-toast';
 import axios from 'axios';
@@ -9,11 +9,11 @@ function UserNavbar() {
     const [userName, setUserName] = useState('');
     const navigate = useNavigate();
     //Categorias de eventos
-    const [categorias, setCategorias] = useState([]);
+    const [categoriasE, setCategoriasE] = useState([]);
+    const [categoriasB, setCategoriasB] = useState([]);
     const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
     const [notificaciones, setNotificaciones] = useState([]);
 
-    //Fake
     const [showNotification, setShowNotification] = useState(false);
 
     // Función para manejar el clic en el botón
@@ -37,6 +37,20 @@ function UserNavbar() {
 
     const showEvents = () => {
         navigate('/showAllevents');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    };
+
+    const goHome = () => {
+        navigate('/home');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    };
+
+    const showBeneficios = () => {
+        navigate('/showAllBeneficios');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
     };
 
     //Funcion para buscar en la barra de busqueda
@@ -47,7 +61,9 @@ function UserNavbar() {
         const category = e.target.elements.category.value;
     
         if (category === '1') {
-            navigate(`/showAllEvents?search=${encodeURIComponent(searchInput)}`);
+            navigate(`/showAllEvents?search=${encodeURIComponent(searchInput)}`);        
+        }else if (category === '3') {
+            navigate(`/showAllBeneficios?search=${encodeURIComponent(searchInput)}`);
         }else{
             toast.error('Elige una categoria para buscar', { style: {
                 background:"#101010",
@@ -141,7 +157,10 @@ function UserNavbar() {
                     'Authorization': `Bearer ${localStorage.getItem('access')}`
                 }
             });
-            setCategorias(response.data);
+            const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'evento');
+            setCategoriasE(categoriasEvento);
+            const categoriasBeneficio = response.data.filter(categoria => categoria.tipo_e === 'beneficio');
+            setCategoriasB(categoriasBeneficio);
         } catch (error) {
             console.error('Error fetching categories', error);
         }
@@ -221,46 +240,79 @@ function UserNavbar() {
         closeNotificationsButton?.click();
     }
 
+    const [isConnected, setIsConnected] = useState(false);
+    const socketRef = useRef(null);
+    const isUnmounted = useRef(false);
     
     //Conectar con el socket de notificaciones
     // useEffect(() => {
-    //     let socket;
+    //     isUnmounted.current = false;
 
     //     const connectWebSocket = () => {
     //         const token = localStorage.getItem('access');
-    //         socket = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
-        
-    //         socket.onopen = () => {
+    //         socketRef.current = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+
+    //         socketRef.current.onopen = () => {
     //             console.log('WebSocket conectado');
+    //             setIsConnected(true);
     //         };
-        
-    //         socket.onmessage = (event) => {
+
+    //         socketRef.current.onmessage = (event) => {
     //             const data = JSON.parse(event.data);
-    //             toast.success(data.message);
-    //             fetchNotificaciones(); // Volver a cargar las notificaciones
+    //             toast.custom((t) => (
+    //                 <div
+    //                     style={{
+    //                         background: '#000', // Fondo negro
+    //                         color: '#fff', // Texto blanco
+    //                         padding: '16px',
+    //                         borderRadius: '8px',
+    //                         display: 'flex',
+    //                         alignItems: 'center',
+    //                         fontSize: '16px',
+    //                     }}
+    //                 >
+    //                     📅 {data.message} {/* Emoji de calendario */}
+    //                 </div>
+    //             ), {
+    //                 duration: 3000, // Duración en milisegundos
+    //             });
+    //             fetchNotificaciones(); 
     //         };
-        
-    //         socket.onerror = () => {
+
+    //         socketRef.current.onerror = () => {
     //             console.error('Error en WebSocket:');
     //         };
-        
-    //         socket.onclose = () => {
+
+    //         socketRef.current.onclose = () => {
     //             console.log('WebSocket desconectado. Intentando reconectar...');
-    //             setTimeout(connectWebSocket, 3000);
+    //             setIsConnected(false);
+    //             if (!isUnmounted.current) {
+    //                 setTimeout(connectWebSocket, 3000);
+    //             }
     //         };
     //     };
 
     //     connectWebSocket();
 
     //     return () => {
-    //         if (socket) {
-    //             socket.close();
+    //         isUnmounted.current = true;
+    //         if (socketRef.current) {
+    //             socketRef.current.close();
+    //             socketRef.current = null;
     //         }
     //     };
     // }, []);
 
     const goCreateEvent = () => {
         navigate('/crearEvento');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    }
+
+    const goCreateBeneficio = () => {
+        navigate('/crearBeneficio');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
     }
 
     return (
@@ -340,6 +392,7 @@ function UserNavbar() {
                             localStorage.removeItem('refresh');
                             localStorage.removeItem('user'); // Elimina el usuario
                             navigate('/'); // Redirige al usuario a la landing page
+
                         }}
                         >
                         Cerrar Sesión
@@ -397,9 +450,9 @@ function UserNavbar() {
                 <div className="offcanvas-body">
                     <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
                     <li className="nav-item">
-                        <Link className="nav-link active" aria-current="page" to='/home'>
+                        <a className="nav-link active" onClick={goHome} style={{ cursor: 'pointer' }}>
                         <span><i class="fa-solid fa-house"></i></span> Inicio
-                        </Link>
+                        </a>
                     </li>
                     
                     <li className="nav-item">
@@ -413,9 +466,9 @@ function UserNavbar() {
                         </a>
                     </li>
                     <li className="nav-item">
-                        <Link className="nav-link active" to={'/'}>
+                        <a className="nav-link active"  onClick={showBeneficios} style={{ cursor: 'pointer' }}>
                         <span><i class="fa-brands fa-google-scholar"></i></span> Beneficios
-                        </Link>
+                        </a>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
@@ -475,14 +528,14 @@ function UserNavbar() {
                                 </button>
                             </li>
                             <li>
-                                <a className="dropdown-item" href="#">
+                                <button className="dropdown-item">
                                 Descuento
-                                </a>
+                                </button>
                             </li>
                             <li>
-                                <a className="dropdown-item" href="#">
+                                <button className="dropdown-item" onClick={goCreateBeneficio}>
                                 Beneficio
-                                </a>
+                                </button>
                             </li>
                             <li>
                                 <a className="dropdown-item" href="#">
@@ -547,7 +600,7 @@ function UserNavbar() {
                             <p>Selecciona las categorias por cada sección de las que te gustaría recibir notificaciones.</p>
                             <hr />
                             <h5>Eventos</h5>
-                            {categorias.map(categoria => (
+                            {categoriasE.map(categoria => (
                                 <button
                                     key={categoria.id}
                                     className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
@@ -557,15 +610,22 @@ function UserNavbar() {
                                 </button>
                             ))}
                             <hr />
-                            <h5>Siguiente tipo de publicacion</h5>
+                            <h5>Beneficios</h5>
+                            {categoriasB.map(categoria => (
+                                <button
+                                    key={categoria.id}
+                                    className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
+                                    onClick={() => handleCategoriaClick(categoria.id)}
+                                >
+                                    {categoria.nombre}
+                                </button>
+                            ))}
                             </div>
                         </div>
                         <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                             <div className="p-3 border border-light bg-light text-dark content-box" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             <h5>Perfil del Usuario</h5>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum in euismod orci, nec feugiat urna. Praesent et vehicula mi. Ut fringilla odio eu mi elementum, ac dictum dolor scelerisque. Integer feugiat purus eget sapien blandit tincidunt. Mauris vel eros est. Suspendisse ac scelerisque velit. Aliquam erat volutpat. Sed id diam nec justo bibendum cursus.</p>
-                            <p>Curabitur volutpat magna sit amet sapien luctus, a fringilla lacus pellentesque. Ut commodo interdum risus, vel sodales enim fermentum nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec tempor eros vel sapien tempor lacinia. Phasellus a justo ac sem euismod tincidunt.</p>
-                            <p>Vestibulum nec sapien ac risus tempor gravida. Phasellus convallis nisl eget est congue, sed facilisis nisi tincidunt. Integer facilisis ligula sed velit facilisis varius. Aenean a libero a est tempus ullamcorper. Mauris ut est nec ante varius congue eget ac elit.</p>
+                            
                             </div>
                         </div>
                         </div>
@@ -597,14 +657,26 @@ function UserNavbar() {
                             ) : (
                                 notificaciones.map((notificacion, index) => (
                                     <Link
-                                        to={`/event/${notificacion.evento.id}`}
+                                        to={notificacion.tipo_e === 'evento'
+                                            ? `/event/${notificacion.evento.id}`
+                                            : notificacion.tipo_e === 'beneficio'
+                                            ? `/beneficio/${notificacion.evento.id}`
+                                            : '#' // URL por defecto en caso de otro tipo
+                                            }
                                         style={{ textDecoration: 'none', color: 'inherit' }}
                                         onClick={closeNotificationsModal}
                                         key={index}
                                     >
                                         <div className="list-group">
                                             <div className="list-group-item">
-                                                <div className="notification-title">Nuevo evento</div>
+                                                <div className="notification-title">
+                                                    {notificacion.tipo_e === 'evento'
+                                                        ? 'Nuevo evento'
+                                                        : notificacion.tipo_e === 'beneficio'
+                                                        ? 'Nuevo beneficio'
+                                                        : 'Nueva notificación' // Título por defecto en caso de otro tipo
+                                                    }
+                                                </div>
                                                 <div className="notification-body">{notificacion.mensaje}</div>
                                             </div>
                                         </div>

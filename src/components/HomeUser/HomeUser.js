@@ -1,10 +1,62 @@
 import React from 'react';
 import './HomeUser.css';
-import UserNavbar from '../UserNavbar/UserNavbar';
+// import UserNavbar from '../UserNavbar/UserNavbar';
 import { Helmet } from 'react-helmet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link} from 'react-router-dom';
 
 function HomeUser() {
+    const defaultImage = '/img/default-logo.jpg';
+    const [events, setEvents] = useState([]);
+    const [userCategories, setUserCategories] = useState([]);
+    const [filteredEvents, setFilteredEvents] = useState([]);
+    //Beneficios
+    const [benefitEvents, setBenefitEvents] = useState([]);
+    const [benefitCategories, setBenefitCategories] = useState([]);
+    const [filteredBenefitEvents, setFilteredBenefitEvents] = useState([]);
+    const [error, setError] = useState(null);
+    
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/events/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+                const eventos = response.data.filter(evento => evento.tipo_e === 'evento');
+                setEvents(eventos);
+
+                const beneficios = response.data.filter(evento => evento.tipo_e === 'beneficio');
+                setBenefitEvents(beneficios);
+            } catch (error) {
+                setError('Error fetching events');
+                console.error(error.response.data);
+            }
+        };
+        fetchEvents();
+    }, []);
+    
+    useEffect(() => {
+        const fetchUserCategories = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/categories/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+                const categorias = response.data.categorias_preferidas || [];
+                setUserCategories(categorias.filter(categoria => categoria.tipo_e === 'evento'));
+                setBenefitCategories(categorias.filter(categoria => categoria.tipo_e === 'beneficio'));
+            } catch (error) {
+                console.error('Error fetching user categories', error);
+            }
+        };
+        fetchUserCategories();
+    }, []);
+
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
         return () => {
@@ -12,12 +64,99 @@ function HomeUser() {
         };
     }, []);
 
+    //Filtrar eventos tipo evento
+    useEffect(() => {
+        const filterEvents = () => {
+            let categorizedEvents = [];
+            let randomEvents = [];
+            const allEvents = [...events];
+    
+            if (userCategories.length > 0) {
+                // Filtra eventos que coinciden con las categorías preferidas del usuario
+                categorizedEvents = events.filter(evento =>
+                    evento.categorias.some(categoria =>
+                        userCategories.some(userCat => userCat.id === categoria.id)
+                    )
+                );
+    
+                // Asegúrate de que los eventos no se repitan
+                categorizedEvents = Array.from(new Set(categorizedEvents.map(event => event.id)))
+                    .map(id => categorizedEvents.find(event => event.id === id));
+            }
+    
+            if (categorizedEvents.length >= 9) {
+                setFilteredEvents(categorizedEvents.slice(0, 9));
+            } else {
+                // Si no hay suficientes eventos categorizados, añadir eventos aleatorios
+                randomEvents = allEvents.filter(evento => !categorizedEvents.some(catEvent => catEvent.id === evento.id));
+                randomEvents = [...randomEvents].sort(() => 0.5 - Math.random()).slice(0, 9 - categorizedEvents.length);
+                setFilteredEvents([...categorizedEvents, ...randomEvents]);
+            }
+        };
+    
+        filterEvents();
+    }, [events, userCategories]);
+    
+    const getCarouselItems = () => {
+        const sections = [];
+        for (let i = 0; i < filteredEvents.length; i += 3) {
+            sections.push(filteredEvents.slice(i, i + 3));
+        }
+        return sections;
+    };
+    
+    // Usar getCarouselItems para renderizar el carrusel
+    const carouselItems = getCarouselItems();
+
+    //Filtrar tipo beneficio
+    useEffect(() => {
+        const filterBenefitEvents = () => {
+            let categorizedBenefits = [];
+            let randomBenefits = [];
+            const allBenefits = [...benefitEvents];
+    
+            if (benefitCategories.length > 0) {
+                // Filtra eventos que coinciden con las categorías preferidas del usuario
+                categorizedBenefits = benefitEvents.filter(evento =>
+                    evento.categorias.some(categoria =>
+                        benefitCategories.some(userCat => userCat.id === categoria.id)
+                    )
+                );
+    
+                // Asegúrate de que los eventos no se repitan
+                categorizedBenefits = Array.from(new Set(categorizedBenefits.map(event => event.id)))
+                    .map(id => categorizedBenefits.find(event => event.id === id));
+            }
+    
+            if (categorizedBenefits.length >= 9) {
+                setFilteredBenefitEvents(categorizedBenefits.slice(0, 9));
+            } else {
+                // Si no hay suficientes eventos categorizados, añadir eventos aleatorios
+                randomBenefits = allBenefits.filter(evento => !categorizedBenefits.some(catEvent => catEvent.id === evento.id));
+                randomBenefits = [...randomBenefits].sort(() => 0.5 - Math.random()).slice(0, 9 - categorizedBenefits.length);
+                setFilteredBenefitEvents([...categorizedBenefits, ...randomBenefits]);
+            }
+        };
+    
+        filterBenefitEvents();
+    }, [benefitEvents, benefitCategories]);
+
+    const getBenefitCarouselItems = () => {
+        const sections = [];
+        for (let i = 0; i < filteredBenefitEvents.length; i += 3) {
+            sections.push(filteredBenefitEvents.slice(i, i + 3));
+        }
+        return sections;
+    };
+    
+    // Usar getBenefitCarouselItems para renderizar el carrusel de beneficios
+    const benefitCarouselItems = getBenefitCarouselItems();
+
     return (
         <div>
             <Helmet>
                 <title>Home</title>
             </Helmet>
-            <UserNavbar />
 
             <style>
                 {`
@@ -55,7 +194,7 @@ function HomeUser() {
 
                 <div className="d-flex align-items-center mb-4">
                     <div className="d-flex align-items-center w-100 mx-2">
-                        <h2>Recomendados</h2>
+                        <h2>Eventos Recomendados</h2>
                         <div className="flex-grow-1 ms-2">
                             <hr />
                         </div>
@@ -65,81 +204,28 @@ function HomeUser() {
                 {/* Carousel para Inicio */}
                 <div id="inicioCarousel" className="carousel carousel-dark slide" data-bs-ride="carousel">
                     <div className="carousel-inner">
-                        <div className="carousel-item active">
-                            <div className="row">
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
+                        {/* Primer seccion del carrousel con maximo 3 cards */}
+                        {carouselItems.map((section, index) => (
+                            <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                                <div className="row">
+                                    {section.map(event => (
+                                        <div className="col-md-4 mb-4" key={event.id}>
+                                            <Link to={`/event/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                <div className="card preview-event-home">
+                                                    <div className="ratio ratio-16x9">
+                                                        <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
+                                                    </div>
+                                                    <div className="card-body">
+                                                        <h5 className="card-title">{event.nombre}</h5>
+                                                        <p className="card-text">{event.descripcion}</p>
+                                                    </div>
+                                                </div>
+                                            </Link>
                                         </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                        {/* Puedes añadir más slides aquí si es necesario */}
-                        <div className="carousel-item">
-                            <div className="row">
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-2.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento 2</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-2.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento 2</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-2.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento 2</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                     <button className="carousel-control-prev" type="button" data-bs-target="#inicioCarousel" data-bs-slide="prev">
                         <span className="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -155,7 +241,7 @@ function HomeUser() {
             {/* EVENTOS */}
             <section className="container my-5">
                 <div className="d-flex align-items-center w-100 mb-4">
-                    <h2>Próximos eventos</h2>
+                    <h2>Beneficios Recomendados</h2>
                     <div className="flex-grow-1 ms-2">
                         <hr />
                     </div>
@@ -164,43 +250,27 @@ function HomeUser() {
                 {/* Carousel para Eventos */}
                 <div id="eventosCarousel" className="carousel carousel-dark slide" data-bs-ride="carousel">
                     <div className="carousel-inner">
-                        <div className="carousel-item active">
+                    {benefitCarouselItems.map((section, index) => (
+                        <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
                             <div className="row">
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
+                                {section.map(event => (
+                                    <div className="col-md-4 mb-4" key={event.id}>
+                                        <Link to={`/beneficio/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <div className="card preview-event-home">
+                                                <div className="ratio ratio-16x9">
+                                                    <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
+                                                </div>
+                                                <div className="card-body">
+                                                    <h5 className="card-title">{event.nombre}</h5>
+                                                    <p className="card-text">{event.descripcion}</p>
+                                                </div>
+                                            </div>
+                                        </Link>
                                     </div>
-                                </div>
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4 mb-4">
-                                    <div className="card preview-event-home">
-                                        <div className="ratio ratio-16x9">
-                                            <img src="./img/event-1.jpg" alt="Event" className="w-100 h-100 object-fit-cover" />
-                                        </div>
-                                        <div className="card-body">
-                                            <h5 className="card-title">Evento Ejemplo</h5>
-                                            <p className="card-text">Texto evento ejemplo.</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
+                    ))}
                         {/* Puedes añadir más slides aquí si es necesario */}
                     </div>
                     <button className="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#eventosCarousel" data-bs-slide="prev">

@@ -2,11 +2,11 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './UpdateEventF.css';
+import './UpdateBeneficio.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import Swal from 'sweetalert2';
 
-function UpdateEventF() {
+function UpdateBeneficio() {
     const { id } = useParams();
     const [eventData, setEventData] = useState({});
     const [nombre, setNombre] = useState('');
@@ -17,19 +17,14 @@ function UpdateEventF() {
     const [error, setError] = useState(null);
     const [currentUserData, setCurrentUserData] = useState(null);
     const navigate = useNavigate();
-
-    // Campos distintivos de Evento
-    const [fechaEvento, setFechaEvento] = useState('');
-    const [horaEvento, setHoraEvento] = useState('');
-    const [hostEvento, setHostEvento] = useState('');
-    const [fechaFinEvento, setFechaFinEvento] = useState('');
-    const [horaFinEvento, setHoraFinEvento] = useState('');
-    const [lugarEvento, setLugarEvento] = useState('');
     
     //categorias
     const [categorias, setCategorias] = useState([]);
     const [categoriaPrincipal, setCategoriaPrincipal] = useState('');
     const [categoriasAsociadas, setCategoriasAsociadas] = useState([]);
+
+    // Campos Caracteristicos
+    const [fechaFinBeneficio, setFechaFinBeneficio] = useState('');
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -44,13 +39,7 @@ function UpdateEventF() {
                 setDescripcion(response.data.descripcion || '');
                 setCategoriaPrincipal(response.data.categoria_p || '');
                 setCategoriasAsociadas(response.data.categorias_ids || []);
-                // Campos distintivos evento
-                setFechaEvento(response.data.fecha_evento || '');
-                setHoraEvento(response.data.hora_evento || '');
-                setHostEvento(response.data.host_evento || '');
-                setFechaFinEvento(response.data.fecha_fin_evento || '');
-                setHoraFinEvento(response.data.hora_fin_evento || '');
-                setLugarEvento(response.data.lugar_evento || '');
+                setFechaFinBeneficio(response.data.fecha_fin_beneficio || '');
 
             } catch (error) {
                 setError('Error fetching event');
@@ -62,8 +51,7 @@ function UpdateEventF() {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/categories/');
-
-                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'evento');
+                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'beneficio');
                 setCategorias(categoriasEvento);
 
             } catch (error) {
@@ -111,16 +99,6 @@ function UpdateEventF() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        // Validación de campos distintivoa
-        if (!fechaEvento.trim() || !horaEvento.trim() || !hostEvento.trim() || !fechaFinEvento.trim() || !horaFinEvento.trim() || !lugarEvento.trim()) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Todos los campos son obligatorios',
-            });
-            return;
-        }
     
         // Validación de nombre y descripción
         if (!nombre.trim() || !descripcion.trim()) {
@@ -163,13 +141,10 @@ function UpdateEventF() {
     
         formData.append('categoria_p', categoriaPrincipal);
         formData.append('categorias_ids', categoriasAsociadas.filter(id => id !== categoriaPrincipal).join(',')); // Excluye la categoría principal si está en categorías asociadas
-        formData.append('fecha_evento', fechaEvento);
-        // Campos distintivos
-        formData.append('hora_evento', horaEvento);
-        formData.append('host_evento', hostEvento);
-        formData.append('fecha_fin_evento', fechaFinEvento);
-        formData.append('hora_fin_evento', horaFinEvento);
-        formData.append('lugar_evento', lugarEvento);
+        
+        if (fechaFinBeneficio) {
+            formData.append('fecha_fin_beneficio', fechaFinBeneficio);
+        }
 
         try {
             await axios.put(`http://localhost:8000/api/events/${id}/`, formData, {
@@ -182,16 +157,16 @@ function UpdateEventF() {
             Swal.fire({
                 icon: 'success',
                 title: 'Éxito',
-                text: 'Evento actualizado correctamente',
+                text: 'Beneficio actualizado correctamente',
             }).then(() => {
-                navigate('/showAllEvents');
+                navigate('/showAllBeneficios');
             });
     
         } catch (error) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Error al actualizar el evento',
+                text: 'Error al actualizar el Beneficio',
             });
         }
     };
@@ -241,7 +216,7 @@ function UpdateEventF() {
                     <div className="container align-self-center justify-content-center d-flex">
                     <div className="row">
                         <div className="justify-content-center text-center text-light">
-                        <h1 className="main-register-title mt-5">Modificar Evento</h1>
+                        <h1 className="main-register-title mt-5">Modificar Beneficio</h1>
                         </div>
                         <div className="col-12 bg-light p-5 form-register bg-light">
                             {/* Formulario */}
@@ -331,75 +306,19 @@ function UpdateEventF() {
                                     </select>
                                 </div>
 
-                                {/* Campos distintivos */}
-
+                                {/* Campos caracteristicos */}
                                 <div className="mb-3">
-                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento</label>
+                                    <label htmlFor="fechaFinBeneficio" className="form-label">Fecha Fin del Beneficio (Opcional)</label>
                                     <input
                                         type="date"
                                         className="form-control"
-                                        id="fechaEvento"
-                                        value={fechaEvento}
-                                        onChange={(e) => setFechaEvento(e.target.value)}
+                                        id="fechaFinBeneficio"
+                                        value={fechaFinBeneficio}
+                                        onChange={(e) => setFechaFinBeneficio(e.target.value)}
                                     />
                                 </div>
 
-                                <div className="mb-3">
-                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento</label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        id="horaEvento"
-                                        value={horaEvento}
-                                        onChange={(e) => setHoraEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="hostEvento" className="form-label">Host del Evento</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="hostEvento"
-                                        value={hostEvento}
-                                        onChange={(e) => setHostEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="fechaFinEvento" className="form-label">Fecha de Fin del Evento</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        id="fechaFinEvento"
-                                        value={fechaFinEvento}
-                                        onChange={(e) => setFechaFinEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="horaFinEvento" className="form-label">Hora de Fin del Evento</label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        id="horaFinEvento"
-                                        value={horaFinEvento}
-                                        onChange={(e) => setHoraFinEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="lugarEvento" className="form-label">Lugar del Evento</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="lugarEvento"
-                                        value={lugarEvento}
-                                        onChange={(e) => setLugarEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <button type="submit" className="btn btn-primary mt-3">Actualizar Evento</button>
+                                <button type="submit" className="btn btn-primary mt-3">Actualizar Beneficio</button>
 
                                 {error && <div className="mt-3 text-danger">{error}</div>}
                                 {success && <div className="mt-3 text-success">{success}</div>}
@@ -413,4 +332,4 @@ function UpdateEventF() {
     );
 }
 
-export default UpdateEventF;
+export default UpdateBeneficio;

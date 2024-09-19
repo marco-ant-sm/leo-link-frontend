@@ -43,7 +43,7 @@ function UserRegister(){
 
     return(
         <div>
-            <UserNavbar/>
+            {/* <UserNavbar/> */}
             <div className="bg-light">
                 <div className="container-fluid single-section bg-light d-flex">
                     <div className="container align-self-center justify-content-center d-flex">

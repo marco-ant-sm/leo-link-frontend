@@ -17,14 +17,6 @@ function UpdateEventF() {
     const [error, setError] = useState(null);
     const [currentUserData, setCurrentUserData] = useState(null);
     const navigate = useNavigate();
-
-    // Campos distintivos de Evento
-    const [fechaEvento, setFechaEvento] = useState('');
-    const [horaEvento, setHoraEvento] = useState('');
-    const [hostEvento, setHostEvento] = useState('');
-    const [fechaFinEvento, setFechaFinEvento] = useState('');
-    const [horaFinEvento, setHoraFinEvento] = useState('');
-    const [lugarEvento, setLugarEvento] = useState('');
     
     //categorias
     const [categorias, setCategorias] = useState([]);
@@ -44,14 +36,6 @@ function UpdateEventF() {
                 setDescripcion(response.data.descripcion || '');
                 setCategoriaPrincipal(response.data.categoria_p || '');
                 setCategoriasAsociadas(response.data.categorias_ids || []);
-                // Campos distintivos evento
-                setFechaEvento(response.data.fecha_evento || '');
-                setHoraEvento(response.data.hora_evento || '');
-                setHostEvento(response.data.host_evento || '');
-                setFechaFinEvento(response.data.fecha_fin_evento || '');
-                setHoraFinEvento(response.data.hora_fin_evento || '');
-                setLugarEvento(response.data.lugar_evento || '');
-
             } catch (error) {
                 setError('Error fetching event');
                 console.error(error);
@@ -62,10 +46,7 @@ function UpdateEventF() {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/categories/');
-
-                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'evento');
-                setCategorias(categoriasEvento);
-
+                setCategorias(response.data);
             } catch (error) {
                 setError('Error fetching categories');
             }
@@ -111,16 +92,6 @@ function UpdateEventF() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        // Validación de campos distintivoa
-        if (!fechaEvento.trim() || !horaEvento.trim() || !hostEvento.trim() || !fechaFinEvento.trim() || !horaFinEvento.trim() || !lugarEvento.trim()) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Todos los campos son obligatorios',
-            });
-            return;
-        }
     
         // Validación de nombre y descripción
         if (!nombre.trim() || !descripcion.trim()) {
@@ -163,14 +134,7 @@ function UpdateEventF() {
     
         formData.append('categoria_p', categoriaPrincipal);
         formData.append('categorias_ids', categoriasAsociadas.filter(id => id !== categoriaPrincipal).join(',')); // Excluye la categoría principal si está en categorías asociadas
-        formData.append('fecha_evento', fechaEvento);
-        // Campos distintivos
-        formData.append('hora_evento', horaEvento);
-        formData.append('host_evento', hostEvento);
-        formData.append('fecha_fin_evento', fechaFinEvento);
-        formData.append('hora_fin_evento', horaFinEvento);
-        formData.append('lugar_evento', lugarEvento);
-
+    
         try {
             await axios.put(`http://localhost:8000/api/events/${id}/`, formData, {
                 headers: {
@@ -235,7 +199,7 @@ function UpdateEventF() {
 
     return (
         <div>
-            {/* <UserNavbar/> */}
+            <UserNavbar/>
             <div className="bg-light">
                 <div className="container-fluid single-section bg-light d-flex">
                     <div className="container align-self-center justify-content-center d-flex">
@@ -329,74 +293,6 @@ function UpdateEventF() {
                                                 </option>
                                             ))}
                                     </select>
-                                </div>
-
-                                {/* Campos distintivos */}
-
-                                <div className="mb-3">
-                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        id="fechaEvento"
-                                        value={fechaEvento}
-                                        onChange={(e) => setFechaEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento</label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        id="horaEvento"
-                                        value={horaEvento}
-                                        onChange={(e) => setHoraEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="hostEvento" className="form-label">Host del Evento</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="hostEvento"
-                                        value={hostEvento}
-                                        onChange={(e) => setHostEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="fechaFinEvento" className="form-label">Fecha de Fin del Evento</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        id="fechaFinEvento"
-                                        value={fechaFinEvento}
-                                        onChange={(e) => setFechaFinEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="horaFinEvento" className="form-label">Hora de Fin del Evento</label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        id="horaFinEvento"
-                                        value={horaFinEvento}
-                                        onChange={(e) => setHoraFinEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="lugarEvento" className="form-label">Lugar del Evento</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="lugarEvento"
-                                        value={lugarEvento}
-                                        onChange={(e) => setLugarEvento(e.target.value)}
-                                    />
                                 </div>
 
                                 <button type="submit" className="btn btn-primary mt-3">Actualizar Evento</button>

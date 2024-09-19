@@ -1,10 +1,10 @@
 import React, {useEffect ,useState } from 'react';
 import axios from 'axios';
 import UserNavbar from '../UserNavbar/UserNavbar';
-import './CreateEventF.css';
+import './CreateBeneficio.css';
 import Swal from 'sweetalert2';
 
-const CreateEventF = () => {
+const CreateBeneficio = () => {
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [error, setError] = useState(null);
@@ -15,12 +15,7 @@ const CreateEventF = () => {
     const [categoriasAsociadas, setCategoriasAsociadas] = useState([]);
 
     // Campos Caracteristicos
-    const [fechaEvento, setFechaEvento] = useState('');
-    const [horaEvento, setHoraEvento] = useState('');
-    const [hostEvento, setHostEvento] = useState('');
-    const [fechaFinEvento, setFechaFinEvento] = useState('');
-    const [horaFinEvento, setHoraFinEvento] = useState('');
-    const [lugarEvento, setLugarEvento] = useState('');
+    const [fechaFinBeneficio, setFechaFinBeneficio] = useState('');
 
 
     useEffect(() => {
@@ -28,7 +23,7 @@ const CreateEventF = () => {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/categories/');
-                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'evento');
+                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'beneficio');
                 setCategorias(categoriasEvento);
 
             } catch (error) {
@@ -43,16 +38,7 @@ const CreateEventF = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        // Validación de los nuevos campos
-        if (!fechaEvento || !horaEvento || !hostEvento || !fechaFinEvento || !horaFinEvento || !lugarEvento) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Todos los campos del evento marcados en rojo son obligatorios',
-            });
-            return;
-        }
-
+        
         if (!nombre.trim()) {
             Swal.fire({
                 icon: 'error',
@@ -99,12 +85,12 @@ const CreateEventF = () => {
         formData.append('categoria_p', categoriaPrincipal);
         formData.append('categorias_ids', categoriasAsociadas.filter(id => id !== categoriaPrincipal).join(',')); // Excluye la categoría principal si está en categorías asociadas
         // Campos caracteristicos
-        formData.append('fecha_evento', fechaEvento);
-        formData.append('hora_evento', horaEvento);
-        formData.append('host_evento', hostEvento);
-        formData.append('fecha_fin_evento', fechaFinEvento);
-        formData.append('hora_fin_evento', horaFinEvento);
-        formData.append('lugar_evento', lugarEvento);
+        formData.append('tipo_e', 'beneficio');
+
+        if (fechaFinBeneficio) {
+            formData.append('fecha_fin_beneficio', fechaFinBeneficio);
+        }
+        
         try {
             await axios.post('http://localhost:8000/api/events/', formData, {
                 headers: {
@@ -114,25 +100,21 @@ const CreateEventF = () => {
             });
             Swal.fire({
                 icon: 'success',
-                title: 'Evento agregado',
-                text: 'Se ha acreado el Evento con éxito',
+                title: 'Beneficio agregado',
+                text: 'Se ha acreado el Beneficio con éxito',
             });
             setNombre('');
             setDescripcion('');
             setImagen(null);
             setCategoriaPrincipal('');
             setCategoriasAsociadas([]);
-            setFechaEvento('');
-            setHoraEvento('');
-            setHostEvento('');
-            setFechaFinEvento('');
-            setHoraFinEvento('');
-            setLugarEvento('');
+            //campos caracteristicos
+            setFechaFinBeneficio('');
         } catch (error) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Error creando el evento',
+                text: 'Error creando el Beneficio',
             });
         }
     };
@@ -145,7 +127,7 @@ const CreateEventF = () => {
                     <div className="container align-self-center justify-content-center d-flex">
                     <div className="row">
                         <div className="justify-content-center text-center text-light">
-                        <h1 className="main-register-title mt-5">Crear un nuevo evento</h1>
+                        <h1 className="main-register-title mt-5">Crear un nuevo Beneficio</h1>
                         </div>
                         <div className="col-12 bg-light p-5 form-register bg-light">
                             <form className="m-auto p-5" onSubmit={handleSubmit}>
@@ -220,77 +202,17 @@ const CreateEventF = () => {
                                 
                                 {/* Campos caracteristicos */}
                                 <div className="mb-3">
-                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento <span className='text-danger'>*</span></label>
+                                    <label htmlFor="fechaFinBeneficio" className="form-label">Fecha Fin del Beneficio (Opcional)</label>
                                     <input
                                         type="date"
                                         className="form-control"
-                                        id="fechaEvento"
-                                        value={fechaEvento}
-                                        onChange={(e) => setFechaEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento <span className='text-danger'>*</span></label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        id="horaEvento"
-                                        value={horaEvento}
-                                        onChange={(e) => setHoraEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="hostEvento" className="form-label">Host del Evento <span className='text-danger'>*</span></label>
-                                    <select
-                                        className="form-select"
-                                        id="hostEvento"
-                                        value={hostEvento}
-                                        onChange={(e) => setHostEvento(e.target.value)}
-                                    >
-                                        <option value="">Selecciona un host</option>
-                                        <option value="Cucei">Cucei</option>
-                                        <option value="Empresa">Empresa</option>
-                                        <option value="Consejo estudiantil">Consejo Estudiantil</option>
-                                        <option value="Docente">Docente</option>
-                                    </select>
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="fechaFinEvento" className="form-label">Fecha de Fin del Evento <span className='text-danger'>*</span></label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        id="fechaFinEvento"
-                                        value={fechaFinEvento}
-                                        onChange={(e) => setFechaFinEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="horaFinEvento" className="form-label">Hora de Fin del Evento <span className='text-danger'>*</span></label>
-                                    <input
-                                        type="time"
-                                        className="form-control"
-                                        id="horaFinEvento"
-                                        value={horaFinEvento}
-                                        onChange={(e) => setHoraFinEvento(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="lugarEvento" className="form-label">Lugar del Evento <span className='text-danger'>*</span></label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="lugarEvento"
-                                        value={lugarEvento}
-                                        onChange={(e) => setLugarEvento(e.target.value)}
+                                        id="fechaFinBeneficio"
+                                        value={fechaFinBeneficio}
+                                        onChange={(e) => setFechaFinBeneficio(e.target.value)}
                                     />
                                 </div>
                                 
-                                <button type="submit" className="btn btn-primary mt-3">Crear Evento</button>
+                                <button type="submit" className="btn btn-primary mt-3">Crear Beneficio</button>
 
                                 {error && <div className="mt-3 text-danger">{error}</div>}
                                 {success && <div className="mt-3 text-success">{success}</div>}
@@ -304,4 +226,4 @@ const CreateEventF = () => {
     );
 };
 
-export default CreateEventF;
+export default CreateBeneficio;

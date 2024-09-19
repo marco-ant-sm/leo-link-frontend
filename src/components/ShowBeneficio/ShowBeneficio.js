@@ -1,4 +1,4 @@
-import './ShowEvent.css';
+import './ShowBeneficio.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import {toast} from 'react-hot-toast';
 import { format, parseISO, isSameDay } from 'date-fns';
 import es from 'date-fns/locale/es';
 
-function ShowEvent() {
+function ShowBeneficio() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
     const [eventData, setEventData] = useState({});
     const [error, setError] = useState(null);
@@ -119,7 +119,7 @@ function ShowEvent() {
 
     //Funcion para ir a editar el evento
     const handleEdit = () => {
-        navigate(`/updateEvent/${eventData.id}`);
+        navigate(`/updateBeneficio/${eventData.id}`);
     }
 
     //Funcion para eliminar el evento
@@ -163,7 +163,7 @@ function ShowEvent() {
     
         // Mostrar el cuadro de diálogo de confirmación
         const result = await Swal.fire({
-          title: '¿Estás seguro que deseas eliminar este evento?',
+          title: '¿Estás seguro que deseas eliminar este beneficio?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Sí',
@@ -180,11 +180,11 @@ function ShowEvent() {
               await Swal.fire({
                 title: 'Eliminado',
                 icon: 'success',
-                text: 'El evento ha sido eliminado.',
+                text: 'El beneficio ha sido eliminado.',
                 timer: 1700,
                 showConfirmButton: false
               });
-              navigate('/showAllEvents');  // Redirige después de eliminar
+              navigate('/showAllBeneficios');  // Redirige después de eliminar
             }
           } else {
             // La URL ha cambiado, no realizar la acción
@@ -271,7 +271,7 @@ function ShowEvent() {
           });
           setAsistido(true);
           setTotalAsistentes(prev => prev + 1);
-          toast.success('Asistencia confirmada', { position: 'bottom-right',style: {
+          toast.success('Like agregado', { position: 'bottom-right',style: {
             background:"#101010",
             color:"#fff",
             bordeRadius:"5px"
@@ -296,7 +296,7 @@ function ShowEvent() {
         });
         setAsistido(false);
         setTotalAsistentes(prev => Math.max(0, prev - 1));
-        toast.success('Asistencia Eliminada', { position: 'bottom-right',style: {
+        toast.success('Like Eliminado', { position: 'bottom-right',style: {
             background:"#101010",
             color:"#fff",
             bordeRadius:"5px"
@@ -308,47 +308,7 @@ function ShowEvent() {
     }
     }
 
-    // Función para capitalizar la primera letra de dias de la semana y meses
-    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
     
-    const capitalizeAllText = (str) => {
-        // Asegúrate de que valor sea una cadena
-        if (typeof str !== 'string') {
-          str = String(str); // Convierte a cadena si no lo es
-        }
-        return str.toUpperCase(); // Convierte a mayúsculas
-      };
-
-    //Hacer fecha más agradable
-    function formatEventDate(startDate, startTime, endDate, endTime) {
-        // Convertir las cadenas de fecha y hora a un formato de fecha válido
-        const startDateTime = new Date(`${startDate}T${startTime}`);
-        const endDateTime = new Date(`${endDate}T${endTime}`);
-
-        // Comprobar si las fechas son válidas
-        if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-            return 'Fecha o hora inválida';
-        }
-
-        // Obtener los valores formateados
-        const dayOfWeekStart = capitalize(format(startDateTime, 'eeee', { locale: es }));
-        const dayOfWeekEnd = capitalize(format(endDateTime, 'eeee', { locale: es }));
-        const dayStart = format(startDateTime, 'd');
-        const monthStart = capitalize(format(startDateTime, 'MMMM', { locale: es }));
-        const yearStart = format(startDateTime, 'yyyy');
-        const timeStart = format(startDateTime, 'h:mm a');
-        const timeEnd = format(endDateTime, 'h:mm a');
-
-        if (startDate === endDate) {
-            return `${dayOfWeekStart} ${dayStart} de ${monthStart} de ${yearStart} ${timeStart} a ${timeEnd}`;
-        } else {
-            const dayEnd = format(endDateTime, 'd');
-            const monthEnd = capitalize(format(endDateTime, 'MMMM', { locale: es }));
-            const yearEnd = format(endDateTime, 'yyyy');
-            return `Desde ${dayOfWeekStart} ${dayStart} de ${monthStart} de ${yearStart} ${timeStart} a ${dayOfWeekEnd} ${dayEnd} de ${monthEnd} de ${yearEnd} ${timeEnd}`;
-        }
-    }
-
     return (
         <>
             {/* <UserNavbar/> */}
@@ -374,22 +334,7 @@ function ShowEvent() {
                     {/* Item main info */}
                     <div className="col-lg-4 col-xl-3 ps-lg-5 order-1 order-lg-2 mb-4 mb-lg-0">
                         <div className="main-info p-lg-3 p-3 p-lg-0 overflow-y-auto overflow-x-hidden">
-                        <p className="main-info-title">Fecha</p>
-                        <p>
-                            {" "}
-                            <span>
-                            <i className="fas fa-calendar-alt" />
-                            </span>{" "}
-                            {formatEventDate(eventData.fecha_evento, eventData.hora_evento, eventData.fecha_fin_evento, eventData.hora_fin_evento)}
-                        </p>
-                        <p className="main-info-title">Lugar</p>
-                        <p>
-                            {" "}
-                            <span>
-                            <i className="fas fa-map-marker-alt" />
-                            </span>{" "}
-                            {eventData.lugar_evento}
-                        </p>
+                
                         <p className="main-info-title">Categorias</p>
                         <p>
                         <span className="badge bg-primary text-light me-1">{categoriaPrincipal}</span>
@@ -418,11 +363,18 @@ function ShowEvent() {
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
 
+                        {eventData.fecha_fin_beneficio && (
+                            <div>
+                                <p className="main-info-title">Fecha de fin</p>
+                                <p>{eventData.fecha_fin_beneficio}</p>
+                            </div>
+                        )}
+
                         {/* Botones de asistencia y no asistencia */}
                         {asistido ? (
-                            <button className="btn btn-danger btn-sm me-3" onClick={handleNoAsistir}><i class="fa-solid fa-user-minus"></i> No Asistiré</button>
+                            <button className="btn btn-danger btn-sm me-3" onClick={handleNoAsistir}><i class="fa-solid fa-heart-crack"></i> No me es útil</button>
                         ) : (
-                            <button className="btn btn-success btn-sm me-3" onClick={handleAsistir}><i class="fa-solid fa-user-plus"></i> Asistiré</button>
+                            <button className="btn btn-success btn-sm me-3" onClick={handleAsistir}><i class="fa-solid fa-heart"></i> Me es útil</button>
                         )}
 
                         {/* Botones para editar y borrar */}
@@ -432,8 +384,8 @@ function ShowEvent() {
                                 <button className="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
                             </div>
                         )}
-                        
-                        <p className="main-info-title mt-3">Host - <span className='text-primary'>{capitalizeAllText(eventData.host_evento)}</span></p>
+
+                                                
                         </div>
                     </div>
                     {/* item description */}
@@ -442,7 +394,7 @@ function ShowEvent() {
                         <p>
                         {eventData.descripcion}
                         </p>
-                        <p>Asistencia:{totalAsistentes}</p>
+                        <p>Le es util a:{totalAsistentes} personas</p>
                     </div>
                     </div>
                 </div>
@@ -485,7 +437,7 @@ function ShowEvent() {
                                 {/* All comments section */}
                                 <div className="mt-5">
                                     {comments.length === 0 ? (
-                                        <p>No hay comentarios sobre este evento.</p>
+                                        <p>No hay comentarios sobre este beneficio.</p>
                                     ) : (
                                         comments.map((comment) => (
                                             <div className="row mb-2" key={comment.id}>
@@ -586,4 +538,4 @@ function ShowEvent() {
     );
   }
   
-  export default ShowEvent;
+  export default ShowBeneficio;
