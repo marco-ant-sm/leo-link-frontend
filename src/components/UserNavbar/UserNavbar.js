@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import {toast} from 'react-hot-toast';
 import axios from 'axios';
 import './UserNavbar.css';
+import Swal from 'sweetalert2';
 
 function UserNavbar() {
     const [userName, setUserName] = useState('');
@@ -15,6 +16,100 @@ function UserNavbar() {
     const [notificaciones, setNotificaciones] = useState([]);
 
     const [showNotification, setShowNotification] = useState(false);
+
+    //Editar perfil de usuario
+    const [descripcion, setDescripcion] = useState('');
+    const [imagen, setImagen] = useState(null);
+    const [currentUserData, setCurrentUserData] = useState({});
+    const [eliminarImagen, setEliminarImagen] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [fileInputKey, setFileInputKey] = useState(0);
+
+    const fetchUserProfile = async () => {
+        const token = localStorage.getItem('access');
+
+        if (!token) {
+            setError('No se encontró token de autenticación');
+            return;
+        }
+
+        try {
+            const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            setCurrentUserData(response.data);
+            setDescripcion(response.data.descripcion);
+        } catch (error) {
+            setError('Error al obtener el perfil del usuario');
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    
+    const handleUserUpdateSubmit = async (event) => {
+        event.preventDefault();
+    
+        const token = localStorage.getItem('access');
+        if (!token) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontró token de autenticación',
+            });
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append('descripcion', descripcion);
+    
+        // Reset imagen if it's not being sent
+        if (eliminarImagen && !imagen) {
+            formData.append('eliminar_imagen', true);
+        } else if (imagen) {
+            formData.append('imagen', imagen);
+        }
+    
+        try {
+            await axios.patch(`http://localhost:8000/api/user/update-user-profile/`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+    
+            // Reset fields
+            setImagen(null); // Reset image selection
+            setEliminarImagen(false); // Uncheck the delete checkbox
+            setDescripcion(''); // Clear the description
+            setFileInputKey(prevKey => prevKey + 1);
+    
+            // Fetch the updated user profile
+            await fetchUserProfile(); // Asegúrate de que esta función esté definida en tu componente
+    
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Perfil actualizado correctamente',
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.errors 
+                ? Object.values(error.response.data.errors).flat().join(', ') 
+                : 'Error al actualizar el perfil';
+    
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+            });
+        }
+    };
 
     // Función para manejar el clic en el botón
     const handleNotificationButtonClick = async () => {
@@ -375,7 +470,20 @@ function UserNavbar() {
                     aria-expanded="false"
                     >
                     <span className="user-image-nav">
-                        <i className="bi bi-person-circle" />
+                        {currentUserData.imagen ? (
+                            <img
+                                src={currentUserData.imagen}
+                                alt="User"
+                                style={{
+                                    width: '37px',
+                                    height: '37px',
+                                    borderRadius: '50%', // Hace que la imagen sea circular
+                                    objectFit: 'cover', // Asegura que la imagen cubra el contenedor
+                                }}
+                            />
+                        ) : (
+                            <i className="bi bi-person-circle" />
+                        )}
                     </span>
                     </button>
                     <ul className="dropdown-menu dropdown-menu-end bg-dark">
@@ -622,10 +730,55 @@ function UserNavbar() {
                             ))}
                             </div>
                         </div>
+                        {/* Editar perfil del usuario */}
                         <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                             <div className="p-3 border border-light bg-light text-dark content-box" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             <h5>Perfil del Usuario</h5>
-                            
+                                <form className="m-auto p-5" onSubmit={handleUserUpdateSubmit}>
+                                    <div className="mb-3">
+                                        <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                        <textarea
+                                            className="form-control"
+                                            id="descripcion"
+                                            value={descripcion}
+                                            onChange={(e) => setDescripcion(e.target.value)}
+                                        />
+                                    </div>
+
+                                    
+                                    <div className="mb-3">
+                                        <label htmlFor="imagen" className="form-label">Imagen (Opcional)</label>
+                                        <input
+                                             key={fileInputKey}
+                                            type="file"
+                                            className="form-control"
+                                            id="imagen"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                setImagen(e.target.files[0] || null); // Si no se selecciona un archivo, establece a null
+                                            }}
+                                        />
+                                    </div>
+
+                                    {currentUserData.imagen && (
+                                        <div className="mb-3">
+                                            <label className="form-check-label">
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input me-1"
+                                                    checked={eliminarImagen}
+                                                    onChange={(e) => setEliminarImagen(e.target.checked)}
+                                                />
+                                                Eliminar imagen actual
+                                            </label>
+                                        </div>
+                                    )}
+
+                                    <button type="submit" className="btn btn-primary mt-3">Actualizar Perfil</button>
+
+                                    {error && <div className="mt-3 text-danger">{error}</div>}
+                                    {success && <div className="mt-3 text-success">{success}</div>}
+                                </form>
                             </div>
                         </div>
                         </div>

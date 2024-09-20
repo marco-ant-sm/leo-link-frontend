@@ -413,7 +413,23 @@ function ShowEvent() {
                         <p>
                             {" "}
                             <span>
-                            <i className="bi bi-person-circle" />
+                                {eventData.usuario && eventData.usuario.imagen ? (
+                                    <img
+                                        src={eventData.usuario.imagen}
+                                        alt="User"
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                ) : (
+                                    <span>
+                                        <i className="bi bi-person-circle" />
+                                    </span>
+                                )}
+
                             </span>{" "}
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
@@ -468,7 +484,23 @@ function ShowEvent() {
                                                 required
                                             />
                                             <label htmlFor="floatingInput">
-                                                <span><i className="bi bi-person-circle" /></span> Añadir un comentario
+                                                {currentUserData && currentUserData.imagen ? (
+                                                    <img
+                                                        src={currentUserData.imagen}
+                                                        alt="User"
+                                                        className='me-1'
+                                                        style={{
+                                                            width: '20px',
+                                                            height: '20px',
+                                                            borderRadius: '50%',
+                                                            objectFit: 'cover',
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <span>
+                                                        <i className="bi bi-person-circle" />
+                                                    </span>
+                                                )} Añadir un comentario
                                             </label>
                                         </div>
                                         <div className="col-lg-1 col-2 m-0 p-0 d-flex">

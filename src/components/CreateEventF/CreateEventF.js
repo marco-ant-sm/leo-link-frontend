@@ -3,6 +3,8 @@ import axios from 'axios';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import './CreateEventF.css';
 import Swal from 'sweetalert2';
+import { format, parseISO} from 'date-fns';
+import es from 'date-fns/locale/es';
 
 const CreateEventF = () => {
     const [nombre, setNombre] = useState('');
@@ -40,8 +42,62 @@ const CreateEventF = () => {
     }, []);
 
 
+    //Verificar si la imagen es apropiada
+    const verificarImagen = async (imagen) => {
+        const img = new Image();
+        const reader = new FileReader();
+    
+        return new Promise((resolve, reject) => {
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+    
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 224;
+                canvas.height = 224;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, 224, 224);
+                const imgData = ctx.getImageData(0, 0, 224, 224).data;
+                const imgArray = Array.from(imgData).map(pixel => pixel / 255.0);
+    
+                try {
+                    const response = await axios.post('http://localhost:5000/api', { imageArray: imgArray });
+                    resolve(response.data.result);
+                } catch {
+                    reject('Error verificando la imagen');
+                }
+            };
+    
+            reader.readAsDataURL(imagen);
+        });
+    };
+
+
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        //validar imagen
+        if (imagen) {
+            try {
+                const resultadoVerificacion = await verificarImagen(imagen);
+                if (resultadoVerificacion === 'Desnudos.') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'La imagen es inapropiada. Por favor, selecciona otra.',
+                    });
+                    return;
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error,
+                });
+                return;
+            }
+        }
 
         // Validación de los nuevos campos
         if (!fechaEvento || !horaEvento || !hostEvento || !fechaFinEvento || !horaFinEvento || !lugarEvento) {
@@ -137,6 +193,84 @@ const CreateEventF = () => {
         }
     };
 
+    //Hacer predicción de asistencia
+    const handleAttendancePrediction = async () => {
+        // Validar campos requeridos
+        if (!categoriaPrincipal || !fechaEvento || !hostEvento || !horaEvento) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Los campos en verde son obligatorios para realizar la predicción.',
+            });
+            return;
+        }
+    
+        // Obtener los parámetros
+        const categoriaMap = {
+            'Deportivo': 'deportivo',
+            'Salud': 'salud',
+            'Recreativo': 'recreativo',
+            'Académico': 'academico',
+            'Laboral': 'laboral',
+            'Informática': 'informatica',
+            'Ocio': 'ocio',
+            'Comercio': 'comercio',
+            'Química': 'quimica',
+            'Industrial': 'industrial',
+            'Mecánica Eléctrica': 'meca-elec',
+            'Electrónica': 'electronica',
+            'Temático': 'tematico'
+        };
+    
+        const quienMap = {
+            'Cucei': 'cucei',
+            'Empresa': 'empresa',
+            'Consejo estudiantil': 'consejo estudiantil',
+            'Docente': 'docente'
+        };
+    
+        const categoria = categoriaMap[categoriaPrincipal];
+        const quienLoRealiza = quienMap[hostEvento];
+        const date = parseISO(fechaEvento);
+        const mes = format(date, 'MMMM', { locale: es }).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const dia = format(date, 'EEEE', { locale: es }).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const hora = horaEvento.split(':')[0];
+    
+        const data = { categoria, mes, dia, quienLoRealiza, hora };
+    
+        // Realizar la petición
+        try {
+            const res = await fetch('http://localhost:5000/predecir', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+    
+            if (!res.ok) {
+                throw new Error('Error en la petición');
+            }
+    
+            const result = await res.json();
+    
+            // Mostrar el resultado con Swal.fire
+            Swal.fire({
+                icon: 'success',
+                title: 'Predicción realizada',
+                text: `Predicción: ${result.prediccion} personas`,
+                confirmButtonText: 'OK',
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al hacer la predicción.',
+            });
+            console.error('Error:', error);
+        }
+    };
+
     return (
         <div>
             {/* <UserNavbar/> */}
@@ -184,7 +318,7 @@ const CreateEventF = () => {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="categoriaPrincipal" className="form-label">Categoría Principal <span className='text-danger'>*</span></label>
+                                    <label htmlFor="categoriaPrincipal" className="form-label">Categoría Principal <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <select
                                         className="form-select"
                                         id="categoriaPrincipal"
@@ -220,7 +354,7 @@ const CreateEventF = () => {
                                 
                                 {/* Campos caracteristicos */}
                                 <div className="mb-3">
-                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento <span className='text-danger'>*</span></label>
+                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -231,7 +365,7 @@ const CreateEventF = () => {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento <span className='text-danger'>*</span></label>
+                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <input
                                         type="time"
                                         className="form-control"
@@ -242,7 +376,7 @@ const CreateEventF = () => {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="hostEvento" className="form-label">Host del Evento <span className='text-danger'>*</span></label>
+                                    <label htmlFor="hostEvento" className="form-label">Host del Evento <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <select
                                         className="form-select"
                                         id="hostEvento"
@@ -290,7 +424,8 @@ const CreateEventF = () => {
                                     />
                                 </div>
                                 
-                                <button type="submit" className="btn btn-primary mt-3">Crear Evento</button>
+                                <button type="submit" className="btn btn-primary mt-3 me-2">Crear Evento</button>
+                                <button className="btn btn-success mt-3" onClick={handleAttendancePrediction}>Predicción de Asistencia</button>
 
                                 {error && <div className="mt-3 text-danger">{error}</div>}
                                 {success && <div className="mt-3 text-success">{success}</div>}
