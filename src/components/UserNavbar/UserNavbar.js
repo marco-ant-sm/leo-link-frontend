@@ -171,9 +171,9 @@ function UserNavbar() {
     };
 
     useEffect(() => {
-        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        document.body.style.overflow = 'auto';
         return () => {
-            document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
+            document.body.style.overflow = '';
         };
     }, []);
 

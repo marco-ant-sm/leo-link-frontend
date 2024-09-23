@@ -425,7 +425,7 @@ const CreateEventF = () => {
                                 </div>
                                 
                                 <button type="submit" className="btn btn-primary mt-3 me-2">Crear Evento</button>
-                                <button className="btn btn-success mt-3" onClick={handleAttendancePrediction}>Predicción de Asistencia</button>
+                                <div className="btn btn-success mt-3" onClick={handleAttendancePrediction}>Predicción de Asistencia</div>
 
                                 {error && <div className="mt-3 text-danger">{error}</div>}
                                 {success && <div className="mt-3 text-success">{success}</div>}

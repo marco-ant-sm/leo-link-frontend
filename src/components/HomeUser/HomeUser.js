@@ -5,6 +5,8 @@ import { Helmet } from 'react-helmet';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link} from 'react-router-dom';
+import { format, parseISO, isSameDay } from 'date-fns';
+import es from 'date-fns/locale/es';
 
 function HomeUser() {
     const defaultImage = '/img/default-logo.jpg';
@@ -26,16 +28,55 @@ function HomeUser() {
                         'Authorization': `Bearer ${localStorage.getItem('access')}`
                     }
                 });
-                const eventos = response.data.filter(evento => evento.tipo_e === 'evento');
-                setEvents(eventos);
 
-                const beneficios = response.data.filter(evento => evento.tipo_e === 'beneficio');
+                const now = new Date();  // Fecha y hora actual
+                const eventos = [];
+                const beneficios = [];
+
+                response.data.forEach(evento => {
+                    if (evento.tipo_e === 'evento') {
+                        const fechaEvento = new Date(evento.fecha_fin_evento);
+                        const horaEvento = new Date(`${evento.fecha_fin_evento}T${evento.hora_fin_evento}`);
+
+                        // Verifica si el evento ha terminado
+                        if (fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now)) {
+                            return; // El evento ha terminado, lo descartamos
+                        }
+                        eventos.push(evento);
+                    } else if (evento.tipo_e === 'beneficio') {
+                        const fechaFin = evento.fecha_fin_beneficio ? new Date(evento.fecha_fin_beneficio) : null;
+
+                        // Si no hay fecha_fin, lo consideramos válido
+                        if (!fechaFin || fechaFin > now) {
+                            beneficios.push(evento);
+                        }
+                    }
+                });
+
+                setEvents(eventos);
                 setBenefitEvents(beneficios);
             } catch (error) {
                 setError('Error fetching events');
                 console.error(error.response.data);
             }
         };
+        // const fetchEvents = async () => {
+        //     try {
+        //         const response = await axios.get('http://localhost:8000/api/events/', {
+        //             headers: {
+        //                 'Authorization': `Bearer ${localStorage.getItem('access')}`
+        //             }
+        //         });
+        //         const eventos = response.data.filter(evento => evento.tipo_e === 'evento');
+        //         setEvents(eventos);
+
+        //         const beneficios = response.data.filter(evento => evento.tipo_e === 'beneficio');
+        //         setBenefitEvents(beneficios);
+        //     } catch (error) {
+        //         setError('Error fetching events');
+        //         console.error(error.response.data);
+        //     }
+        // };
         fetchEvents();
     }, []);
     

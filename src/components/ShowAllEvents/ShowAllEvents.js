@@ -3,6 +3,7 @@ import axios from 'axios';
 import './ShowAllEvents.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import { Link, useLocation } from 'react-router-dom';
+import { isSameDay } from 'date-fns';
 
 
 function ShowAllEvents() {
@@ -120,6 +121,14 @@ function ShowAllEvents() {
     //     return <div>{error}</div>;
     // }
 
+    const hasEventEnded = (fechaFin, horaFin) => {
+        const fechaEvento = new Date(fechaFin);
+        const horaEvento = new Date(`${fechaFin}T${horaFin}`);
+        const now = new Date();
+    
+        return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
+    };
+
     return (
         <div>
             {/* <UserNavbar/> */}
@@ -198,7 +207,7 @@ function ShowAllEvents() {
             </section>
             {/* FIN - Título, barra y botón de filtro */}
 
-            {/* Recomendadas */}
+            {/* Eventos disponibles */}
             <section className="container my-5">
                 <div className="d-flex align-items-center w-100 mb-4">
                     <h2>Eventos disponibles</h2>
@@ -216,7 +225,7 @@ function ShowAllEvents() {
                                             <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">{event.nombre}</h5>
+                                            <h5 className="card-title">{event.nombre} {hasEventEnded(event.fecha_fin_evento, event.hora_fin_evento) && <span className='text-danger'>(Finalizado)</span>}</h5>
                                             <p className="card-text">{event.descripcion}</p>
                                         </div>
                                     </div>

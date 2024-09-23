@@ -1,13 +1,10 @@
 import './ShowBeneficio.css';
-import UserNavbar from '../UserNavbar/UserNavbar';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {toast} from 'react-hot-toast';
-import { format, parseISO, isSameDay } from 'date-fns';
-import es from 'date-fns/locale/es';
 
 function ShowBeneficio() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
@@ -19,9 +16,20 @@ function ShowBeneficio() {
     const [asistido, setAsistido] = useState(false);
     const [totalAsistentes, setTotalAsistentes] = useState(0);
     const defaultImage = '/img/default-logo.jpg';
+
     //categorias
     const [categoriaPrincipal, setCategoriaPrincipal] = useState('');
     const [categoriasAsociadas, setCategoriasAsociadas] = useState([]);
+
+    //currentShowProfile
+    const [profileName, setProfileName] = useState('');
+    const [profileImagen, setProfileImagen] = useState('');
+    const [profileDescription, setProfileDescription] = useState('');
+    const [profileCorreo, setProfileCorreo] = useState('');
+
+    //Recomendaciones
+    //Recommended Events
+    const [recommendedBenefits, setRecommendedBenefits] = useState([]);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -308,6 +316,109 @@ function ShowBeneficio() {
     }
     }
 
+    //Fill show profile info
+    function fillProfileInfo(name, description, image, email){
+        setProfileName(name);
+        setProfileDescription(description);
+        setProfileImagen(image);
+        setProfileCorreo(email);
+    }
+
+
+    const closeModal = () => {
+        // Quitar la sombra del CSS
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.parentNode.removeChild(backdrop));
+    
+        // Restablecer el padding-right del body a 0
+        document.body.style.paddingRight = '0';
+    };
+    
+    const handleUrlChange = () => {
+        closeModal();
+    };
+    
+    useEffect(() => {
+        const modalElement = document.getElementById('showProfileModal');
+    
+        const handleModalShow = () => {
+            // Asegurarse de que no haya sombras previas
+            closeModal();
+            window.addEventListener('popstate', handleUrlChange);
+            window.addEventListener('hashchange', handleUrlChange);
+        };
+    
+        const handleModalHide = () => {
+            window.removeEventListener('popstate', handleUrlChange);
+            window.removeEventListener('hashchange', handleUrlChange);
+        };
+    
+        if (modalElement) {
+            modalElement.addEventListener('show.bs.modal', handleModalShow);
+            modalElement.addEventListener('hidden.bs.modal', handleModalHide);
+        }
+    
+        // Limpiar los listeners al desmontar el componente
+        return () => {
+            if (modalElement) {
+                modalElement.removeEventListener('show.bs.modal', handleModalShow);
+                modalElement.removeEventListener('hidden.bs.modal', handleModalHide);
+            }
+        };
+    }, []);
+
+
+    useEffect(() => {
+        const fetchRecommendedBenefits = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/events/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access')}`
+                    }
+                });
+    
+                const now = new Date();  // Fecha y hora actual
+                const eventos = [];
+                const excludedId = id;
+    
+                response.data.forEach(evento => {
+                    if (evento.tipo_e === 'beneficio' && evento.id !== parseInt(excludedId)) {
+                        const fechaEvento =  evento.fecha_fin_beneficio ? new Date(evento.fecha_fin_beneficio) : null;
+
+                        if (!fechaEvento || fechaEvento > now) {
+                            eventos.push(evento);
+                        }
+                    }
+                });
+    
+                // Limitar el número de eventos a 4
+                // Mezclar los eventos aleatoriamente
+                const shuffledEvents = eventos.sort(() => 0.5 - Math.random());
+                setRecommendedBenefits(shuffledEvents.slice(0, 4));
+            } catch (error) {
+                setError('Error fetching events');
+                console.error(error.response.data);
+            }
+        };
+        
+        fetchRecommendedBenefits();
+    }, [id]);
+
+    //Entrar a evento recomendado
+    const handleIntoRecommendedEvent = (eventId) => {
+        window.scrollTo(0, 0);
+        navigate(`/beneficio/${eventId}`);
+    };
+
+
+    const hasBenefitEnded = (fechaFinBeneficio) => {
+        const now = new Date();
+        const fechaFin = fechaFinBeneficio ? new Date(fechaFinBeneficio) : null;
+    
+        // Si no hay fecha_fin, lo consideramos válido
+        return !fechaFin || fechaFin > now;
+    };
+
     
     return (
         <>
@@ -321,7 +432,7 @@ function ShowBeneficio() {
                     {/* Title */}
                     {/* Aqui en Nombre del evento va el nombre del evento*/}
                     <div className="col-12 pb-3 pb-lg-5">
-                        <h1 className="main-title-event">{eventData.nombre}</h1>
+                        <h1 className="main-title-event">{eventData.nombre} {!hasBenefitEnded(eventData.fecha_fin_beneficio) && <span className='text-danger'>(Vencido)</span>}</h1>
                     </div>
                     {/* Item image */}
                     <div className="col-lg-8 col-xl-7 order-2 order-lg-1">
@@ -358,7 +469,26 @@ function ShowBeneficio() {
                         <p>
                             {" "}
                             <span>
-                            <i className="bi bi-person-circle" />
+                            {eventData.usuario && eventData.usuario.imagen ? (
+                                    <img
+                                        src={eventData.usuario.imagen}
+                                        alt="User"
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            objectFit: 'cover',
+                                            cursor: 'pointer',
+                                        }}
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#showProfileModal"
+                                        onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email)}
+                                    />
+                                ) : (
+                                    <span data-bs-toggle="modal" data-bs-target="#showProfileModal">
+                                        <i className="bi bi-person-circle" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email)}/>
+                                    </span>
+                                )}
                             </span>{" "}
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
@@ -420,7 +550,23 @@ function ShowBeneficio() {
                                                 required
                                             />
                                             <label htmlFor="floatingInput">
-                                                <span><i className="bi bi-person-circle" /></span> Añadir un comentario
+                                                {currentUserData && currentUserData.imagen ? (
+                                                        <img
+                                                            src={currentUserData.imagen}
+                                                            alt="User"
+                                                            className='me-1'
+                                                            style={{
+                                                                width: '20px',
+                                                                height: '20px',
+                                                                borderRadius: '50%',
+                                                                objectFit: 'cover',
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <span>
+                                                            <i className="bi bi-person-circle" />
+                                                        </span>
+                                                    )} Añadir un comentario
                                             </label>
                                         </div>
                                         <div className="col-lg-1 col-2 m-0 p-0 d-flex">
@@ -442,9 +588,27 @@ function ShowBeneficio() {
                                         comments.map((comment) => (
                                             <div className="row mb-2" key={comment.id}>
                                                 <div className="col-auto">
-                                                    <span className="m-0 p-0">
-                                                        <i className="bi bi-person-circle" />
-                                                    </span>
+                                                    {comment.usuario && comment.usuario.imagen ? (
+                                                            <img
+                                                                src={comment.usuario.imagen}
+                                                                alt="User"
+                                                                className='me-1'
+                                                                style={{
+                                                                    width: '20px',
+                                                                    height: '20px',
+                                                                    borderRadius: '50%',
+                                                                    objectFit: 'cover',
+                                                                    cursor: 'pointer',
+                                                                }}
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#showProfileModal"
+                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email)}
+                                                            />
+                                                        ) : (
+                                                            <span className="m-0 p-0">
+                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email)}/>
+                                                            </span>
+                                                        )}
                                                 </div>
                                                 <div className="col">
                                                     <div className="row">
@@ -471,66 +635,67 @@ function ShowBeneficio() {
                 {/* Upcoming events */}
                 <div className="container mt-5 upcoming-events">
                 <p>
-                    <span>Próximos eventos</span>
+                    <span>Otros Beneficios</span>
                 </p>
                 </div>
                 <div className="container mt-3 d-flex gap-5 flex-wrap justify-content-center">
-                {/* Event */}
-                <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
-                    <div className="card-body">
-                    <h5 className="card-title">Carrera Cucei</h5>
-                    <p className="card-text">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis,
-                        eligendi quae! Reprehenderit ex suscipit deserunt.
-                    </p>
-                    <a href="#" className="btn btn-dark">
-                        <i className="fa-solid fa-circle-info" />
-                    </a>
-                    </div>
+                    {/* Benefit */}
+                    {recommendedBenefits.length > 0 ? (
+                        recommendedBenefits.map((event) => (
+                            <div key={event.id} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => handleIntoRecommendedEvent(event.id)}>
+                                <div className="card preview-event" style={{ width: "18rem", maxHeight: "400px", minHeight: "400px"}}>
+                                    <img src={event.imagen ? event.imagen : defaultImage} className="card-img-top" alt={event.nombre} />
+                                    <div className="card-body">
+                                        <h5 className="card-title">{event.nombre}</h5>
+                                        <p className="card-text">{event.descripcion}</p>
+                                        <a href="#" className="btn btn-dark">
+                                            <i className="fa-solid fa-circle-info" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Por el momento no hay recomendaciones.</p>
+                    )}
                 </div>
-                {/* Event */}
-                <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
-                    <div className="card-body">
-                    <h5 className="card-title">Carrera Cucei</h5>
-                    <p className="card-text">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis,
-                        eligendi quae! Reprehenderit ex suscipit deserunt.
-                    </p>
-                    <a href="#" className="btn btn-dark">
-                        <i className="fa-solid fa-circle-info" />
-                    </a>
+            </div>
+
+            {/* Modal show profile */}
+            <div className="modal fade custom-modal" id="showProfileModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content">
+                        <div className="modal-header d-flex align-items-center">
+                            {/* Espacio para la foto del usuario */}
+                            {profileImagen ? (
+                                     <img src={profileImagen} alt="Foto de Usuario" className="rounded-circle me-3" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                ):(
+                                    <span>
+                                        <i className="bi bi-person-circle me-1" style={{fontSize:'1.5rem' }}/>
+                                    </span>
+                                )}
+                            {/* Nickname del usuario */}
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">{profileName && (<>{profileName}</>)}</h1>
+                            <button type="button" className="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            {/* Descripción del usuario */}
+                            <div className="user-description">
+                                <p className="main-info-title">Descripción</p>
+                                 {profileDescription ? (
+                                    <p>{profileDescription}</p>
+                                ):(<p>Sin descripcion</p>)}
+                            </div>
+                            {/* Información de contacto del usuario */}
+                            <div className="user-contact mt-3">
+                                <p className="main-info-title">Contacto</p>
+                                {profileCorreo}
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
                     </div>
-                </div>
-                {/* Event */}
-                <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
-                    <div className="card-body">
-                    <h5 className="card-title">Carrera Cucei</h5>
-                    <p className="card-text">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis,
-                        eligendi quae! Reprehenderit ex suscipit deserunt.
-                    </p>
-                    <a href="#" className="btn btn-dark">
-                        <i className="fa-solid fa-circle-info" />
-                    </a>
-                    </div>
-                </div>
-                {/* Event */}
-                <div className="card preview-event" style={{ width: "18rem" }}>
-                    <img src="/img/event-2.jpg" className="card-img-top" alt="..." />
-                    <div className="card-body">
-                    <h5 className="card-title">Carrera Cucei</h5>
-                    <p className="card-text">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis,
-                        eligendi quae! Reprehenderit ex suscipit deserunt.
-                    </p>
-                    <a href="#" className="btn btn-dark">
-                        <i className="fa-solid fa-circle-info" />
-                    </a>
-                    </div>
-                </div>
                 </div>
             </div>
         </>

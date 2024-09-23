@@ -120,6 +120,14 @@ function ShowAllBeneficios() {
     //     return <div>{error}</div>;
     // }
 
+    const hasBenefitEnded = (fechaFinBeneficio) => {
+        const now = new Date();
+        const fechaFin = fechaFinBeneficio ? new Date(fechaFinBeneficio) : null;
+    
+        // Si no hay fecha_fin, lo consideramos válido
+        return !fechaFin || fechaFin > now;
+    };
+
     return (
         <div>
             {/* <UserNavbar/> */}
@@ -198,7 +206,7 @@ function ShowAllBeneficios() {
             </section>
             {/* FIN - Título, barra y botón de filtro */}
 
-            {/* Recomendadas */}
+            {/* Beneficios disponibles */}
             <section className="container my-5">
                 <div className="d-flex align-items-center w-100 mb-4">
                     <h2>Beneficios disponibles</h2>
@@ -216,7 +224,7 @@ function ShowAllBeneficios() {
                                             <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">{event.nombre}</h5>
+                                            <h5 className="card-title">{event.nombre} {!hasBenefitEnded(event.fecha_fin_beneficio) && <span className='text-danger'>(Vencido)</span>}</h5>
                                             <p className="card-text">{event.descripcion}</p>
                                         </div>
                                     </div>

@@ -142,9 +142,11 @@ function UpdateBeneficio() {
         formData.append('categoria_p', categoriaPrincipal);
         formData.append('categorias_ids', categoriasAsociadas.filter(id => id !== categoriaPrincipal).join(',')); // Excluye la categoría principal si está en categorías asociadas
         
-        if (fechaFinBeneficio) {
-            formData.append('fecha_fin_beneficio', fechaFinBeneficio);
-        }
+        //Enviamos la fecha fin de todos modos porque puede borrarla
+        formData.append('fecha_fin_beneficio', fechaFinBeneficio);
+        // if (fechaFinBeneficio) {
+        //     formData.append('fecha_fin_beneficio', fechaFinBeneficio);
+        // }
 
         try {
             await axios.put(`http://localhost:8000/api/events/${id}/`, formData, {
