@@ -35,6 +35,10 @@ import UpdateBeneficio from './components/UpdateBeneficio/UpdateBeneficio';
 import UserNavbar from './components/UserNavbar/UserNavbar';
 import PrivateLayout from './components/PrivateLayout/PrivateLayout';
 import AI from './components/AI/AI';
+import CreateDescuento from './components/CreateDescuento/CreateDescuento';
+import ShowAllDescuentos from './components/ShowAllDescuentos/ShowAllDescuentos';
+import ShowDescuento from './components/ShowDescuento/ShowDescuento';
+import UpdateDescuento from './components/UpdateDescuento/UpdateDescuento';
 
 const App = () =>{
   return (
@@ -78,6 +82,10 @@ const App = () =>{
                 { path: '/userRegister', element: <UserRegister /> },
                 { path: '/crearEvento', element: <CreateEventF /> },
                 { path: '/crearBeneficio', element: <CreateBeneficio /> },
+                { path: '/crearDescuento', element: <CreateDescuento /> },
+                { path: '/showAllDescuentos', element: <ShowAllDescuentos /> },
+                { path: '/descuento/:id', element: <ShowDescuento /> },
+                { path: '/updateDescuento/:id', element: <UpdateDescuento /> },
               ]}
             />
           }

@@ -12,6 +12,7 @@ function UserNavbar() {
     //Categorias de eventos
     const [categoriasE, setCategoriasE] = useState([]);
     const [categoriasB, setCategoriasB] = useState([]);
+    const [categoriasD, setCategoriasD] = useState([]);
     const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
     const [notificaciones, setNotificaciones] = useState([]);
 
@@ -136,6 +137,12 @@ function UserNavbar() {
         closeButton?.click();
     };
 
+    const showDescuentos = () => {
+        navigate('/showAllDescuentos');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    };
+
     const goHome = () => {
         navigate('/home');
         const closeButton = document.querySelector('.btn-close');
@@ -159,6 +166,8 @@ function UserNavbar() {
             navigate(`/showAllEvents?search=${encodeURIComponent(searchInput)}`);        
         }else if (category === '3') {
             navigate(`/showAllBeneficios?search=${encodeURIComponent(searchInput)}`);
+        }else if (category === '2') {
+            navigate(`/showAllDescuentos?search=${encodeURIComponent(searchInput)}`);
         }else{
             toast.error('Elige una categoria para buscar', { style: {
                 background:"#101010",
@@ -256,6 +265,9 @@ function UserNavbar() {
             setCategoriasE(categoriasEvento);
             const categoriasBeneficio = response.data.filter(categoria => categoria.tipo_e === 'beneficio');
             setCategoriasB(categoriasBeneficio);
+            const categoriasDescuento = response.data.filter(categoria => categoria.tipo_e === 'descuento');
+            setCategoriasD(categoriasDescuento);
+
         } catch (error) {
             console.error('Error fetching categories', error);
         }
@@ -404,6 +416,12 @@ function UserNavbar() {
         closeButton?.click();
     }
 
+    const goCreateDescuento = () => {
+        navigate('/crearDescuento');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    }
+
     const goCreateBeneficio = () => {
         navigate('/crearBeneficio');
         const closeButton = document.querySelector('.btn-close');
@@ -449,8 +467,8 @@ function UserNavbar() {
                         >
                         <option selected="">Categoria</option>
                         <option value={1}>Evento</option>
-                        <option value={2}>Descuento</option>
                         <option value={3}>Beneficio</option>
+                        <option value={2}>Descuento</option>
                         </select>
                     </div>
                     <button className="btn btn-danger search-button-nav" type="submit">
@@ -568,16 +586,19 @@ function UserNavbar() {
                         <span><i class="fa-solid fa-calendar-days"></i></span> Eventos
                         </a>
                     </li>
-                    <li className="nav-item">
-                        <a className="nav-link active" href="#">
-                        <span><i class="fa-solid fa-percent"></i></span> Descuentos
-                        </a>
-                    </li>
+
                     <li className="nav-item">
                         <a className="nav-link active"  onClick={showBeneficios} style={{ cursor: 'pointer' }}>
                         <span><i class="fa-brands fa-google-scholar"></i></span> Beneficios
                         </a>
                     </li>
+
+                    <li className="nav-item">
+                        <a className="nav-link active" onClick={showDescuentos} style={{ cursor: 'pointer' }}>
+                        <span><i class="fa-solid fa-percent"></i></span> Descuentos
+                        </a>
+                    </li>
+                    
                     <li className="nav-item">
                         <a className="nav-link active" href="#">
                         <span><i class="fa-solid fa-business-time"></i></span> Prácticas Profesionales
@@ -610,8 +631,8 @@ function UserNavbar() {
                         >
                         <option selected="">Categoria</option>
                         <option value={1}>Evento</option>
-                        <option value={2}>Descuento</option>
                         <option value={3}>Beneficio</option>
+                        <option value={2}>Descuento</option>
                         </select>
                     </div>
                     <button className="btn btn-danger search-button-nav" type="submit">
@@ -635,16 +656,19 @@ function UserNavbar() {
                                 Evento
                                 </button>
                             </li>
-                            <li>
-                                <button className="dropdown-item">
-                                Descuento
-                                </button>
-                            </li>
+
                             <li>
                                 <button className="dropdown-item" onClick={goCreateBeneficio}>
                                 Beneficio
                                 </button>
                             </li>
+
+                            <li>
+                                <button className="dropdown-item" onClick={goCreateDescuento}>
+                                Descuento
+                                </button>
+                            </li>
+                            
                             <li>
                                 <a className="dropdown-item" href="#">
                                 Prácticas Profesionales
@@ -704,30 +728,43 @@ function UserNavbar() {
                         <div className="tab-content mt-3" id="myTabContent">
                         <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                             <div className="p-3 border border-light bg-light text-dark content-box" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                            <h5>Categorías</h5>
-                            <p>Selecciona las categorias por cada sección de las que te gustaría recibir notificaciones.</p>
-                            <hr />
-                            <h5>Eventos</h5>
-                            {categoriasE.map(categoria => (
-                                <button
-                                    key={categoria.id}
-                                    className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
-                                    onClick={() => handleCategoriaClick(categoria.id)}
-                                >
-                                    {categoria.nombre}
-                                </button>
-                            ))}
-                            <hr />
-                            <h5>Beneficios</h5>
-                            {categoriasB.map(categoria => (
-                                <button
-                                    key={categoria.id}
-                                    className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
-                                    onClick={() => handleCategoriaClick(categoria.id)}
-                                >
-                                    {categoria.nombre}
-                                </button>
-                            ))}
+                                <h5>Categorías</h5>
+                                <p>Selecciona las categorias por cada sección de las que te gustaría recibir notificaciones.</p>
+                                <hr />
+                                <h5>Eventos</h5>
+                                {categoriasE.map(categoria => (
+                                    <button
+                                        key={categoria.id}
+                                        className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
+                                        onClick={() => handleCategoriaClick(categoria.id)}
+                                    >
+                                        {categoria.nombre}
+                                    </button>
+                                ))}
+                                <hr />
+                                <h5>Beneficios</h5>
+                                {categoriasB.map(categoria => (
+                                    <button
+                                        key={categoria.id}
+                                        className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
+                                        onClick={() => handleCategoriaClick(categoria.id)}
+                                    >
+                                        {categoria.nombre}
+                                    </button>
+                                ))}
+
+                                <hr />
+                                <h5>Descuentos</h5>
+                                {categoriasD.map(categoria => (
+                                    <button
+                                        key={categoria.id}
+                                        className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
+                                        onClick={() => handleCategoriaClick(categoria.id)}
+                                    >
+                                        {categoria.nombre}
+                                    </button>
+                                ))}
+
                             </div>
                         </div>
                         {/* Editar perfil del usuario */}
@@ -814,7 +851,9 @@ function UserNavbar() {
                                             ? `/event/${notificacion.evento.id}`
                                             : notificacion.tipo_e === 'beneficio'
                                             ? `/beneficio/${notificacion.evento.id}`
-                                            : '#' // URL por defecto en caso de otro tipo
+                                            : notificacion.tipo_e === 'descuento'
+                                            ? `/descuento/${notificacion.evento.id}`
+                                            : '#'
                                             }
                                         style={{ textDecoration: 'none', color: 'inherit' }}
                                         onClick={closeNotificationsModal}

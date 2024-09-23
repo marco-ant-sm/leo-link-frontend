@@ -279,7 +279,7 @@ const CreateEventF = () => {
                     <div className="container align-self-center justify-content-center d-flex">
                     <div className="row">
                         <div className="justify-content-center text-center text-light">
-                        <h1 className="main-register-title mt-5">Crear un nuevo evento</h1>
+                        <h1 className="main-register-title mt-5">Crear un nuevo Evento</h1>
                         </div>
                         <div className="col-12 bg-light p-5 form-register bg-light">
                             <form className="m-auto p-5" onSubmit={handleSubmit}>

@@ -1,4 +1,4 @@
-import './ShowBeneficio.css';
+import './ShowDescuento.css';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import { useNavigate} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {toast} from 'react-hot-toast';
 
-function ShowBeneficio() {
+function ShowDescuento() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
     const [eventData, setEventData] = useState({});
     const [error, setError] = useState(null);
@@ -127,7 +127,7 @@ function ShowBeneficio() {
 
     //Funcion para ir a editar el evento
     const handleEdit = () => {
-        navigate(`/updateBeneficio/${eventData.id}`);
+        navigate(`/updateDescuento/${eventData.id}`);
     }
 
     //Funcion para eliminar el evento
@@ -171,7 +171,7 @@ function ShowBeneficio() {
     
         // Mostrar el cuadro de diálogo de confirmación
         const result = await Swal.fire({
-          title: '¿Estás seguro que deseas eliminar este beneficio?',
+          title: '¿Estás seguro que deseas eliminar este descuento?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Sí',
@@ -188,11 +188,11 @@ function ShowBeneficio() {
               await Swal.fire({
                 title: 'Eliminado',
                 icon: 'success',
-                text: 'El beneficio ha sido eliminado.',
+                text: 'El descuento ha sido eliminado.',
                 timer: 1700,
                 showConfirmButton: false
               });
-              navigate('/showAllBeneficios');  // Redirige después de eliminar
+              navigate('/showAllDescuentos');  // Redirige después de eliminar
             }
           } else {
             // La URL ha cambiado, no realizar la acción
@@ -382,8 +382,8 @@ function ShowBeneficio() {
                 const excludedId = id;
     
                 response.data.forEach(evento => {
-                    if (evento.tipo_e === 'beneficio' && evento.id !== parseInt(excludedId)) {
-                        const fechaEvento =  evento.fecha_fin_beneficio ? new Date(evento.fecha_fin_beneficio) : null;
+                    if (evento.tipo_e === 'descuento' && evento.id !== parseInt(excludedId)) {
+                        const fechaEvento =  evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento) : null;
 
                         if (!fechaEvento || fechaEvento > now) {
                             eventos.push(evento);
@@ -407,13 +407,13 @@ function ShowBeneficio() {
     //Entrar a evento recomendado
     const handleIntoRecommendedEvent = (eventId) => {
         window.scrollTo(0, 0);
-        navigate(`/beneficio/${eventId}`);
+        navigate(`/descuento/${eventId}`);
     };
 
 
-    const hasBenefitEnded = (fechaFinBeneficio) => {
+    const hasDescuentoEnded = (fechaFinDescuento) => {
         const now = new Date();
-        const fechaFin = fechaFinBeneficio ? new Date(fechaFinBeneficio) : null;
+        const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento) : null;
     
         // Si no hay fecha_fin, lo consideramos válido
         return !fechaFin || fechaFin > now;
@@ -432,7 +432,7 @@ function ShowBeneficio() {
                     {/* Title */}
                     {/* Aqui en Nombre del evento va el nombre del evento*/}
                     <div className="col-12 pb-3 pb-lg-5">
-                        <h1 className="main-title-event">{eventData.nombre} {!hasBenefitEnded(eventData.fecha_fin_beneficio) && <span className='text-danger'>(Vencido)</span>}</h1>
+                        <h1 className="main-title-event">{eventData.nombre} {!hasDescuentoEnded(eventData.fecha_fin_descuento) && <span className='text-danger'>(Vencido)</span>}</h1>
                     </div>
                     {/* Item image */}
                     <div className="col-lg-8 col-xl-7 order-2 order-lg-1">
@@ -493,10 +493,10 @@ function ShowBeneficio() {
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
 
-                        {eventData.fecha_fin_beneficio && (
+                        {eventData.fecha_fin_descuento && (
                             <div>
                                 <p className="main-info-title">Fecha de fin</p>
-                                <p>{eventData.fecha_fin_beneficio}</p>
+                                <p>{eventData.fecha_fin_descuento}</p>
                             </div>
                         )}
 
@@ -583,7 +583,7 @@ function ShowBeneficio() {
                                 {/* All comments section */}
                                 <div className="mt-5">
                                     {comments.length === 0 ? (
-                                        <p>No hay comentarios sobre este beneficio.</p>
+                                        <p>No hay comentarios sobre este Descuento.</p>
                                     ) : (
                                         comments.map((comment) => (
                                             <div className="row mb-2" key={comment.id}>
@@ -635,7 +635,7 @@ function ShowBeneficio() {
                 {/* Upcoming events */}
                 <div className="container mt-5 upcoming-events">
                 <p>
-                    <span>Otros Beneficios</span>
+                    <span>Otros Descuentos</span>
                 </p>
                 </div>
                 <div className="container mt-3 d-flex gap-5 flex-wrap justify-content-center">
@@ -703,4 +703,4 @@ function ShowBeneficio() {
     );
   }
   
-  export default ShowBeneficio;
+  export default ShowDescuento;

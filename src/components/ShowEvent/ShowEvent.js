@@ -699,7 +699,7 @@ function ShowEvent() {
                         recommendedEvents.map((event) => (
                             <div key={event.id} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => handleIntoRecommendedEvent(event.id)}>
                                 <div className="card preview-event" style={{ width: "18rem", maxHeight: "385px", minHeight: "385px"}}>
-                                    <img src={event.imagen ? event.imagen : defaultImage} className="card-img-top" alt={event.nombre} />
+                                    <img src={event.imagen ? event.imagen : defaultImage} className="card-img-top w-100 h-100 object-fit-cover" alt={event.nombre} style={{ maxHeight: "180px", minHeight: "180px" }}/>
                                     <div className="card-body">
                                         <h5 className="card-title">{event.nombre}</h5>
                                         <p className="card-text">{event.descripcion}</p>
