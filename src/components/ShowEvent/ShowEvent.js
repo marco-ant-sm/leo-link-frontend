@@ -462,6 +462,14 @@ function ShowEvent() {
         return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
     };
 
+    const truncateDescription = (descripcion, maxLength) => {
+        if (descripcion.length > maxLength) {
+            return descripcion.substring(0, maxLength) + '...';
+        }
+        return descripcion;
+    };
+
+
     return (
         <>
             {/* <UserNavbar/> */}
@@ -702,7 +710,7 @@ function ShowEvent() {
                                     <img src={event.imagen ? event.imagen : defaultImage} className="card-img-top w-100 h-100 object-fit-cover" alt={event.nombre} style={{ maxHeight: "180px", minHeight: "180px" }}/>
                                     <div className="card-body">
                                         <h5 className="card-title">{event.nombre}</h5>
-                                        <p className="card-text">{event.descripcion}</p>
+                                        <p className="card-text">{truncateDescription(event.descripcion, 100)}</p>
                                         <a href="#" className="btn btn-dark">
                                             <i className="fa-solid fa-circle-info" />
                                         </a>

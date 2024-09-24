@@ -13,6 +13,7 @@ function UserNavbar() {
     const [categoriasE, setCategoriasE] = useState([]);
     const [categoriasB, setCategoriasB] = useState([]);
     const [categoriasD, setCategoriasD] = useState([]);
+    const [categoriasP, setCategoriasP] = useState([]);
     const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
     const [notificaciones, setNotificaciones] = useState([]);
 
@@ -143,6 +144,12 @@ function UserNavbar() {
         closeButton?.click();
     };
 
+    const showPracticas = () => {
+        navigate('/showAllPracticas');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    };
+
     const goHome = () => {
         navigate('/home');
         const closeButton = document.querySelector('.btn-close');
@@ -168,6 +175,8 @@ function UserNavbar() {
             navigate(`/showAllBeneficios?search=${encodeURIComponent(searchInput)}`);
         }else if (category === '2') {
             navigate(`/showAllDescuentos?search=${encodeURIComponent(searchInput)}`);
+        }else if (category === '4') {
+            navigate(`/showAllPracticas?search=${encodeURIComponent(searchInput)}`);
         }else{
             toast.error('Elige una categoria para buscar', { style: {
                 background:"#101010",
@@ -267,6 +276,8 @@ function UserNavbar() {
             setCategoriasB(categoriasBeneficio);
             const categoriasDescuento = response.data.filter(categoria => categoria.tipo_e === 'descuento');
             setCategoriasD(categoriasDescuento);
+            const categoriasPractica = response.data.filter(categoria => categoria.tipo_e === 'practica');
+            setCategoriasP(categoriasPractica);
 
         } catch (error) {
             console.error('Error fetching categories', error);
@@ -422,6 +433,12 @@ function UserNavbar() {
         closeButton?.click();
     }
 
+    const goCreatePractica = () => {
+        navigate('/crearPractica');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    }
+
     const goCreateBeneficio = () => {
         navigate('/crearBeneficio');
         const closeButton = document.querySelector('.btn-close');
@@ -469,6 +486,7 @@ function UserNavbar() {
                         <option value={1}>Evento</option>
                         <option value={3}>Beneficio</option>
                         <option value={2}>Descuento</option>
+                        <option value={4}>Práctica</option>
                         </select>
                     </div>
                     <button className="btn btn-danger search-button-nav" type="submit">
@@ -600,7 +618,7 @@ function UserNavbar() {
                     </li>
                     
                     <li className="nav-item">
-                        <a className="nav-link active" href="#">
+                        <a className="nav-link active" onClick={showPracticas} style={{ cursor: 'pointer' }} >
                         <span><i class="fa-solid fa-business-time"></i></span> Prácticas Profesionales
                         </a>
                     </li>
@@ -633,6 +651,7 @@ function UserNavbar() {
                         <option value={1}>Evento</option>
                         <option value={3}>Beneficio</option>
                         <option value={2}>Descuento</option>
+                        <option value={4}>Práctica</option>
                         </select>
                     </div>
                     <button className="btn btn-danger search-button-nav" type="submit">
@@ -670,9 +689,9 @@ function UserNavbar() {
                             </li>
                             
                             <li>
-                                <a className="dropdown-item" href="#">
+                                <button className="dropdown-item" onClick={goCreatePractica}>
                                 Prácticas Profesionales
-                                </a>
+                                </button>
                             </li>
                         </ul>
                     </li>
@@ -756,6 +775,18 @@ function UserNavbar() {
                                 <hr />
                                 <h5>Descuentos</h5>
                                 {categoriasD.map(categoria => (
+                                    <button
+                                        key={categoria.id}
+                                        className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
+                                        onClick={() => handleCategoriaClick(categoria.id)}
+                                    >
+                                        {categoria.nombre}
+                                    </button>
+                                ))}
+
+                                <hr />
+                                <h5>Prácticas</h5>
+                                {categoriasP.map(categoria => (
                                     <button
                                         key={categoria.id}
                                         className={`btn btn-${categoriasSeleccionadas.includes(categoria.id) ? 'danger' : 'success'} btn-sm me-3 my-2 rounded-pill`}
@@ -853,6 +884,8 @@ function UserNavbar() {
                                             ? `/beneficio/${notificacion.evento.id}`
                                             : notificacion.tipo_e === 'descuento'
                                             ? `/descuento/${notificacion.evento.id}`
+                                            :  notificacion.tipo_e === 'practica'
+                                            ? `/practica/${notificacion.evento.id}`
                                             : '#'
                                             }
                                         style={{ textDecoration: 'none', color: 'inherit' }}
@@ -866,7 +899,11 @@ function UserNavbar() {
                                                         ? 'Nuevo evento'
                                                         : notificacion.tipo_e === 'beneficio'
                                                         ? 'Nuevo beneficio'
-                                                        : 'Nueva notificación' // Título por defecto en caso de otro tipo
+                                                        : notificacion.tipo_e === 'descuento'
+                                                        ? 'Nuevo descuento'
+                                                        : notificacion.tipo_e === 'practica'
+                                                        ? 'Nueva Práctica'
+                                                        :'Nueva notificación' // Título por defecto en caso de otro tipo
                                                     }
                                                 </div>
                                                 <div className="notification-body">{notificacion.mensaje}</div>

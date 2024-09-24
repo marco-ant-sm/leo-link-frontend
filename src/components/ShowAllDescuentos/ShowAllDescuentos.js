@@ -128,6 +128,14 @@ function ShowAllDescuentos() {
         return !fechaFin || fechaFin > now;
     };
 
+    const truncateDescription = (descripcion, maxLength) => {
+        if (descripcion.length > maxLength) {
+            return descripcion.substring(0, maxLength) + '...';
+        }
+        return descripcion;
+    };
+
+
     return (
         <div>
             {/* <UserNavbar/> */}
@@ -225,7 +233,7 @@ function ShowAllDescuentos() {
                                         </div>
                                         <div className="card-body">
                                             <h5 className="card-title">{event.nombre} {!hasDescuentoEnded(event.fecha_fin_descuento) && <span className='text-danger'>(Vencido)</span>}</h5>
-                                            <p className="card-text">{event.descripcion}</p>
+                                            <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
                                         </div>
                                     </div>
                                 </Link>

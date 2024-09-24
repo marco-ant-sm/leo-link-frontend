@@ -39,6 +39,10 @@ import CreateDescuento from './components/CreateDescuento/CreateDescuento';
 import ShowAllDescuentos from './components/ShowAllDescuentos/ShowAllDescuentos';
 import ShowDescuento from './components/ShowDescuento/ShowDescuento';
 import UpdateDescuento from './components/UpdateDescuento/UpdateDescuento';
+import CreatePractica from './components/CreatePractica/CreatePractica';
+import ShowAllPracticas from './components/ShowAllPracticas/ShowAllPracticas';
+import ShowPractica from './components/ShowPractica/ShowPractica';
+import UpdatePractica from './components/UpdatePractica/UpdatePractica';
 
 const App = () =>{
   return (
@@ -86,6 +90,10 @@ const App = () =>{
                 { path: '/showAllDescuentos', element: <ShowAllDescuentos /> },
                 { path: '/descuento/:id', element: <ShowDescuento /> },
                 { path: '/updateDescuento/:id', element: <UpdateDescuento /> },
+                { path: '/crearPractica', element: <CreatePractica /> },
+                { path: '/showAllPracticas', element: <ShowAllPracticas /> },
+                { path: '/practica/:id', element: <ShowPractica /> },
+                { path: '/updatePractica/:id', element: <UpdatePractica /> },
               ]}
             />
           }

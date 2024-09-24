@@ -22,6 +22,11 @@ function HomeUser() {
     const [descuentosEvents, setDescuentosEvents] = useState([]);
     const [descuentosCategories, setDescuentosCategories] = useState([]);
     const [filteredDescuentosEvents, setFilteredDescuentosEvents] = useState([]);
+
+    //Practicas
+    const [practicasEvents, setPracticasEvents] = useState([]);
+    const [practicasCategories, setPracticasCategories] = useState([]);
+    const [filteredPracticasEvents, setFilteredPracticasEvents] = useState([]);
     
     const [error, setError] = useState(null);
     
@@ -38,7 +43,8 @@ function HomeUser() {
                 const now = new Date();  // Fecha y hora actual
                 const eventos = [];
                 const beneficios = [];
-                const descuentos = []
+                const descuentos = [];
+                const practicas = [];
 
                 response.data.forEach(evento => {
                     if (evento.tipo_e === 'evento') {
@@ -64,12 +70,20 @@ function HomeUser() {
                         if (!fechaFin || fechaFin > now) {
                             descuentos.push(evento);
                         }
+                    } else if (evento.tipo_e === 'practica') {
+                        const fechaFin = evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica) : null;
+
+                        // Si no hay fecha_fin, lo consideramos válido
+                        if (!fechaFin || fechaFin > now) {
+                            practicas.push(evento);
+                        }
                     }
                 });
 
                 setEvents(eventos);
                 setBenefitEvents(beneficios);
                 setDescuentosEvents(descuentos);
+                setPracticasEvents(practicas);
             } catch (error) {
                 setError('Error fetching events');
                 console.error(error.response.data);
@@ -107,6 +121,7 @@ function HomeUser() {
                 setUserCategories(categorias.filter(categoria => categoria.tipo_e === 'evento'));
                 setBenefitCategories(categorias.filter(categoria => categoria.tipo_e === 'beneficio'));
                 setDescuentosCategories(categorias.filter(categoria => categoria.tipo_e === 'descuento'));
+                setPracticasCategories(categorias.filter(categoria => categoria.tipo_e === 'practica'));
             } catch (error) {
                 console.error('Error fetching user categories', error);
             }
@@ -252,6 +267,57 @@ function HomeUser() {
     
     // Usar getBenefitCarouselItems para renderizar el carrusel de beneficios
     const descuentoCarouselItems = getDescuentoCarouselItems();
+    
+    //Filtrar tipo Practicas
+    useEffect(() => {
+        const filterPracticaEvents = () => {
+            let categorizedPracticas = [];
+            let randomPracticas = [];
+            const allPracticas = [...practicasEvents];
+    
+            if (practicasCategories.length > 0) {
+                // Filtra eventos que coinciden con las categorías preferidas del usuario
+                categorizedPracticas = practicasEvents.filter(evento =>
+                    evento.categorias.some(categoria =>
+                        practicasCategories.some(userCat => userCat.id === categoria.id)
+                    )
+                );
+    
+                // Asegúrate de que los eventos no se repitan
+                categorizedPracticas = Array.from(new Set(categorizedPracticas.map(event => event.id)))
+                    .map(id => categorizedPracticas.find(event => event.id === id));
+            }
+    
+            if (categorizedPracticas.length >= 9) {
+                setFilteredPracticasEvents(categorizedPracticas.slice(0, 9));
+            } else {
+                // Si no hay suficientes eventos categorizados, añadir eventos aleatorios
+                randomPracticas = allPracticas.filter(evento => !categorizedPracticas.some(catEvent => catEvent.id === evento.id));
+                randomPracticas = [...randomPracticas].sort(() => 0.5 - Math.random()).slice(0, 9 - categorizedPracticas.length);
+                setFilteredPracticasEvents([...categorizedPracticas, ...randomPracticas]);
+            }
+        };
+    
+        filterPracticaEvents();
+    }, [practicasEvents, practicasCategories]);
+
+    const getPracticaCarouselItems = () => {
+        const sections = [];
+        for (let i = 0; i < filteredPracticasEvents.length; i += 3) {
+            sections.push(filteredPracticasEvents.slice(i, i + 3));
+        }
+        return sections;
+    };
+    
+    // Usar getBenefitCarouselItems para renderizar el carrusel de beneficios
+    const practicaCarouselItems = getPracticaCarouselItems();
+
+    const truncateDescription = (descripcion, maxLength) => {
+        if (descripcion.length > maxLength) {
+            return descripcion.substring(0, maxLength) + '...';
+        }
+        return descripcion;
+    };
 
     return (
         <div>
@@ -318,7 +384,7 @@ function HomeUser() {
                                                     </div>
                                                     <div className="card-body">
                                                         <h5 className="card-title">{event.nombre}</h5>
-                                                        <p className="card-text">{event.descripcion}</p>
+                                                        <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
                                                     </div>
                                                 </div>
                                             </Link>
@@ -348,7 +414,7 @@ function HomeUser() {
                     </div>
                 </div>
                 
-                {/* Carousel para Eventos */}
+                {/* Carousel para Beneficios */}
                 <div id="eventosCarousel" className="carousel carousel-dark slide" data-bs-ride="carousel">
                     <div className="carousel-inner">
                     {benefitCarouselItems.map((section, index) => (
@@ -363,7 +429,7 @@ function HomeUser() {
                                                 </div>
                                                 <div className="card-body">
                                                     <h5 className="card-title">{event.nombre}</h5>
-                                                    <p className="card-text">{event.descripcion}</p>
+                                                    <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
                                                 </div>
                                             </div>
                                         </Link>
@@ -385,7 +451,7 @@ function HomeUser() {
                 </div>
             </section>
             
-            {/* PROFESIONALES */}
+            {/* Descuentos */}
             <section className="container my-5">
                 <div className="d-flex align-items-center w-100 mb-4">
                     <h2>Descuentos Recomendados</h2>
@@ -394,8 +460,8 @@ function HomeUser() {
                     </div>
                 </div>
                 
-                {/* Carousel para Profesionales */}
-                <div id="profesionalesCarousel" className="carousel carousel-dark slide" data-bs-ride="carousel">
+                {/* Carousel para Descuentos */}
+                <div id="descuentosCarousel" className="carousel carousel-dark slide" data-bs-ride="carousel">
                     <div className="carousel-inner">
                         {descuentoCarouselItems.map((section, index) => (
                             <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
@@ -409,7 +475,53 @@ function HomeUser() {
                                                     </div>
                                                     <div className="card-body">
                                                         <h5 className="card-title">{event.nombre}</h5>
-                                                        <p className="card-text">{event.descripcion}</p>
+                                                        <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        {/* Puedes añadir más slides aquí si es necesario */}
+                    </div>
+                    <button className="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#profesionalesCarousel" data-bs-slide="prev">
+                        <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span className="visually-hidden">Previous</span>
+                    </button>
+                    <button className="carousel-control-next custom-carousel-control" type="button" data-bs-target="#profesionalesCarousel" data-bs-slide="next">
+                        <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span className="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </section>
+
+            {/* Practicas */}
+            <section className="container my-5">
+                <div className="d-flex align-items-center w-100 mb-4">
+                    <h2>Prácticas Recomendadas</h2>
+                    <div className="flex-grow-1 ms-2">
+                        <hr />
+                    </div>
+                </div>
+                
+                {/* Carousel para Practicas */}
+                <div id="profesionalesCarousel" className="carousel carousel-dark slide" data-bs-ride="carousel">
+                    <div className="carousel-inner">
+                        {practicaCarouselItems.map((section, index) => (
+                            <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                                <div className="row">
+                                    {section.map(event => (
+                                        <div className="col-md-4 mb-4" key={event.id}>
+                                            <Link to={`/practica/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                <div className="card preview-event-home">
+                                                    <div className="ratio ratio-16x9">
+                                                        <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
+                                                    </div>
+                                                    <div className="card-body">
+                                                        <h5 className="card-title">{event.nombre}</h5>
+                                                        <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
                                                     </div>
                                                 </div>
                                             </Link>

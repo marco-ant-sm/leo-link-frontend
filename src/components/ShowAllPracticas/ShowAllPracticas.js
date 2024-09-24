@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ShowAllEvents.css';
+import './ShowAllPracticas.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import { Link, useLocation } from 'react-router-dom';
-import { isSameDay } from 'date-fns';
 
 
-function ShowAllEvents() {
+function ShowAllPracticas() {
     const [events, setEvents] = useState([]);
     const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
     const [error, setError] = useState(null);
@@ -40,9 +39,9 @@ function ShowAllEvents() {
                         'Authorization': `Bearer ${localStorage.getItem('access')}`
                     }
                 });
+                const tiposPractica = response.data.filter(evento => evento.tipo_e === 'practica');
+                setEvents(tiposPractica);
 
-                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento');
-                setEvents(tiposEvento);
             } catch (error) {
                 setError('Error fetching events');
                 console.error(error.response.data);
@@ -57,7 +56,7 @@ function ShowAllEvents() {
                     }
                 });
 
-                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'evento');
+                const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'practica');
                 setCategories(categoriasEvento);
 
             } catch (error) {
@@ -121,12 +120,12 @@ function ShowAllEvents() {
     //     return <div>{error}</div>;
     // }
 
-    const hasEventEnded = (fechaFin, horaFin) => {
-        const fechaEvento = new Date(fechaFin);
-        const horaEvento = new Date(`${fechaFin}T${horaFin}`);
+    const hasPracticaEnded = (fechaFinPractica) => {
         const now = new Date();
+        const fechaFin = fechaFinPractica ? new Date(fechaFinPractica) : null;
     
-        return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
+        // Si no hay fecha_fin, lo consideramos válido
+        return !fechaFin || fechaFin > now;
     };
 
     const truncateDescription = (descripcion, maxLength) => {
@@ -142,7 +141,7 @@ function ShowAllEvents() {
             {/* <UserNavbar/> */}
             <section className="container my-5">
                 {/* INICIO - Título, barra y botón de filtro */}
-                <h1 className="mb-4">Eventos</h1>
+                <h1 className="mb-4">Prácticas</h1>
                 <div className="d-flex justify-content-between mb-4">
                     <div className="input-group w-50">
                         <input 
@@ -186,7 +185,7 @@ function ShowAllEvents() {
                                         onChange={(e) => setMyEventsFilter(e.target.checked)}
                                     />
                                     <label className="form-check-label" htmlFor="myEventsFilter">
-                                        Mis eventos
+                                        Mis Prácticas
                                     </label>
                                 </div>
                             </li>
@@ -215,10 +214,10 @@ function ShowAllEvents() {
             </section>
             {/* FIN - Título, barra y botón de filtro */}
 
-            {/* Eventos disponibles */}
+            {/* Prácticas disponibles */}
             <section className="container my-5">
                 <div className="d-flex align-items-center w-100 mb-4">
-                    <h2>Eventos disponibles</h2>
+                    <h2>Prácticas disponibles</h2>
                     <div className="flex-grow-1 ms-2">
                         <hr />
                     </div>
@@ -227,13 +226,13 @@ function ShowAllEvents() {
                     {filteredEvents.length > 0 ? (
                         filteredEvents.map((event) => (
                             <div className="col-md-4 mb-4" key={event.id}>
-                                <Link to={`/event/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link to={`/practica/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <div className="card preview-event-allevents">
                                         <div className="ratio ratio-16x9">
                                             <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">{event.nombre} {hasEventEnded(event.fecha_fin_evento, event.hora_fin_evento) && <span className='text-danger'>(Finalizado)</span>}</h5>
+                                            <h5 className="card-title">{event.nombre} {!hasPracticaEnded(event.fecha_fin_practica) && <span className='text-danger'>(Vencida)</span>}</h5>
                                             <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
                                         </div>
                                     </div>
@@ -241,7 +240,7 @@ function ShowAllEvents() {
                             </div>
                         ))
                     ) : (
-                        <p>No se encontraron eventos</p>
+                        <p>No se encontraron Prácticas</p>
                     )}
                 </div>
             </section>
@@ -249,4 +248,4 @@ function ShowAllEvents() {
     );
 }
 
-export default ShowAllEvents;
+export default ShowAllPracticas;

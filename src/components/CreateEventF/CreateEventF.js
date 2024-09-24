@@ -77,7 +77,7 @@ const CreateEventF = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        //validar imagen
+        // //validar imagen
         if (imagen) {
             try {
                 const resultadoVerificacion = await verificarImagen(imagen);

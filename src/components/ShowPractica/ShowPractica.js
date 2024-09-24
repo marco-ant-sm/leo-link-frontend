@@ -1,4 +1,4 @@
-import './ShowDescuento.css';
+import './ShowPractica.css';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import { useNavigate} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {toast} from 'react-hot-toast';
 
-function ShowDescuento() {
+function ShowPractica() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
     const [eventData, setEventData] = useState({});
     const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ function ShowDescuento() {
 
     //Recomendaciones
     //Recommended Events
-    const [recommendedBenefits, setRecommendedBenefits] = useState([]);
+    const [recommendedPracticas, setRecommendedPracticas] = useState([]);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -127,7 +127,7 @@ function ShowDescuento() {
 
     //Funcion para ir a editar el evento
     const handleEdit = () => {
-        navigate(`/updateDescuento/${eventData.id}`);
+        navigate(`/updatePractica/${eventData.id}`);
     }
 
     //Funcion para eliminar el evento
@@ -171,7 +171,7 @@ function ShowDescuento() {
     
         // Mostrar el cuadro de diálogo de confirmación
         const result = await Swal.fire({
-          title: '¿Estás seguro que deseas eliminar este descuento?',
+          title: '¿Estás seguro que deseas eliminar esta práctica?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Sí',
@@ -188,11 +188,11 @@ function ShowDescuento() {
               await Swal.fire({
                 title: 'Eliminado',
                 icon: 'success',
-                text: 'El descuento ha sido eliminado.',
+                text: 'La practica ha sido eliminada.',
                 timer: 1700,
                 showConfirmButton: false
               });
-              navigate('/showAllDescuentos');  // Redirige después de eliminar
+              navigate('/showAllPracticas');  // Redirige después de eliminar
             }
           } else {
             // La URL ha cambiado, no realizar la acción
@@ -369,7 +369,7 @@ function ShowDescuento() {
 
 
     useEffect(() => {
-        const fetchRecommendedBenefits = async () => {
+        const fetchRecommendedPracticas = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/events/', {
                     headers: {
@@ -382,8 +382,8 @@ function ShowDescuento() {
                 const excludedId = id;
     
                 response.data.forEach(evento => {
-                    if (evento.tipo_e === 'descuento' && evento.id !== parseInt(excludedId)) {
-                        const fechaEvento =  evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento) : null;
+                    if (evento.tipo_e === 'practica' && evento.id !== parseInt(excludedId)) {
+                        const fechaEvento =  evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica) : null;
 
                         if (!fechaEvento || fechaEvento > now) {
                             eventos.push(evento);
@@ -394,31 +394,30 @@ function ShowDescuento() {
                 // Limitar el número de eventos a 4
                 // Mezclar los eventos aleatoriamente
                 const shuffledEvents = eventos.sort(() => 0.5 - Math.random());
-                setRecommendedBenefits(shuffledEvents.slice(0, 4));
+                setRecommendedPracticas(shuffledEvents.slice(0, 4));
             } catch (error) {
                 setError('Error fetching events');
                 console.error(error.response.data);
             }
         };
         
-        fetchRecommendedBenefits();
+        fetchRecommendedPracticas();
     }, [id]);
 
     //Entrar a evento recomendado
     const handleIntoRecommendedEvent = (eventId) => {
         window.scrollTo(0, 0);
-        navigate(`/descuento/${eventId}`);
+        navigate(`/practica/${eventId}`);
     };
 
 
-    const hasDescuentoEnded = (fechaFinDescuento) => {
+    const hasPracticaEnded = (fechaFinPractica) => {
         const now = new Date();
-        const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento) : null;
+        const fechaFin = fechaFinPractica ? new Date(fechaFinPractica) : null;
     
         // Si no hay fecha_fin, lo consideramos válido
         return !fechaFin || fechaFin > now;
     };
-
 
     const truncateDescription = (descripcion, maxLength) => {
         if (descripcion.length > maxLength) {
@@ -426,6 +425,7 @@ function ShowDescuento() {
         }
         return descripcion;
     };
+
 
     
     return (
@@ -440,7 +440,7 @@ function ShowDescuento() {
                     {/* Title */}
                     {/* Aqui en Nombre del evento va el nombre del evento*/}
                     <div className="col-12 pb-3 pb-lg-5">
-                        <h1 className="main-title-event">{eventData.nombre} {!hasDescuentoEnded(eventData.fecha_fin_descuento) && <span className='text-danger'>(Vencido)</span>}</h1>
+                        <h1 className="main-title-event">{eventData.nombre} {!hasPracticaEnded(eventData.fecha_fin_practica) && <span className='text-danger'>(Vencida)</span>}</h1>
                     </div>
                     {/* Item image */}
                     <div className="col-lg-8 col-xl-7 order-2 order-lg-1">
@@ -453,7 +453,16 @@ function ShowDescuento() {
                     {/* Item main info */}
                     <div className="col-lg-4 col-xl-3 ps-lg-5 order-1 order-lg-2 mb-4 mb-lg-0">
                         <div className="main-info p-lg-3 p-3 p-lg-0 overflow-y-auto overflow-x-hidden">
-                
+                        
+                        <p className="main-info-title">Dirección</p>
+                        <p>
+                            {" "}
+                            <span>
+                            <i className="fas fa-map-marker-alt" />
+                            </span>{" "}
+                            {eventData.direccion_practica}
+                        </p>
+
                         <p className="main-info-title">Categorias</p>
                         <p>
                         <span className="badge bg-primary text-light me-1">{categoriaPrincipal}</span>
@@ -471,6 +480,15 @@ function ShowDescuento() {
                         )}
 
                         </p>
+
+                        <p className="main-info-title">Horas</p>
+                        <p>{eventData.horas_practica}</p>
+
+                        <p className="main-info-title">Teléfono</p>
+                        <p>{eventData.telefono_practica}</p>
+
+                        <p className="main-info-title">¿Ayuda Ecónomica?</p>
+                        <p>{eventData.ayuda_economica_p}</p>
 
                         <p className="main-info-title">Autor</p>
                         {/* Aqui en Nombre autor va el nombre del usuario que creo el evento */}
@@ -501,10 +519,10 @@ function ShowDescuento() {
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
 
-                        {eventData.fecha_fin_descuento && (
+                        {eventData.fecha_fin_practica && (
                             <div>
                                 <p className="main-info-title">Fecha de fin</p>
-                                <p>{eventData.fecha_fin_descuento}</p>
+                                <p>{eventData.fecha_fin_practica}</p>
                             </div>
                         )}
 
@@ -591,7 +609,7 @@ function ShowDescuento() {
                                 {/* All comments section */}
                                 <div className="mt-5">
                                     {comments.length === 0 ? (
-                                        <p>No hay comentarios sobre este Descuento.</p>
+                                        <p>No hay comentarios sobre esta práctica.</p>
                                     ) : (
                                         comments.map((comment) => (
                                             <div className="row mb-2" key={comment.id}>
@@ -643,19 +661,19 @@ function ShowDescuento() {
                 {/* Upcoming events */}
                 <div className="container mt-5 upcoming-events">
                 <p>
-                    <span>Otros Descuentos</span>
+                    <span>Otras Prácticas</span>
                 </p>
                 </div>
                 <div className="container mt-3 d-flex gap-5 flex-wrap justify-content-center">
-                    {/* Benefit */}
-                    {recommendedBenefits.length > 0 ? (
-                        recommendedBenefits.map((event) => (
+                    {/* Practicas */}
+                    {recommendedPracticas.length > 0 ? (
+                        recommendedPracticas.map((event) => (
                             <div key={event.id} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => handleIntoRecommendedEvent(event.id)}>
                                 <div className="card preview-event" style={{ width: "18rem", maxHeight: "400px", minHeight: "400px"}}>
                                     <img src={event.imagen ? event.imagen : defaultImage} className="card-img-top w-100 h-100 object-fit-cover" alt={event.nombre} style={{ maxHeight: "180px", minHeight: "180px" }}/>
                                     <div className="card-body">
                                         <h5 className="card-title">{event.nombre}</h5>
-                                        <p className="card-text">{truncateDescription(event.descripcion,100)}</p>
+                                        <p className="card-text">{truncateDescription(event.descripcion, 100)}</p>
                                         <a href="#" className="btn btn-dark">
                                             <i className="fa-solid fa-circle-info" />
                                         </a>
@@ -711,4 +729,4 @@ function ShowDescuento() {
     );
   }
   
-  export default ShowDescuento;
+  export default ShowPractica;

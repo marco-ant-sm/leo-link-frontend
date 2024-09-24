@@ -37,8 +37,8 @@ function LogInSignUp() {
     // standard login
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        //Empty fields validation
+    
+        // Validación de campos vacíos
         if (!formData.email || !formData.password) {
             setAlert({
                 show: true,
@@ -47,35 +47,81 @@ function LogInSignUp() {
             });
             return;
         }
-
+    
         try {
             const response = await axios.post('http://localhost:8000/api/token/', formData);
-            localStorage.setItem('access', response.data.access); // Almacenar el token
-            localStorage.setItem('refresh', response.data.refresh); // Almacenar el token de refresco
-
+            localStorage.setItem('access', response.data.access); 
+            localStorage.setItem('refresh', response.data.refresh);
+    
             const token = localStorage.getItem('access');
             if (token) {
-                try {
-                    const decodedToken = jwtDecode(token);
-                    localStorage.setItem('user', JSON.stringify({
-                        nombre: `${decodedToken.nombre}`,
-                        apellidos: `${decodedToken.apellidos}`
-                    }));
-                } catch (error) {
-                    console.error('Error decoding token:', error);
-                }
+                const decodedToken = jwtDecode(token);
+                localStorage.setItem('user', JSON.stringify({
+                    nombre: decodedToken.nombre,
+                    apellidos: decodedToken.apellidos
+                }));
             }
-
+    
             navigate('/home'); 
         } catch (error) {
-            console.error('Error al iniciar sesión:', error);
-            setAlert({
-                show: true,
-                message: 'Error al iniciar sesión, usuario o contraseña incorrectos.',
-                type: 'danger'
-            });
+            console.error('Error al iniciar sesión:', error.response);
+            if (error.response) {
+                const errorMessage = error.response.data.message || 'Error al iniciar sesión, usuario o contraseña incorrectos.';
+                setAlert({
+                    show: true,
+                    message: errorMessage,
+                    type: 'danger'
+                });
+            } else {
+                setAlert({
+                    show: true,
+                    message: 'Error en el servidor. Intente más tarde.',
+                    type: 'danger'
+                });
+            }
         }
     };
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     //Empty fields validation
+    //     if (!formData.email || !formData.password) {
+    //         setAlert({
+    //             show: true,
+    //             message: 'Por favor ingrese todos los campos.',
+    //             type: 'danger'
+    //         });
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await axios.post('http://localhost:8000/api/token/', formData);
+    //         localStorage.setItem('access', response.data.access); // Almacenar el token
+    //         localStorage.setItem('refresh', response.data.refresh); // Almacenar el token de refresco
+
+    //         const token = localStorage.getItem('access');
+    //         if (token) {
+    //             try {
+    //                 const decodedToken = jwtDecode(token);
+    //                 localStorage.setItem('user', JSON.stringify({
+    //                     nombre: `${decodedToken.nombre}`,
+    //                     apellidos: `${decodedToken.apellidos}`
+    //                 }));
+    //             } catch (error) {
+    //                 console.error('Error decoding token:', error);
+    //             }
+    //         }
+
+    //         navigate('/home'); 
+    //     } catch (error) {
+    //         console.error('Error al iniciar sesión:', error);
+    //         setAlert({
+    //             show: true,
+    //             message: 'Error al iniciar sesión, usuario o contraseña incorrectos.',
+    //             type: 'danger'
+    //         });
+    //     }
+    // };
 
 
     // login and register with google
