@@ -44,6 +44,9 @@ function UserNavbar() {
             });
             setCurrentUserData(response.data);
             setDescripcion(response.data.descripcion);
+            const fullName = `${response.data.nombre} ${response.data.apellidos}`;
+            setUserName(fullName);
+
         } catch (error) {
             setError('Error al obtener el perfil del usuario');
             console.error(error);
@@ -210,20 +213,6 @@ function UserNavbar() {
     }, []);
 
     useEffect(() => {
-        const user = localStorage.getItem('user');
-
-        if (user) {
-            try {
-                // Convierte la cadena JSON en un objeto JavaScript
-                const userObj = JSON.parse(user);
-                
-                // Accede a las propiedades del objeto
-                const fullName = `${userObj.nombre} ${userObj.apellidos}`;
-                setUserName(fullName);
-            } catch (error) {
-                console.error('Error getting user:', error);
-            }
-        }
 
         // Function to handle keydown events
         const handleKeyDown = (event) => {
@@ -444,6 +433,79 @@ function UserNavbar() {
         const closeButton = document.querySelector('.btn-close');
         closeButton?.click();
     }
+
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState('');
+
+    const handlePasswordChangeSubmit = async (event) => {
+        event.preventDefault();
+    
+        // Validaciones
+        if (newPassword.length < 8) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La nueva contraseña debe tener al menos 8 caracteres.',
+            });
+            return;
+        }
+    
+        if (newPassword !== confirmPassword) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Las contraseñas no coinciden.',
+            });
+            return;
+        }
+    
+        const token = localStorage.getItem('access');
+        if (!token) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontró token de autenticación',
+            });
+            return;
+        }
+    
+        try {
+            const response = await axios.patch(`http://localhost:8000/api/user/update-password/`, {
+                new_password: newPassword,
+                confirm_password: confirmPassword,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            setNewPassword('');
+            setConfirmPassword('');
+            setPasswordSuccess(response.data.detail);
+            setPasswordError('');
+    
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Contraseña Actualizada con Éxito',
+            });
+        } catch (error) {
+            const errorMessage = error.response?.data?.detail || 'Error al actualizar la contraseña';
+            setPasswordError(errorMessage);
+            setPasswordSuccess('');
+    
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+            });
+        }
+    };
 
     return (
         <>
@@ -729,7 +791,7 @@ function UserNavbar() {
                     <div className="modal-content bg-dark text-light">
                     {/* Encabezado del Modal */}
                     <div className="modal-header">
-                        <h5 className="modal-title" id="exampleModalLabel">Configuración de Usuario</h5>
+                        <h5 className="modal-title" id="exampleModalLabel">Configuración de la Cuenta</h5>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     {/* Cuerpo del Modal */}
@@ -740,7 +802,7 @@ function UserNavbar() {
                             <a className="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Notificaciones</a>
                         </li>
                         <li className="nav-item" role="presentation">
-                            <a className="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Perfil del Usuario</a>
+                            <a className="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Configuración de Usuario</a>
                         </li>
                         </ul>
                         {/* Contenido de las Pestañas */}
@@ -847,6 +909,64 @@ function UserNavbar() {
                                     {error && <div className="mt-3 text-danger">{error}</div>}
                                     {success && <div className="mt-3 text-success">{success}</div>}
                                 </form>
+                                
+                                {currentUserData.email && !currentUserData.email.endsWith('@alumnos.udg.mx') && 
+                                    !currentUserData.email.endsWith('@academicos.udg.mx') && (
+                                        <>
+                                            <h5 className='mt-3'>Cambiar Contraseña</h5>
+                                            <form className="m-auto p-5" onSubmit={handlePasswordChangeSubmit}>
+                                                <div className="mb-3">
+                                                    <label htmlFor="newPassword" className="form-label">Nueva Contraseña</label>
+                                                    <div className="position-relative">
+                                                        <input
+                                                            type={showNewPassword ? 'text' : 'password'}
+                                                            className="form-control pe-5"
+                                                            id="newPassword"
+                                                            value={newPassword}
+                                                            onChange={(e) => setNewPassword(e.target.value)}
+                                                            required
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-light position-absolute top-50 end-0 translate-middle-y border-0"
+                                                            style={{ right: '10px', transform: 'translateY(-50%)' }}
+                                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                                        >
+                                                            {showNewPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <label htmlFor="confirmPassword" className="form-label">Confirmar Contraseña</label>
+                                                    <div className="position-relative">
+                                                        <input
+                                                            type={showConfirmPassword ? 'text' : 'password'}
+                                                            className="form-control pe-5"
+                                                            id="confirmPassword"
+                                                            value={confirmPassword}
+                                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                                            required
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-light position-absolute top-50 end-0 translate-middle-y border-0"
+                                                            style={{ right: '10px', transform: 'translateY(-50%)' }}
+                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                        >
+                                                            {showConfirmPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <button type="submit" className="btn btn-primary mt-3">Actualizar Contraseña</button>
+
+                                                {/* {passwordError && <div className="mt-3 text-danger">{passwordError}</div>}
+                                                {passwordSuccess && <div className="mt-3 text-success">{passwordSuccess}</div>} */}
+                                            </form>
+                                        </>
+                                    )}
+
                             </div>
                         </div>
                         </div>

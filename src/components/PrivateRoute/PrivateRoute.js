@@ -21,6 +21,7 @@ const PrivateRoute = ({ element: Component, ...rest }) => {
                     setIsAuthenticated(response.status === 200); // Establece autenticación basada en la respuesta
                 } catch {
                     setIsAuthenticated(false); // Considera que no está autenticado si hay un error
+                    localStorage.removeItem('access');
                 }
             } else {
                 setIsAuthenticated(false);
@@ -32,7 +33,7 @@ const PrivateRoute = ({ element: Component, ...rest }) => {
     }, []);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div>Cargando...</div>;
     }
 
     return isAuthenticated ? Component : <Navigate to="/signUp" />;

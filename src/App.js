@@ -43,6 +43,7 @@ import CreatePractica from './components/CreatePractica/CreatePractica';
 import ShowAllPracticas from './components/ShowAllPracticas/ShowAllPracticas';
 import ShowPractica from './components/ShowPractica/ShowPractica';
 import UpdatePractica from './components/UpdatePractica/UpdatePractica';
+import RecoverPassword from './components/RecoverPassword/RecoverPassword';
 
 const App = () =>{
   return (
@@ -58,6 +59,7 @@ const App = () =>{
           <Route path='/signUp' element={<PrivateRouteAfterLogin element={<LogInSignUp />} />}/>
           <Route path='/success' element={<LoginSuccess/>}/>
           <Route path='/ia' element={<AI/>}/>
+          <Route path='/recoverPassword' element={<RecoverPassword/>}/>
           {/* <Route path='/userRegister' element={<UserRegister/>}/>
           <Route path='/crearEvento' element={<CreateEventF/>}/>
           <Route path='/crearBeneficio' element={<CreateBeneficio/>}/> */}

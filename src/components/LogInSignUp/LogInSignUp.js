@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 function LogInSignUp() {
 
@@ -168,6 +169,58 @@ function LogInSignUp() {
         }
     }, [location.search]);
 
+    //Recuperar Contraseña
+    const [email, setEmail] = useState('');
+
+    const handlePasswordRecovery = async (e) => {
+        e.preventDefault();
+
+         // Validar si el correo pertenece a los dominios de Google institucionales
+         const forbiddenDomains = ['@alumnos.udg.mx', '@academicos.udg.mx'];
+         const emailDomain = email.substring(email.lastIndexOf("@"));
+ 
+         if (forbiddenDomains.includes(emailDomain)) {
+             Swal.fire({
+                 title: 'Correo no permitido',
+                 text: 'No se puede recuperar la contraseña para correos institucionales de Google. Por favor, utiliza otro correo.',
+                 icon: 'error',
+                 confirmButtonText: 'Aceptar'
+             });
+             return; // Evita que se haga la petición a la API
+         }
+
+        try {
+            const response = await axios.post('http://localhost:8000/api/recover-password/', { email });
+            
+            // Si el correo se envió exitosamente
+            Swal.fire({
+                title: 'Correo enviado',
+                text: 'Se ha enviado un correo para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            });
+        } catch (error) {
+            if (error.response && error.response.status === 400) {
+                // Si el correo no está registrado
+                Swal.fire({
+                    title: 'Correo no registrado',
+                    text: 'El correo electrónico no está asociado a ninguna cuenta. Por favor, verifica y prueba de nuevo.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            } else {
+                // Si hay un error en el servidor u otro tipo de error
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al intentar enviar el correo. Por favor, inténtalo nuevamente más tarde.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        }
+    };
+
+
     return (
         <div className="container-fluid single-section bg-dark d-flex">
             <Helmet>
@@ -237,6 +290,18 @@ function LogInSignUp() {
                                         )}
                                     </button>
                                 </div>
+
+                                <div className="text-end mt-1">
+                                    <button
+                                        type="button"
+                                        className="btn btn-link p-0"
+                                        style={{ textDecoration: 'none', color: 'white' }} // Añadir estilos aquí
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#recoverPassword"
+                                    >
+                                        <p className='main-info-title m-0'>Recuperar contraseña</p>
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" className="btn log-in me-2 mt-2 mt-md-0">
                                 Iniciar Sesión
@@ -284,6 +349,45 @@ function LogInSignUp() {
                                 </div>
                             </button>
                         </form>
+                    </div>
+                </div>
+            </div>
+           {/* Modal Recuperar Contraseña */}
+            <div className="modal fade" id="recoverPassword" tabIndex="-1" aria-labelledby="recoverPasswordModalLabel" aria-hidden="true">
+                <style>
+                    {`
+                        .custom-modal {
+                            border: 3px solid black; /* Borde negro alrededor del modal */
+                        }
+
+                        .modal-backdrop {
+                            background-color: rgba(66, 112, 140, 0.8) !important; /* Sombra más clara (blanca) */
+                        }
+                    `}
+                </style>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content custom-modal">
+                        <div className="modal-header border-0">
+                            <h5 className="modal-title" id="recoverPasswordModalLabel">Recuperar Contraseña</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handlePasswordRecovery}> 
+                                <div className="mb-3">
+                                    <label htmlFor="emailInput" className="form-label">Correo Electrónico</label>
+                                    <input 
+                                        type="email" 
+                                        className="form-control" 
+                                        id="emailInput" 
+                                        placeholder="Ingrese su correo electrónico" 
+                                        value={email} 
+                                        onChange={(e) => setEmail(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100 log-in">Recuperar Contraseña</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
