@@ -2,9 +2,11 @@ import './Homep.css';
 import { useEffect, useRef } from 'react';
 import PublicNavbar from '../PublicNavbar/PublicNavbar';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
 
 function Homep() {
     const carouselRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
@@ -24,6 +26,10 @@ function Homep() {
 
         return () => clearTimeout(timer);
         }, []);
+
+    const goPublicEvents = () =>{
+        navigate('/verEventosPublicos');
+    }
 
     return (
         <>
@@ -49,7 +55,7 @@ function Homep() {
                                     </p>
                                 </div>
                                 <div className="carousel-text">
-                                    <button type="button" className="btn custom-btn">
+                                    <button type="button" className="btn custom-btn" onClick={goPublicEvents}>
                                         Ver Eventos Públicos
                                     </button>
                                 </div>

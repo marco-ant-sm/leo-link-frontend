@@ -44,6 +44,9 @@ import ShowAllPracticas from './components/ShowAllPracticas/ShowAllPracticas';
 import ShowPractica from './components/ShowPractica/ShowPractica';
 import UpdatePractica from './components/UpdatePractica/UpdatePractica';
 import RecoverPassword from './components/RecoverPassword/RecoverPassword';
+import ManageUsers from './components/ManageUsers/ManageUsers';
+import ShowAllPublicEvents from './components/ShowAllPublicEvents/ShowAllPublicEvents';
+import ShowPublicEvent from './components/ShowPublicEvent/ShowPublicEvent';
 
 const App = () =>{
   return (
@@ -60,6 +63,8 @@ const App = () =>{
           <Route path='/success' element={<LoginSuccess/>}/>
           <Route path='/ia' element={<AI/>}/>
           <Route path='/recoverPassword' element={<RecoverPassword/>}/>
+          <Route path='/verEventosPublicos' element={<ShowAllPublicEvents/>}/>
+          <Route path='/public-event/:id' element={<ShowPublicEvent/>}/>
           {/* <Route path='/userRegister' element={<UserRegister/>}/>
           <Route path='/crearEvento' element={<CreateEventF/>}/>
           <Route path='/crearBeneficio' element={<CreateBeneficio/>}/> */}
@@ -85,7 +90,7 @@ const App = () =>{
                 { path: '/home', element: <HomeUser /> },
                 { path: '/showAllEvents', element: <ShowAllEvents /> },
                 { path: '/showAllBeneficios', element: <ShowAllBeneficios /> },
-                { path: '/userRegister', element: <UserRegister /> },
+                { path: '/crearUsuario', element: <UserRegister /> },
                 { path: '/crearEvento', element: <CreateEventF /> },
                 { path: '/crearBeneficio', element: <CreateBeneficio /> },
                 { path: '/crearDescuento', element: <CreateDescuento /> },
@@ -96,6 +101,8 @@ const App = () =>{
                 { path: '/showAllPracticas', element: <ShowAllPracticas /> },
                 { path: '/practica/:id', element: <ShowPractica /> },
                 { path: '/updatePractica/:id', element: <UpdatePractica /> },
+                { path: '/administrarUsuarios', element: <ManageUsers /> },
+                
               ]}
             />
           }

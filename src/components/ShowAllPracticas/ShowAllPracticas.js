@@ -120,11 +120,19 @@ function ShowAllPracticas() {
     //     return <div>{error}</div>;
     // }
 
+    //Ha funcionando
     const hasPracticaEnded = (fechaFinPractica) => {
         const now = new Date();
-        const fechaFin = fechaFinPractica ? new Date(fechaFinPractica) : null;
+        let fechaFin = null;
     
-        // Si no hay fecha_fin, lo consideramos válido
+        if (fechaFinPractica) {
+            fechaFin = new Date(fechaFinPractica + 'T00:00:00'); // Asegurarse de que se interprete como medianoche en la zona horaria local
+        }
+    
+        console.log('ahora: ', now);
+        console.log('fecha fin: ', fechaFin);
+        
+        // Si no hay fecha_fin, lo consideramos válida
         return !fechaFin || fechaFin > now;
     };
 

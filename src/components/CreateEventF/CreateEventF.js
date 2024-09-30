@@ -23,6 +23,7 @@ const CreateEventF = () => {
     const [fechaFinEvento, setFechaFinEvento] = useState('');
     const [horaFinEvento, setHoraFinEvento] = useState('');
     const [lugarEvento, setLugarEvento] = useState('');
+    const [accesoEvento, setAccesoEvento] = useState('red-universitaria');
 
 
     useEffect(() => {
@@ -79,6 +80,19 @@ const CreateEventF = () => {
 
         // //validar imagen
         if (imagen) {
+            Swal.fire({
+                title: 'Validando contenido de la imagen...',
+                html: '<style>.swal2-html { max-height: 150px; overflow: hidden; }</style>' +
+                      '<div class="d-flex justify-content-center">' +
+                      '<div class="spinner-border text-success" role="status">' +
+                      '<span class="visually-hidden">Cargando...</span>' +
+                      '</div></div>',
+                allowOutsideClick: false,
+                onBeforeOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 const resultadoVerificacion = await verificarImagen(imagen);
                 if (resultadoVerificacion === 'Desnudos.') {
@@ -100,7 +114,7 @@ const CreateEventF = () => {
         }
 
         // Validación de los nuevos campos
-        if (!fechaEvento || !horaEvento || !hostEvento || !fechaFinEvento || !horaFinEvento || !lugarEvento) {
+        if (!fechaEvento || !horaEvento || !hostEvento || !fechaFinEvento || !horaFinEvento || !lugarEvento || !accesoEvento) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -161,6 +175,7 @@ const CreateEventF = () => {
         formData.append('fecha_fin_evento', fechaFinEvento);
         formData.append('hora_fin_evento', horaFinEvento);
         formData.append('lugar_evento', lugarEvento);
+        formData.append('acceso_e', accesoEvento);
         try {
             await axios.post('http://localhost:8000/api/events/', formData, {
                 headers: {
@@ -184,6 +199,7 @@ const CreateEventF = () => {
             setFechaFinEvento('');
             setHoraFinEvento('');
             setLugarEvento('');
+            setAccesoEvento('red-universitaria')
         } catch (error) {
             Swal.fire({
                 icon: 'error',
@@ -237,7 +253,20 @@ const CreateEventF = () => {
         const hora = horaEvento.split(':')[0];
     
         const data = { categoria, mes, dia, quienLoRealiza, hora };
-    
+        
+        Swal.fire({
+            title: 'Realizando predicción...',
+            html: '<style>.swal2-html { max-height: 150px; overflow-y: hidden; }</style>' +
+                  '<div class="d-flex justify-content-center">' +
+                  '<div class="spinner-border text-success" role="status">' +
+                  '<span class="visually-hidden">Cargando...</span>' +
+                  '</div></div>',
+            allowOutsideClick: false,
+            onBeforeOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
         // Realizar la petición
         try {
             const res = await fetch('http://localhost:5000/predecir', {
@@ -422,6 +451,20 @@ const CreateEventF = () => {
                                         value={lugarEvento}
                                         onChange={(e) => setLugarEvento(e.target.value)}
                                     />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="accesoEvento" className="form-label">Acceso al evento: <span className='text-danger'>*</span></label>
+                                    <select
+                                        className="form-select"
+                                        id="accesoEvento"
+                                        value={accesoEvento}
+                                        onChange={(e) => setAccesoEvento(e.target.value)}
+                                        required
+                                    >
+                                        <option value="red-universitaria">Red Universitaria</option>
+                                        <option value="publico">Público</option>
+                                    </select>
                                 </div>
                                 
                                 <button type="submit" className="btn btn-primary mt-3 me-2">Crear Evento</button>

@@ -120,13 +120,22 @@ function ShowAllDescuentos() {
     //     return <div>{error}</div>;
     // }
 
+
     const hasDescuentoEnded = (fechaFinDescuento) => {
         const now = new Date();
-        const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento) : null;
+        const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento + 'T00:00:00') : null;
     
         // Si no hay fecha_fin, lo consideramos válido
         return !fechaFin || fechaFin > now;
     };
+    
+    // const hasDescuentoEnded = (fechaFinDescuento) => {
+    //     const now = new Date();
+    //     const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento) : null;
+    
+    //     // Si no hay fecha_fin, lo consideramos válido
+    //     return !fechaFin || fechaFin > now;
+    // };
 
     const truncateDescription = (descripcion, maxLength) => {
         if (descripcion.length > maxLength) {

@@ -25,6 +25,7 @@ function UpdateEventF() {
     const [fechaFinEvento, setFechaFinEvento] = useState('');
     const [horaFinEvento, setHoraFinEvento] = useState('');
     const [lugarEvento, setLugarEvento] = useState('');
+    const [accesoEvento, setAccesoEvento] = useState('');
     
     //categorias
     const [categorias, setCategorias] = useState([]);
@@ -51,6 +52,7 @@ function UpdateEventF() {
                 setFechaFinEvento(response.data.fecha_fin_evento || '');
                 setHoraFinEvento(response.data.hora_fin_evento || '');
                 setLugarEvento(response.data.lugar_evento || '');
+                setAccesoEvento(response.data.acceso_e || '');
 
             } catch (error) {
                 setError('Error fetching event');
@@ -166,7 +168,7 @@ function UpdateEventF() {
         }
 
         // Validación de campos distintivoa
-        if (!fechaEvento.trim() || !horaEvento.trim() || !hostEvento.trim() || !fechaFinEvento.trim() || !horaFinEvento.trim() || !lugarEvento.trim()) {
+        if (!fechaEvento.trim() || !horaEvento.trim() || !hostEvento.trim() || !fechaFinEvento.trim() || !horaFinEvento.trim() || !lugarEvento.trim() || !accesoEvento.trim()) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -223,6 +225,7 @@ function UpdateEventF() {
         formData.append('fecha_fin_evento', fechaFinEvento);
         formData.append('hora_fin_evento', horaFinEvento);
         formData.append('lugar_evento', lugarEvento);
+        formData.append('acceso_e', accesoEvento);
 
         try {
             await axios.put(`http://localhost:8000/api/events/${id}/`, formData, {
@@ -450,6 +453,20 @@ function UpdateEventF() {
                                         value={lugarEvento}
                                         onChange={(e) => setLugarEvento(e.target.value)}
                                     />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="accesoEvento" className="form-label">Acceso al evento: <span className='text-danger'>*</span></label>
+                                    <select
+                                        className="form-select"
+                                        id="accesoEvento"
+                                        value={accesoEvento}
+                                        onChange={(e) => setAccesoEvento(e.target.value)}
+                                        required
+                                    >
+                                        <option value="red-universitaria">Red Universitaria</option>
+                                        <option value="publico">Público</option>
+                                    </select>
                                 </div>
 
                                 <button type="submit" className="btn btn-primary mt-3">Actualizar Evento</button>

@@ -1,4 +1,4 @@
-import './ShowEvent.css';
+import './ShowPublicEvent.css';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -7,14 +7,14 @@ import Swal from 'sweetalert2';
 import {toast} from 'react-hot-toast';
 import { format, isSameDay } from 'date-fns';
 import es from 'date-fns/locale/es';
+import PublicNavbar from '../PublicNavbar/PublicNavbar';
 
-function ShowEvent() {
+function ShowPublicEvent() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
     const [eventData, setEventData] = useState({});
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [comments, setComments] = useState([]);
-    const [currentUserData, setCurrentUserData] = useState(null);
     const [asistido, setAsistido] = useState(false);
     const [totalAsistentes, setTotalAsistentes] = useState(0);
     const defaultImage = '/img/default-logo.jpg';
@@ -27,7 +27,6 @@ function ShowEvent() {
     const [profileImagen, setProfileImagen] = useState('');
     const [profileDescription, setProfileDescription] = useState('');
     const [profileCorreo, setProfileCorreo] = useState('');
-    const [profileTelefono, setProfileTelefono] = useState('');
 
     //Recommended Events
     const [recommendedEvents, setRecommendedEvents] = useState([]);
@@ -36,11 +35,7 @@ function ShowEvent() {
     useEffect(() => {
         const fetchEvent = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/events/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('access')}`
-                    }
-                });
+                const response = await axios.get(`http://localhost:8000/api/public-events/${id}`);
                 setEventData(response.data);
                 setAsistido(response.data.asistido_por_usuario);
                 setTotalAsistentes(response.data.numero_asistentes || 0);
@@ -53,51 +48,12 @@ function ShowEvent() {
             }
         };
 
-        const fetchComments = async (eventId) => {
-            try {
-                const response = await axios.get(`http://localhost:8000/api/eventos/${eventId}/comentarios/`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('access')}`
-                    }
-                });
-                setComments(response.data);
-            } catch (error) {
-                console.error('Error fetching comments', error);
-            }
-        };
-
         fetchEvent();
-        fetchComments(id);
     }, [id, navigate]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
       }, []);
-
-    useEffect(() => {
-    const fetchUserProfile = async () => {
-        const token = localStorage.getItem('access');
-
-        if (!token) {
-            setError('No token found');
-            return;
-        }
-
-        try {
-            const response = await axios.get('http://localhost:8000/api/user/profile/', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            setCurrentUserData(response.data);
-        } catch (error) {
-            setError('Error fetching user profile');
-            console.error(error);
-        }
-    };
-
-    fetchUserProfile();
-    }, []);
 
     const [newComment, setNewComment] = useState('');
 
@@ -360,12 +316,11 @@ function ShowEvent() {
     }
 
     //Fill show profile info
-    function fillProfileInfo(name, description, image, email, phone){
+    function fillProfileInfo(name, description, image, email){
         setProfileName(name);
         setProfileDescription(description);
         setProfileImagen(image);
         setProfileCorreo(email);
-        setProfileTelefono(phone);
     }
 
 
@@ -411,28 +366,6 @@ function ShowEvent() {
         };
     }, []);
 
-    const hasEventEnded = (fechaFin, horaFin) => {
-        const fechaEvento = new Date(fechaFin + 'T00:00:00'); // Asegurarse de que se interprete como medianoche en la zona horaria local
-        const horaEvento = new Date(`${fechaFin}T${horaFin}`);
-        const now = new Date();
-    
-        // Si la fecha del evento es mayor que ahora, es válido
-        if (fechaEvento > now) {
-            return false; // Evento válido
-        }
-    
-        // Si la fecha del evento es igual a ahora, comprobamos la hora
-        if (isSameDay(fechaEvento, now)) {
-            console.log('que onda hora', horaEvento);
-            console.log('que onda now', now);
-            return horaEvento < now; // Solo válido si la hora de fin es mayor que ahora
-        }
-    
-        // Si la fecha del evento es menor que ahora, no es válido
-        return true; // Evento no válido
-    };
-
-
     useEffect(() => {
         const fetchRecommendedEvents = async () => {
             try {
@@ -451,8 +384,8 @@ function ShowEvent() {
                         const fechaEvento = new Date(evento.fecha_fin_evento);
                         const horaEvento = new Date(`${evento.fecha_fin_evento}T${evento.hora_fin_evento}`);
     
-                        // Verifica si el evento ha terminado utilizando la función hasEventEnded
-                        if (hasEventEnded(evento.fecha_fin_evento, evento.hora_fin_evento)) {
+                        // Verifica si el evento ha terminado
+                        if (fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now)) {
                             return; // El evento ha terminado, lo descartamos
                         }
                         eventos.push(evento);
@@ -478,14 +411,13 @@ function ShowEvent() {
         navigate(`/event/${eventId}`);
     };
 
+    const hasEventEnded = (fechaFin, horaFin) => {
+        const fechaEvento = new Date(fechaFin);
+        const horaEvento = new Date(`${fechaFin}T${horaFin}`);
+        const now = new Date();
     
-    // const hasEventEnded = (fechaFin, horaFin) => {
-    //     const fechaEvento = new Date(fechaFin);
-    //     const horaEvento = new Date(`${fechaFin}T${horaFin}`);
-    //     const now = new Date();
-    
-    //     return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
-    // };
+        return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
+    };
 
     const truncateDescription = (descripcion, maxLength) => {
         if (descripcion.length > maxLength) {
@@ -497,7 +429,7 @@ function ShowEvent() {
 
     return (
         <>
-            {/* <UserNavbar/> */}
+            <PublicNavbar/>
             <div className="general-color mb-5">
                 {/* Item */}
                 <section className='mt-5'>
@@ -568,58 +500,17 @@ function ShowEvent() {
                                             height: '20px',
                                             borderRadius: '50%',
                                             objectFit: 'cover',
-                                            cursor: 'pointer',
                                         }}
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#showProfileModal"
-                                        onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email, eventData.usuario.telefono)}
                                     />
                                 ) : (
-                                    <span data-bs-toggle="modal" data-bs-target="#showProfileModal">
-                                        <i className="bi bi-person-circle" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email, eventData.usuario.telefono)}/>
+                                    <span>
+                                        <i className="bi bi-person-circle"/>
                                     </span>
                                 )}
 
                             </span>{" "}
                             {eventData.usuario && `${eventData.usuario.nombre} ${eventData.usuario.apellidos}`}
                         </p>
-
-                        {/* Botones de asistencia y no asistencia */}
-                        {!hasEventEnded(eventData.fecha_fin_evento, eventData.hora_fin_evento) && (
-                            <>
-                                {asistido ? (
-                                    <button className="btn btn-danger btn-sm me-3" onClick={handleNoAsistir}><i class="fa-solid fa-user-minus"></i> No Asistiré</button>
-                                ) : (
-                                    <button className="btn btn-success btn-sm me-3" onClick={handleAsistir}><i class="fa-solid fa-user-plus"></i> Asistiré</button>
-                                )}
-                            </>
-                        )}
-
-                        {/* Botones para editar y borrar */}
-                        {currentUserData && eventData.usuario && (
-                            <div className='d-inline'>
-                                {currentUserData.id === eventData.usuario.id ? (
-                                    <>
-                                        <button className="btn btn-warning btn-sm me-1" onClick={handleEdit}>
-                                            <i className="fa-regular fa-pen-to-square"></i>
-                                        </button>
-                                        <button className="btn btn-danger btn-sm" onClick={handleDelete}>
-                                            <i className="fa-solid fa-trash"></i>
-                                        </button>
-                                    </>
-                                ) : currentUserData.permiso_u === 'admin' ? (
-                                    <button className="btn btn-danger btn-sm" onClick={handleDelete}>
-                                        <i className="fa-solid fa-trash"></i>
-                                    </button>
-                                ) : null}
-                            </div>
-                        )}
-                        {/* {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
-                            <div className='d-inline'>
-                                <button className="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
-                                <button className="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
-                            </div>
-                        )} */}
                         
                         <p className="main-info-title mt-3">Host - <span className='text-primary'>{capitalizeAllText(eventData.host_evento)}</span></p>
                         <p className="main-info-title mt-3">Acceso - {eventData.acceso_e === 'publico' ? 'Público' : 'Red Universitaria'}</p>
@@ -636,187 +527,10 @@ function ShowEvent() {
                     </div>
                 </div>
                 </section>
-                {/* Comments section */}
-                <div className="container mt-4">
-                    <div className="row">
-                        <div className="col-12 col-lg-10">
-                            <div className="border p-3 comments overflow-auto">
-                                <h4><i className="fa-solid fa-comment" /> Comentarios</h4>
-
-                                {/* Form to make a comment */}
-                                <form className="form-floating mb-3 mt-4" onSubmit={handleCommentSubmit}>
-                                    <div className="row">
-                                        <div className="col-lg-11 col-10 form-floating">
-                                            <input
-                                                type="text"
-                                                className="form-control custom-input"
-                                                id="floatingInput"
-                                                placeholder="Añadir un comentario"
-                                                value={newComment}
-                                                onChange={handleCommentChange}
-                                                required
-                                            />
-                                            <label htmlFor="floatingInput">
-                                                {currentUserData && currentUserData.imagen ? (
-                                                    <img
-                                                        src={currentUserData.imagen}
-                                                        alt="User"
-                                                        className='me-1'
-                                                        style={{
-                                                            width: '20px',
-                                                            height: '20px',
-                                                            borderRadius: '50%',
-                                                            objectFit: 'cover',
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <span>
-                                                        <i className="bi bi-person-circle" />
-                                                    </span>
-                                                )} Añadir un comentario
-                                            </label>
-                                        </div>
-                                        <div className="col-lg-1 col-2 m-0 p-0 d-flex">
-                                            <button
-                                                type="submit"
-                                                className="btn btn-outline-dark align-self-end border-2 send"
-                                            >
-                                                <i className="fa-regular fa-paper-plane" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-
-                                {/* All comments section */}
-                                <div className="mt-5">
-                                    {comments.length === 0 ? (
-                                        <p>No hay comentarios sobre este evento.</p>
-                                    ) : (
-                                        comments.map((comment) => (
-                                            <div className="row mb-2" key={comment.id}>
-                                                <div className="col-auto">
-                                                    {comment.usuario && comment.usuario.imagen ? (
-                                                        <img
-                                                            src={comment.usuario.imagen}
-                                                            alt="User"
-                                                            className='me-1'
-                                                            style={{
-                                                                width: '20px',
-                                                                height: '20px',
-                                                                borderRadius: '50%',
-                                                                objectFit: 'cover',
-                                                                cursor: 'pointer',
-                                                            }}
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#showProfileModal"
-                                                            onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}
-                                                        />
-                                                    ) : (
-                                                        <span className="m-0 p-0">
-                                                            <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}/>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="col">
-                                                    <div className="row">
-                                                        <div className="col-12 name-user-comment">
-                                                            <p className="mt-0 mb-1">{comment.usuario.nombre} {comment.usuario.apellidos}
-                                                            {currentUserData && comment.usuario && (
-                                                                (currentUserData.id === comment.usuario.id || currentUserData.permiso_u === 'admin') && (
-                                                                    <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
-                                                                )
-                                                            )}
-                                                            {/* {currentUserData && comment.usuario && currentUserData.id === comment.usuario.id && (
-                                                                <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
-                                                            )} */}
-                                                            </p>
-                                                        </div>
-                                                        <div className="col-12 mt-0 mb-0 pt-0 pb-0">
-                                                            <p className="mt-0 mb-0 pt-0 pb-0">{comment.comentario}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* Upcoming events */}
-                <div className="container mt-5 upcoming-events">
-                <p>
-                    <span>Próximos Eventos</span>
-                </p>
-                </div>
-                <div className="container mt-3 d-flex gap-5 flex-wrap justify-content-center">
-                    {/* Event */}
-                    {recommendedEvents.length > 0 ? (
-                        recommendedEvents.map((event) => (
-                            <div key={event.id} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => handleIntoRecommendedEvent(event.id)}>
-                                <div className="card preview-event" style={{ width: "18rem", maxHeight: "385px", minHeight: "385px"}}>
-                                    <img src={event.imagen ? event.imagen : defaultImage} className="card-img-top w-100 h-100 object-fit-cover" alt={event.nombre} style={{ maxHeight: "180px", minHeight: "180px" }}/>
-                                    <div className="card-body">
-                                        <h5 className="card-title">{event.nombre}</h5>
-                                        <p className="card-text">{truncateDescription(event.descripcion, 100)}</p>
-                                        <a href="#" className="btn btn-dark">
-                                            <i className="fa-solid fa-circle-info" />
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p>Por el momento no hay recomendaciones.</p>
-                    )}
-                
-                </div>
-            </div>
-
-            {/* Modal show profile */}
-            <div className="modal fade custom-modal" id="showProfileModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content">
-                        <div className="modal-header d-flex align-items-center">
-                            {/* Espacio para la foto del usuario */}
-                            {profileImagen ? (
-                                     <img src={profileImagen} alt="Foto de Usuario" className="rounded-circle me-3" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
-                                ):(
-                                    <span>
-                                        <i className="bi bi-person-circle me-1" style={{fontSize:'1.5rem' }}/>
-                                    </span>
-                                )}
-                            {/* Nickname del usuario */}
-                            <h1 className="modal-title fs-5" id="exampleModalLabel">{profileName && (<>{profileName}</>)}</h1>
-                            <button type="button" className="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                            {/* Descripción del usuario */}
-                            <div className="user-description">
-                                <p className="main-info-title">Descripción</p>
-                                 {profileDescription ? (
-                                    <p>{profileDescription}</p>
-                                ):(<p>Sin descripcion</p>)}
-                            </div>
-                            {/* Información de contacto del usuario */}
-                            <div className="user-contact mt-3">
-                                <p className="main-info-title">Contacto</p>
-                                <p>Correo: {profileCorreo}</p>
-                                {profileTelefono && (
-                                    <p>Teléfono: {profileTelefono}</p>
-                                )}
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </>
       
     );
   }
   
-  export default ShowEvent;
+  export default ShowPublicEvent;

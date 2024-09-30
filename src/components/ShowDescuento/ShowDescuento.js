@@ -26,6 +26,7 @@ function ShowDescuento() {
     const [profileImagen, setProfileImagen] = useState('');
     const [profileDescription, setProfileDescription] = useState('');
     const [profileCorreo, setProfileCorreo] = useState('');
+    const [profileTelefono, setProfileTelefono] = useState('');
 
     //Recomendaciones
     //Recommended Events
@@ -317,11 +318,12 @@ function ShowDescuento() {
     }
 
     //Fill show profile info
-    function fillProfileInfo(name, description, image, email){
+    function fillProfileInfo(name, description, image, email, phone){
         setProfileName(name);
         setProfileDescription(description);
         setProfileImagen(image);
         setProfileCorreo(email);
+        setProfileTelefono(phone);
     }
 
 
@@ -383,7 +385,7 @@ function ShowDescuento() {
     
                 response.data.forEach(evento => {
                     if (evento.tipo_e === 'descuento' && evento.id !== parseInt(excludedId)) {
-                        const fechaEvento =  evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento) : null;
+                        const fechaEvento =  evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento + 'T00:00:00') : null;
 
                         if (!fechaEvento || fechaEvento > now) {
                             eventos.push(evento);
@@ -413,11 +415,19 @@ function ShowDescuento() {
 
     const hasDescuentoEnded = (fechaFinDescuento) => {
         const now = new Date();
-        const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento) : null;
+        const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento + 'T00:00:00') : null;
     
         // Si no hay fecha_fin, lo consideramos válido
         return !fechaFin || fechaFin > now;
     };
+    
+    // const hasDescuentoEnded = (fechaFinDescuento) => {
+    //     const now = new Date();
+    //     const fechaFin = fechaFinDescuento ? new Date(fechaFinDescuento) : null;
+    
+    //     // Si no hay fecha_fin, lo consideramos válido
+    //     return !fechaFin || fechaFin > now;
+    // };
 
 
     const truncateDescription = (descripcion, maxLength) => {
@@ -490,11 +500,11 @@ function ShowDescuento() {
                                         }}
                                         data-bs-toggle="modal" 
                                         data-bs-target="#showProfileModal"
-                                        onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email)}
+                                        onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email, eventData.usuario.telefono)}
                                     />
                                 ) : (
                                     <span data-bs-toggle="modal" data-bs-target="#showProfileModal">
-                                        <i className="bi bi-person-circle" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email)}/>
+                                        <i className="bi bi-person-circle" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email, eventData.usuario.telefono)}/>
                                     </span>
                                 )}
                             </span>{" "}
@@ -516,12 +526,30 @@ function ShowDescuento() {
                         )}
 
                         {/* Botones para editar y borrar */}
-                        {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
+                        {currentUserData && eventData.usuario && (
+                            <div className='d-inline'>
+                                {currentUserData.id === eventData.usuario.id ? (
+                                    <>
+                                        <button className="btn btn-warning btn-sm me-1" onClick={handleEdit}>
+                                            <i className="fa-regular fa-pen-to-square"></i>
+                                        </button>
+                                        <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                    </>
+                                ) : currentUserData.permiso_u === 'admin' ? (
+                                    <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                                        <i className="fa-solid fa-trash"></i>
+                                    </button>
+                                ) : null}
+                            </div>
+                        )}
+                        {/* {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
                             <div className='d-inline'>
                                 <button className="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
                                 <button className="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
                             </div>
-                        )}
+                        )} */}
 
                                                 
                         </div>
@@ -610,11 +638,11 @@ function ShowDescuento() {
                                                                 }}
                                                                 data-bs-toggle="modal" 
                                                                 data-bs-target="#showProfileModal"
-                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email)}
+                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}
                                                             />
                                                         ) : (
                                                             <span className="m-0 p-0">
-                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email)}/>
+                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}/>
                                                             </span>
                                                         )}
                                                 </div>
@@ -622,9 +650,14 @@ function ShowDescuento() {
                                                     <div className="row">
                                                         <div className="col-12 name-user-comment">
                                                             <p className="mt-0 mb-1">{comment.usuario.nombre} {comment.usuario.apellidos}
-                                                            {currentUserData && comment.usuario && currentUserData.id === comment.usuario.id && (
-                                                                <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                            {currentUserData && comment.usuario && (
+                                                                (currentUserData.id === comment.usuario.id || currentUserData.permiso_u === 'admin') && (
+                                                                    <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                                )
                                                             )}
+                                                            {/* {currentUserData && comment.usuario && currentUserData.id === comment.usuario.id && (
+                                                                <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                            )} */}
                                                             </p>
                                                         </div>
                                                         <div className="col-12 mt-0 mb-0 pt-0 pb-0">
@@ -697,7 +730,10 @@ function ShowDescuento() {
                             {/* Información de contacto del usuario */}
                             <div className="user-contact mt-3">
                                 <p className="main-info-title">Contacto</p>
-                                {profileCorreo}
+                                <p>Correo: {profileCorreo}</p>
+                                {profileTelefono && (
+                                    <p>Teléfono: {profileTelefono}</p>
+                                )}
                             </div>
                         </div>
                         <div className="modal-footer">

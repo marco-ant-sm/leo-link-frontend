@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ShowAllEvents.css';
-import UserNavbar from '../UserNavbar/UserNavbar';
+import './ShowAllPublicEvents.css';
 import { Link, useLocation } from 'react-router-dom';
 import { isSameDay } from 'date-fns';
+import PublicNavbar from '../PublicNavbar/PublicNavbar';
 
 
-function ShowAllEvents() {
+function ShowAllPublicEvents() {
     const [events, setEvents] = useState([]);
     const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
     const [error, setError] = useState(null);
@@ -14,8 +14,6 @@ function ShowAllEvents() {
     const defaultImage = '/img/default-logo.jpg';
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const [myEventsFilter, setMyEventsFilter] = useState(false);
-    const [currentUserData, setCurrentUserData] = useState(null);
 
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
@@ -35,13 +33,9 @@ function ShowAllEvents() {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/events/', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('access')}`
-                    }
-                });
-
-                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento');
+                const response = await axios.get('http://localhost:8000/api/public-events/');
+                
+                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && evento.acceso_e === 'publico');
                 setEvents(tiposEvento);
             } catch (error) {
                 setError('Error fetching events');
@@ -51,11 +45,7 @@ function ShowAllEvents() {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/categories/', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('access')}`
-                    }
-                });
+                const response = await axios.get('http://localhost:8000/api/public-event-categories/');
 
                 const categoriasEvento = response.data.filter(categoria => categoria.tipo_e === 'evento');
                 setCategories(categoriasEvento);
@@ -66,30 +56,8 @@ function ShowAllEvents() {
             }
         };
 
-        const fetchUserProfile = async () => {
-            const token = localStorage.getItem('access');
-
-            if (!token) {
-                setError('No token found');
-                return;
-            }
-
-            try {
-                const response = await axios.get('http://localhost:8000/api/user/profile/', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                setCurrentUserData(response.data);
-            } catch (error) {
-                setError('Error fetching user profile');
-                console.error(error);
-            }
-        };
-
         fetchEvents();
         fetchCategories();
-        fetchUserProfile();
     }, []);
 
 
@@ -108,8 +76,7 @@ function ShowAllEvents() {
     const filteredEvents = events.filter((event) => {
         const matchesSearchTerm = event.nombre.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategories = selectedCategories.length === 0 || event.categorias_ids.some(categoryId => selectedCategories.includes(String(categoryId)));
-        const matchesUserFilter = !myEventsFilter || event.usuario.id === currentUserData?.id;
-        return matchesSearchTerm && matchesCategories && matchesUserFilter;
+        return matchesSearchTerm && matchesCategories;
     });
 
     // Filtrar eventos basado en el término de búsqueda
@@ -122,34 +89,12 @@ function ShowAllEvents() {
     // }
 
     const hasEventEnded = (fechaFin, horaFin) => {
-        const fechaEvento = new Date(fechaFin + 'T00:00:00'); // Asegurarse de que se interprete como medianoche en la zona horaria local
+        const fechaEvento = new Date(fechaFin);
         const horaEvento = new Date(`${fechaFin}T${horaFin}`);
         const now = new Date();
     
-        // Si la fecha del evento es mayor que ahora, es válido
-        if (fechaEvento > now) {
-            return false; // Evento válido
-        }
-    
-        // Si la fecha del evento es igual a ahora, comprobamos la hora
-        if (isSameDay(fechaEvento, now)) {
-            console.log('que onda hora', horaEvento);
-            console.log('que onda now', now);
-            return horaEvento < now; // Solo válido si la hora de fin es mayor que ahora
-        }
-    
-        // Si la fecha del evento es menor que ahora, no es válido
-        return true; // Evento no válido
+        return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
     };
-    
-    
-    // const hasEventEnded = (fechaFin, horaFin) => {
-    //     const fechaEvento = new Date(fechaFin);
-    //     const horaEvento = new Date(`${fechaFin}T${horaFin}`);
-    //     const now = new Date();
-    
-    //     return fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now);
-    // };
 
     const truncateDescription = (descripcion, maxLength) => {
         if (descripcion.length > maxLength) {
@@ -161,10 +106,10 @@ function ShowAllEvents() {
 
     return (
         <div>
-            {/* <UserNavbar/> */}
+            <PublicNavbar/>
             <section className="container my-5">
                 {/* INICIO - Título, barra y botón de filtro */}
-                <h1 className="mb-4">Eventos</h1>
+                <h1 className="mb-4">Eventos Públicos</h1>
                 <div className="d-flex justify-content-between mb-4">
                     <div className="input-group w-50">
                         <input 
@@ -197,22 +142,6 @@ function ShowAllEvents() {
                             Filtros
                         </button>
                         <ul className="dropdown-menu" aria-labelledby="filtrosDropdown">
-                            {/* Filtro para mis eventos */}
-                            <li>
-                                <div className="form-check m-2">
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        id="myEventsFilter"
-                                        checked={myEventsFilter}
-                                        onChange={(e) => setMyEventsFilter(e.target.checked)}
-                                    />
-                                    <label className="form-check-label" htmlFor="myEventsFilter">
-                                        Mis eventos
-                                    </label>
-                                </div>
-                            </li>
-                            {/* Fin de filtro para mis eventos */}
 
                             {categories.map(category => (
                                 <li key={category.id}>
@@ -249,7 +178,7 @@ function ShowAllEvents() {
                     {filteredEvents.length > 0 ? (
                         filteredEvents.map((event) => (
                             <div className="col-md-4 mb-4" key={event.id}>
-                                <Link to={`/event/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link to={`/public-event/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <div className="card preview-event-allevents">
                                         <div className="ratio ratio-16x9">
                                             <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
@@ -271,4 +200,4 @@ function ShowAllEvents() {
     );
 }
 
-export default ShowAllEvents;
+export default ShowAllPublicEvents;

@@ -122,11 +122,19 @@ function ShowAllBeneficios() {
 
     const hasBenefitEnded = (fechaFinBeneficio) => {
         const now = new Date();
-        const fechaFin = fechaFinBeneficio ? new Date(fechaFinBeneficio) : null;
+        const fechaFin = fechaFinBeneficio ? new Date(fechaFinBeneficio + 'T00:00:00') : null;
     
         // Si no hay fecha_fin, lo consideramos válido
         return !fechaFin || fechaFin > now;
     };
+    
+    // const hasBenefitEnded = (fechaFinBeneficio) => {
+    //     const now = new Date();
+    //     const fechaFin = fechaFinBeneficio ? new Date(fechaFinBeneficio) : null;
+    
+    //     // Si no hay fecha_fin, lo consideramos válido
+    //     return !fechaFin || fechaFin > now;
+    // };
 
     const truncateDescription = (descripcion, maxLength) => {
         if (descripcion.length > maxLength) {

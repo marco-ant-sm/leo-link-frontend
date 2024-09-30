@@ -26,6 +26,7 @@ function ShowPractica() {
     const [profileImagen, setProfileImagen] = useState('');
     const [profileDescription, setProfileDescription] = useState('');
     const [profileCorreo, setProfileCorreo] = useState('');
+    const [profileTelefono, setProfileTelefono] = useState('');
 
     //Recomendaciones
     //Recommended Events
@@ -317,11 +318,12 @@ function ShowPractica() {
     }
 
     //Fill show profile info
-    function fillProfileInfo(name, description, image, email){
+    function fillProfileInfo(name, description, image, email, phone){
         setProfileName(name);
         setProfileDescription(description);
         setProfileImagen(image);
         setProfileCorreo(email);
+        setProfileTelefono(phone);
     }
 
 
@@ -383,7 +385,7 @@ function ShowPractica() {
     
                 response.data.forEach(evento => {
                     if (evento.tipo_e === 'practica' && evento.id !== parseInt(excludedId)) {
-                        const fechaEvento =  evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica) : null;
+                        const fechaEvento = evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica + 'T00:00:00') : null;
 
                         if (!fechaEvento || fechaEvento > now) {
                             eventos.push(evento);
@@ -413,9 +415,16 @@ function ShowPractica() {
 
     const hasPracticaEnded = (fechaFinPractica) => {
         const now = new Date();
-        const fechaFin = fechaFinPractica ? new Date(fechaFinPractica) : null;
+        let fechaFin = null;
     
-        // Si no hay fecha_fin, lo consideramos válido
+        if (fechaFinPractica) {
+            fechaFin = new Date(fechaFinPractica + 'T00:00:00'); // Asegurarse de que se interprete como medianoche en la zona horaria local
+        }
+    
+        console.log('ahora: ', now);
+        console.log('fecha fin: ', fechaFin);
+        
+        // Si no hay fecha_fin, lo consideramos válida
         return !fechaFin || fechaFin > now;
     };
 
@@ -508,11 +517,11 @@ function ShowPractica() {
                                         }}
                                         data-bs-toggle="modal" 
                                         data-bs-target="#showProfileModal"
-                                        onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email)}
+                                        onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email, eventData.usuario.telefono)}
                                     />
                                 ) : (
                                     <span data-bs-toggle="modal" data-bs-target="#showProfileModal">
-                                        <i className="bi bi-person-circle" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email)}/>
+                                        <i className="bi bi-person-circle" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(eventData.usuario.nombre + ' ' + eventData.usuario.apellidos, eventData.usuario.descripcion, eventData.usuario.imagen, eventData.usuario.email, eventData.usuario.telefono)}/>
                                     </span>
                                 )}
                             </span>{" "}
@@ -528,18 +537,37 @@ function ShowPractica() {
 
                         {/* Botones de asistencia y no asistencia */}
                         {asistido ? (
-                            <button className="btn btn-danger btn-sm me-3" onClick={handleNoAsistir}><i class="fa-solid fa-heart-crack"></i> No me es útil</button>
+                            <button className="btn btn-danger btn-sm me-3" onClick={handleNoAsistir}><i class="fa-solid fa-heart-crack"></i> No me interesa</button>
                         ) : (
-                            <button className="btn btn-success btn-sm me-3" onClick={handleAsistir}><i class="fa-solid fa-heart"></i> Me es útil</button>
+                            <button className="btn btn-success btn-sm me-3" onClick={handleAsistir}><i class="fa-solid fa-heart"></i> Me interesa</button>
                         )}
 
                         {/* Botones para editar y borrar */}
-                        {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
+                        {currentUserData && eventData.usuario && (
+                            <div className='d-inline'>
+                                {currentUserData.id === eventData.usuario.id ? (
+                                    <>
+                                        <button className="btn btn-warning btn-sm me-1" onClick={handleEdit}>
+                                            <i className="fa-regular fa-pen-to-square"></i>
+                                        </button>
+                                        <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                    </>
+                                ) : currentUserData.permiso_u === 'admin' ? (
+                                    <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+                                        <i className="fa-solid fa-trash"></i>
+                                    </button>
+                                ) : null}
+                            </div>
+                        )}
+
+                        {/* {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
                             <div className='d-inline'>
                                 <button className="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
                                 <button className="btn btn-danger btn-sm"><i className="fa-solid fa-trash" onClick={handleDelete}></i></button>
                             </div>
-                        )}
+                        )} */}
 
                                                 
                         </div>
@@ -550,7 +578,7 @@ function ShowPractica() {
                         <p>
                         {eventData.descripcion}
                         </p>
-                        <p>Le es util a:{totalAsistentes} personas</p>
+                        <p>Le interesa a:{totalAsistentes} personas</p>
                     </div>
                     </div>
                 </div>
@@ -628,11 +656,11 @@ function ShowPractica() {
                                                                 }}
                                                                 data-bs-toggle="modal" 
                                                                 data-bs-target="#showProfileModal"
-                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email)}
+                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}
                                                             />
                                                         ) : (
                                                             <span className="m-0 p-0">
-                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email)}/>
+                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}/>
                                                             </span>
                                                         )}
                                                 </div>
@@ -640,9 +668,14 @@ function ShowPractica() {
                                                     <div className="row">
                                                         <div className="col-12 name-user-comment">
                                                             <p className="mt-0 mb-1">{comment.usuario.nombre} {comment.usuario.apellidos}
-                                                            {currentUserData && comment.usuario && currentUserData.id === comment.usuario.id && (
-                                                                <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                            {currentUserData && comment.usuario && (
+                                                                (currentUserData.id === comment.usuario.id || currentUserData.permiso_u === 'admin') && (
+                                                                    <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                                )
                                                             )}
+                                                            {/* {currentUserData && comment.usuario && currentUserData.id === comment.usuario.id && (
+                                                                <button className="btn btn-danger btn-sm d-inline mx-2 delete-comment" onClick={() => handleDeleteCommentWithConfirmation(comment.id)}></button>
+                                                            )} */}
                                                             </p>
                                                         </div>
                                                         <div className="col-12 mt-0 mb-0 pt-0 pb-0">
@@ -715,7 +748,10 @@ function ShowPractica() {
                             {/* Información de contacto del usuario */}
                             <div className="user-contact mt-3">
                                 <p className="main-info-title">Contacto</p>
-                                {profileCorreo}
+                                <p>Correo: {profileCorreo}</p>
+                                {profileTelefono && (
+                                    <p>Teléfono: {profileTelefono}</p>
+                                )}
                             </div>
                         </div>
                         <div className="modal-footer">

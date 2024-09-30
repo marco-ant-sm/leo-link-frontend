@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link} from 'react-router-dom';
 import { format, parseISO, isSameDay } from 'date-fns';
-import es from 'date-fns/locale/es';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 function HomeUser() {
     const defaultImage = '/img/default-logo.jpg';
@@ -29,7 +30,29 @@ function HomeUser() {
     const [filteredPracticasEvents, setFilteredPracticasEvents] = useState([]);
     
     const [error, setError] = useState(null);
+    const [currentUserData, setCurrentUserData] = useState({});
+    const navigate = useNavigate();
+
+    const hasEventEnded = (fechaFin, horaFin) => {
+        const fechaEvento = new Date(fechaFin + 'T00:00:00'); // Asegurarse de que se interprete como medianoche en la zona horaria local
+        const horaEvento = new Date(`${fechaFin}T${horaFin}`);
+        const now = new Date();
     
+        // Si la fecha del evento es mayor que ahora, es válido
+        if (fechaEvento > now) {
+            return false; // Evento válido
+        }
+    
+        // Si la fecha del evento es igual a ahora, comprobamos la hora
+        if (isSameDay(fechaEvento, now)) {
+            console.log('que onda hora', horaEvento);
+            console.log('que onda now', now);
+            return horaEvento < now; // Solo válido si la hora de fin es mayor que ahora
+        }
+    
+        // Si la fecha del evento es menor que ahora, no es válido
+        return true; // Evento no válido
+    };
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -46,39 +69,76 @@ function HomeUser() {
                 const descuentos = [];
                 const practicas = [];
 
+                //Corregido fechas
                 response.data.forEach(evento => {
+                    const now = new Date();
+                
                     if (evento.tipo_e === 'evento') {
-                        const fechaEvento = new Date(evento.fecha_fin_evento);
+                        const fechaEvento = new Date(evento.fecha_fin_evento + 'T00:00:00');
                         const horaEvento = new Date(`${evento.fecha_fin_evento}T${evento.hora_fin_evento}`);
-
-                        // Verifica si el evento ha terminado
-                        if (fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now)) {
+                
+                        // Verifica si el evento ha terminado utilizando la función hasEventEnded
+                        if (hasEventEnded(evento.fecha_fin_evento, evento.hora_fin_evento)) {
                             return; // El evento ha terminado, lo descartamos
                         }
                         eventos.push(evento);
                     } else if (evento.tipo_e === 'beneficio') {
-                        const fechaFin = evento.fecha_fin_beneficio ? new Date(evento.fecha_fin_beneficio) : null;
-
+                        const fechaFin = evento.fecha_fin_beneficio ? new Date(evento.fecha_fin_beneficio + 'T00:00:00') : null;
+                
                         // Si no hay fecha_fin, lo consideramos válido
                         if (!fechaFin || fechaFin > now) {
                             beneficios.push(evento);
                         }
                     } else if (evento.tipo_e === 'descuento') {
-                        const fechaFin = evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento) : null;
-
+                        const fechaFin = evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento + 'T00:00:00') : null;
+                
                         // Si no hay fecha_fin, lo consideramos válido
                         if (!fechaFin || fechaFin > now) {
                             descuentos.push(evento);
                         }
                     } else if (evento.tipo_e === 'practica') {
-                        const fechaFin = evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica) : null;
-
+                        const fechaFin = evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica + 'T00:00:00') : null;
+                
                         // Si no hay fecha_fin, lo consideramos válido
                         if (!fechaFin || fechaFin > now) {
                             practicas.push(evento);
                         }
                     }
                 });
+
+                // response.data.forEach(evento => {
+                //     if (evento.tipo_e === 'evento') {
+                //         const fechaEvento = new Date(evento.fecha_fin_evento);
+                //         const horaEvento = new Date(`${evento.fecha_fin_evento}T${evento.hora_fin_evento}`);
+
+                //         // Verifica si el evento ha terminado
+                //         if (fechaEvento < now || (isSameDay(fechaEvento, now) && horaEvento < now)) {
+                //             return; // El evento ha terminado, lo descartamos
+                //         }
+                //         eventos.push(evento);
+                //     } else if (evento.tipo_e === 'beneficio') {
+                //         const fechaFin = evento.fecha_fin_beneficio ? new Date(evento.fecha_fin_beneficio) : null;
+
+                //         // Si no hay fecha_fin, lo consideramos válido
+                //         if (!fechaFin || fechaFin > now) {
+                //             beneficios.push(evento);
+                //         }
+                //     } else if (evento.tipo_e === 'descuento') {
+                //         const fechaFin = evento.fecha_fin_descuento ? new Date(evento.fecha_fin_descuento) : null;
+
+                //         // Si no hay fecha_fin, lo consideramos válido
+                //         if (!fechaFin || fechaFin > now) {
+                //             descuentos.push(evento);
+                //         }
+                //     } else if (evento.tipo_e === 'practica') {
+                //         const fechaFin = evento.fecha_fin_practica ? new Date(evento.fecha_fin_practica) : null;
+
+                //         // Si no hay fecha_fin, lo consideramos válido
+                //         if (!fechaFin || fechaFin > now) {
+                //             practicas.push(evento);
+                //         }
+                //     }
+                // });
 
                 setEvents(eventos);
                 setBenefitEvents(beneficios);
@@ -126,6 +186,47 @@ function HomeUser() {
                 console.error('Error fetching user categories', error);
             }
         };
+
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+        
+            if (!token) {
+                setError('No se encontró token de autenticación');
+                return;
+            }
+        
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+        
+                // Verificar si el usuario está baneado
+                if (response.data.baneo) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acceso Denegado',
+                        text: 'Has sido baneado, comunícate con un administrador.',
+                    }).then(() => {
+                        localStorage.removeItem('access'); // Elimina el token del localStorage
+                        localStorage.removeItem('refresh');
+                        localStorage.removeItem('user');
+                        navigate('/'); // Redirige a la página principal o login
+                    });
+                    return; // Salir de la función
+                }
+        
+                // Si no está baneado, continuar con la asignación de datos
+                setCurrentUserData(response.data);
+        
+            } catch (error) {
+                setError('Error al obtener el perfil del usuario');
+                console.error(error);
+            }
+        };
+
+        fetchUserProfile();
         fetchUserCategories();
     }, []);
 
