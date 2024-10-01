@@ -78,7 +78,7 @@ const CreateEventF = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        // //validar imagen
+        //validar imagen
         if (imagen) {
             Swal.fire({
                 title: 'Validando contenido de la imagen...',

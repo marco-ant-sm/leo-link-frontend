@@ -562,6 +562,8 @@ function ShowPractica() {
                             </div>
                         )}
 
+                        <p className="main-info-title mt-3">Le interesa a - {totalAsistentes} persona(s)</p>
+
                         {/* {currentUserData && eventData.usuario && currentUserData.id === eventData.usuario.id && (
                             <div className='d-inline'>
                                 <button className="btn btn-warning btn-sm me-1"><i className="fa-regular fa-pen-to-square" onClick={handleEdit}></i></button>
@@ -578,7 +580,7 @@ function ShowPractica() {
                         <p>
                         {eventData.descripcion}
                         </p>
-                        <p>Le interesa a:{totalAsistentes} personas</p>
+                        {/* <p>Le interesa a:{totalAsistentes} personas</p> */}
                     </div>
                     </div>
                 </div>
@@ -656,11 +658,11 @@ function ShowPractica() {
                                                                 }}
                                                                 data-bs-toggle="modal" 
                                                                 data-bs-target="#showProfileModal"
-                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}
+                                                                onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, comment.usuario.telefono)}
                                                             />
                                                         ) : (
                                                             <span className="m-0 p-0">
-                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, eventData.usuario.telefono)}/>
+                                                                <i className="bi bi-person-circle" data-bs-toggle="modal" data-bs-target="#showProfileModal" style={{cursor: 'pointer',}} onClick={() => fillProfileInfo(comment.usuario.nombre + ' ' + comment.usuario.apellidos, comment.usuario.descripcion, comment.usuario.imagen, comment.usuario.email, comment.usuario.telefono)}/>
                                                             </span>
                                                         )}
                                                 </div>
@@ -745,11 +747,13 @@ function ShowPractica() {
                                     <p>{profileDescription}</p>
                                 ):(<p>Sin descripcion</p>)}
                             </div>
+
                             {/* Información de contacto del usuario */}
+                            
                             <div className="user-contact mt-3">
                                 <p className="main-info-title">Contacto</p>
                                 <p>Correo: {profileCorreo}</p>
-                                {profileTelefono && (
+                                {profileTelefono && currentUserData && ['admin', 'docente', 'empresa'].includes(currentUserData.permiso_u) &&(
                                     <p>Teléfono: {profileTelefono}</p>
                                 )}
                             </div>

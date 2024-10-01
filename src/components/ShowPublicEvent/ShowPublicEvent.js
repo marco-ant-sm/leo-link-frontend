@@ -514,6 +514,7 @@ function ShowPublicEvent() {
                         
                         <p className="main-info-title mt-3">Host - <span className='text-primary'>{capitalizeAllText(eventData.host_evento)}</span></p>
                         <p className="main-info-title mt-3">Acceso - {eventData.acceso_e === 'publico' ? 'Público' : 'Red Universitaria'}</p>
+                        <p className="main-info-title mt-3">Asistencia - {totalAsistentes} persona(s)</p>
                         </div>
                     </div>
                     {/* item description */}
@@ -522,7 +523,7 @@ function ShowPublicEvent() {
                         <p>
                         {eventData.descripcion}
                         </p>
-                        <p>Asistencia:{totalAsistentes}</p>
+                        {/* <p>Asistencia:{totalAsistentes}</p> */}
                     </div>
                     </div>
                 </div>

@@ -587,11 +587,11 @@ function HomeUser() {
                         ))}
                         {/* Puedes añadir más slides aquí si es necesario */}
                     </div>
-                    <button className="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#profesionalesCarousel" data-bs-slide="prev">
+                    <button className="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#descuentosCarousel" data-bs-slide="prev">
                         <span className="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span className="visually-hidden">Previous</span>
                     </button>
-                    <button className="carousel-control-next custom-carousel-control" type="button" data-bs-target="#profesionalesCarousel" data-bs-slide="next">
+                    <button className="carousel-control-next custom-carousel-control" type="button" data-bs-target="#descuentosCarousel" data-bs-slide="next">
                         <span className="carousel-control-next-icon" aria-hidden="true"></span>
                         <span className="visually-hidden">Next</span>
                     </button>

@@ -203,15 +203,15 @@ function Homep() {
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
-                            <i className="fa-solid fa-music" />
+                            <i class="fa-solid fa-umbrella-beach"></i>
                         </div>
-                        <p>Música</p>
+                        <p>Ocio</p>
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
-                            <i className="fa-solid fa-lightbulb" />
+                            <i class="fa-solid fa-person-biking"></i>
                         </div>
-                        <p>Ideas</p>
+                        <p>Deportivo</p>
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
@@ -223,13 +223,13 @@ function Homep() {
                         <div className="logo-cat">
                             <i className="fa-solid fa-gamepad" />
                         </div>
-                        <p>Games</p>
+                        <p>Recreativo</p>
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
                             <i className="fa-solid fa-code" />
                         </div>
-                        <p>Code</p>
+                        <p>Informática</p>
                         </div>
                     </div>
                     </div>

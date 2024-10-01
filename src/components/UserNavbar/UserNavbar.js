@@ -59,9 +59,76 @@ function UserNavbar() {
         fetchUserProfile();
     }, []);
 
+
+    //Verificar si la imagen es apropiada
+    const verificarImagen = async (imagen) => {
+        const img = new Image();
+        const reader = new FileReader();
+    
+        return new Promise((resolve, reject) => {
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+    
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 224;
+                canvas.height = 224;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, 224, 224);
+                const imgData = ctx.getImageData(0, 0, 224, 224).data;
+                const imgArray = Array.from(imgData).map(pixel => pixel / 255.0);
+    
+                try {
+                    const response = await axios.post('http://localhost:5000/api', { imageArray: imgArray });
+                    resolve(response.data.result);
+                } catch {
+                    reject('Error verificando la imagen');
+                }
+            };
+    
+            reader.readAsDataURL(imagen);
+        });
+    };
+
     
     const handleUserUpdateSubmit = async (event) => {
         event.preventDefault();
+
+        //validar imagen
+        if (imagen) {
+            Swal.fire({
+                title: 'Validando contenido de la imagen...',
+                html: '<style>.swal2-html { max-height: 150px; overflow: hidden; }</style>' +
+                      '<div class="d-flex justify-content-center">' +
+                      '<div class="spinner-border text-success" role="status">' +
+                      '<span class="visually-hidden">Cargando...</span>' +
+                      '</div></div>',
+                allowOutsideClick: false,
+                onBeforeOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const resultadoVerificacion = await verificarImagen(imagen);
+                if (resultadoVerificacion === 'Desnudos.') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'La imagen es inapropiada. Por favor, selecciona otra.',
+                    });
+                    return;
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error,
+                });
+                return;
+            }
+        }
     
         const token = localStorage.getItem('access');
         if (!token) {
@@ -784,11 +851,13 @@ function UserNavbar() {
                             <span><i class="fa-solid fa-business-time"></i></span> Prácticas Profesionales
                             </a>
                         </li>
-                        <li className="nav-item">
+
+                    
+                        {/* <li className="nav-item">
                             <a className="nav-link active" href="#">
                             <span><i class="fa-solid fa-circle-info"></i></span> Servicios Escolares IA
                             </a>
-                        </li>
+                        </li> */}
 
                         {/* hidden search bar */}
                         <form className="d-flex mt-3 second-search" role="search" onSubmit={handleSearchSubmit}>
@@ -1037,7 +1106,7 @@ function UserNavbar() {
                             <h5>Perfil del Usuario</h5>
                                 <form className="m-auto p-5" onSubmit={handleUserUpdateSubmit}>
                                     <div className="mb-3">
-                                        <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                        <label htmlFor="descripcion" className="form-label">Descripción (Opcional)</label>
                                         <textarea
                                             className="form-control"
                                             id="descripcion"
@@ -1047,7 +1116,7 @@ function UserNavbar() {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="telefono" className="form-label">Teléfono (Opcional)<span className='text-danger'>*</span></label>
+                                        <label htmlFor="telefono" className="form-label">Teléfono (Opcional)</label>
                                         <input
                                             type="tel"
                                             className="form-control"

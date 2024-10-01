@@ -27,7 +27,7 @@ function UserRegister() {
         // Validar campos requeridos
         const { nombre, permiso_u, password, confirmPassword } = formData;
         if (!nombre || !permiso_u || !password || !confirmPassword) {
-            Swal.fire('Error', 'Por favor, complete todos los campos requeridos', 'error');
+            Swal.fire('Error', 'Por favor, complete todos los campos requeridos en rojo', 'error');
             return;
         }
 
@@ -114,7 +114,7 @@ function UserRegister() {
                             <div className="col-12 bg-light p-5 form-register bg-light">
                                 <form className="m-auto p-5" onSubmit={handleSubmit}>
                                     <div className="mb-3">
-                                        <label htmlFor="nombre" className="form-label">Nombre</label>
+                                        <label htmlFor="nombre" className="form-label">Nombre <span className='text-danger'>*</span></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -137,7 +137,7 @@ function UserRegister() {
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="email" className="form-label">Correo Electrónico</label>
+                                        <label htmlFor="email" className="form-label">Correo Electrónico <span className='text-danger'>*</span></label>
                                         <input
                                             type="email"
                                             className="form-control"
@@ -149,7 +149,7 @@ function UserRegister() {
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="permiso_u" className="form-label">Seleccione el rol de usuario</label>
+                                        <label htmlFor="permiso_u" className="form-label">Seleccione el rol de usuario <span className='text-danger'>*</span></label>
                                         <select
                                             id="permiso_u"
                                             name="permiso_u"
@@ -167,7 +167,7 @@ function UserRegister() {
                                         </select>
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="password" className="form-label">Contraseña</label>
+                                        <label htmlFor="password" className="form-label">Contraseña <span className='text-danger'>*</span></label>
                                         <div className="position-relative">
                                             <input
                                                 type={showPassword ? 'text' : 'password'}
@@ -193,7 +193,7 @@ function UserRegister() {
                                         </div>
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="confirmPassword" className="form-label">Confirmar Contraseña</label>
+                                        <label htmlFor="confirmPassword" className="form-label">Confirmar Contraseña <span className='text-danger'>*</span></label>
                                         <div className="position-relative">
                                             <input
                                                 type={showConfirmPassword ? 'text' : 'password'}

@@ -35,9 +35,75 @@ const CreateBeneficio = () => {
     }, []);
 
 
+     //Verificar si la imagen es apropiada
+     const verificarImagen = async (imagen) => {
+        const img = new Image();
+        const reader = new FileReader();
+    
+        return new Promise((resolve, reject) => {
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+    
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 224;
+                canvas.height = 224;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, 224, 224);
+                const imgData = ctx.getImageData(0, 0, 224, 224).data;
+                const imgArray = Array.from(imgData).map(pixel => pixel / 255.0);
+    
+                try {
+                    const response = await axios.post('http://localhost:5000/api', { imageArray: imgArray });
+                    resolve(response.data.result);
+                } catch {
+                    reject('Error verificando la imagen');
+                }
+            };
+    
+            reader.readAsDataURL(imagen);
+        });
+    };
+
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        //validar imagen
+        if (imagen) {
+            Swal.fire({
+                title: 'Validando contenido de la imagen...',
+                html: '<style>.swal2-html { max-height: 150px; overflow: hidden; }</style>' +
+                      '<div class="d-flex justify-content-center">' +
+                      '<div class="spinner-border text-success" role="status">' +
+                      '<span class="visually-hidden">Cargando...</span>' +
+                      '</div></div>',
+                allowOutsideClick: false,
+                onBeforeOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const resultadoVerificacion = await verificarImagen(imagen);
+                if (resultadoVerificacion === 'Desnudos.') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'La imagen es inapropiada. Por favor, selecciona otra.',
+                    });
+                    return;
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error,
+                });
+                return;
+            }
+        }
         
         if (!nombre.trim()) {
             Swal.fire({

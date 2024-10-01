@@ -147,6 +147,19 @@ function UpdateEventF() {
 
         //validar imagen
         if (imagen) {
+            Swal.fire({
+                title: 'Validando contenido de la imagen...',
+                html: '<style>.swal2-html { max-height: 150px; overflow: hidden; }</style>' +
+                      '<div class="d-flex justify-content-center">' +
+                      '<div class="spinner-border text-success" role="status">' +
+                      '<span class="visually-hidden">Cargando...</span>' +
+                      '</div></div>',
+                allowOutsideClick: false,
+                onBeforeOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 const resultadoVerificacion = await verificarImagen(imagen);
                 if (resultadoVerificacion === 'Desnudos.') {
