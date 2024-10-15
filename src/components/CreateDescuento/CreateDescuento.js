@@ -3,6 +3,7 @@ import axios from 'axios';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import './CreateDescuento.css';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const CreateDescuento = () => {
     const [nombre, setNombre] = useState('');
@@ -17,6 +18,11 @@ const CreateDescuento = () => {
     // Campos Caracteristicos
     const [fechaFinDescuento, setFechaFinDescuento] = useState('');
 
+    //Info del usuario para saber si tiene acceso a la funcion
+    const [currentUserData, setCurrentUserData] = useState({});
+
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         // Fetch categories when the component mounts
@@ -30,9 +36,47 @@ const CreateDescuento = () => {
                 setError('Error fetching categories');
             }
         };
+
+        //Cargar info del usuario
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+    
+            if (!token) {
+                setError('No se encontró token de autenticación');
+                return;
+            }
+    
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setCurrentUserData(response.data);
+                
+                const permisosPermitidos = ['admin'];
+
+                if (!permisosPermitidos.includes(response.data.permiso_u)) {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'No tienes permiso para crear descuentos.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+
+                    // Redirigir al menú principal
+                    navigate('/home');
+                }
+    
+            } catch (error) {
+                setError('Error al obtener el perfil del usuario');
+                console.error(error);
+            }
+        };
         
         fetchCategories();
-    }, []);
+        fetchUserProfile();
+    }, [navigate]);
 
 
      //Verificar si la imagen es apropiada
@@ -105,7 +149,7 @@ const CreateDescuento = () => {
             }
         }
         
-        if (!nombre.trim()) {
+        if (!nombre) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -114,7 +158,7 @@ const CreateDescuento = () => {
             return;
         }
     
-        if (!descripcion.trim()) {
+        if (!descripcion) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',

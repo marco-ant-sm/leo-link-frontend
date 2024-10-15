@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './UserRegister.css';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 
 function UserRegister() {
     const [formData, setFormData] = useState({
@@ -13,6 +16,55 @@ function UserRegister() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState(null);
+
+    //Info del usuario para saber si tiene acceso a la funcion
+    const [currentUserData, setCurrentUserData] = useState({});
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        //Cargar info del usuario
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+    
+            if (!token) {
+                setError('No se encontró token de autenticación');
+                return;
+            }
+    
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setCurrentUserData(response.data);
+                
+                const permisosPermitidos = ['admin'];
+
+                if (!permisosPermitidos.includes(response.data.permiso_u)) {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'No tienes permiso para crear usuarios.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+
+                    // Redirigir al menú principal
+                    navigate('/home');
+                }
+    
+            } catch (error) {
+                setError('Error al obtener el perfil del usuario');
+                console.error(error);
+            }
+        };
+
+        fetchUserProfile();
+      
+    }, [navigate]);
+    
 
     const handleChange = (e) => {
         setFormData({

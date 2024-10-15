@@ -40,6 +40,21 @@ const ManageUsers = () => {
                     },
                 });
                 setCurrentUserData(response.data);
+
+                const permisosPermitidos = ['admin'];
+
+                if (!permisosPermitidos.includes(response.data.permiso_u)) {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'No tienes permiso para administrar cuentas.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+
+                    // Redirigir al menú principal
+                    navigate('/home');
+                }
+
             } catch (error) {
                 setError('Error al obtener el perfil del usuario');
                 console.error(error);

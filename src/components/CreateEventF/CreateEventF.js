@@ -5,6 +5,7 @@ import './CreateEventF.css';
 import Swal from 'sweetalert2';
 import { format, parseISO} from 'date-fns';
 import es from 'date-fns/locale/es';
+import { useNavigate } from 'react-router-dom';
 
 const CreateEventF = () => {
     const [nombre, setNombre] = useState('');
@@ -25,6 +26,11 @@ const CreateEventF = () => {
     const [lugarEvento, setLugarEvento] = useState('');
     const [accesoEvento, setAccesoEvento] = useState('red-universitaria');
 
+    //Info del usuario para saber si tiene acceso a la funcion
+    const [currentUserData, setCurrentUserData] = useState({});
+
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         // Fetch categories when the component mounts
@@ -39,8 +45,46 @@ const CreateEventF = () => {
             }
         };
         
+        //Cargar info del usuario
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+    
+            if (!token) {
+                setError('No se encontró token de autenticación');
+                return;
+            }
+    
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setCurrentUserData(response.data);
+                
+                const permisosPermitidos = ['admin', 'docente', 'grupo_personal', 'empresa'];
+
+                if (!permisosPermitidos.includes(response.data.permiso_u)) {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'No tienes permiso para crear eventos.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+
+                    // Redirigir al menú principal
+                    navigate('/home');
+                }
+    
+            } catch (error) {
+                setError('Error al obtener el perfil del usuario');
+                console.error(error);
+            }
+        };
+
         fetchCategories();
-    }, []);
+        fetchUserProfile();
+    }, [navigate]);
 
 
     //Verificar si la imagen es apropiada
@@ -123,7 +167,7 @@ const CreateEventF = () => {
             return;
         }
 
-        if (!nombre.trim()) {
+        if (!nombre) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -132,7 +176,7 @@ const CreateEventF = () => {
             return;
         }
     
-        if (!descripcion.trim()) {
+        if (!descripcion) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -146,6 +190,38 @@ const CreateEventF = () => {
                 icon: 'error',
                 title: 'Error',
                 text: 'La categoría principal es obligatoria',
+            });
+            return;
+        }
+
+        // Validación de fechas
+        const hoy = new Date();
+        const fechaEventoDate = new Date(fechaEvento);
+        const fechaFinEventoDate = new Date(fechaFinEvento);
+
+        if (fechaEventoDate <= hoy || fechaFinEventoDate <= hoy) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Las fechas deben ser mayores a la fecha actual.',
+            });
+            return;
+        }
+
+        if (fechaEventoDate > fechaFinEventoDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La fecha de fin del evento debe ser mayor o igual que la fecha de inicio.',
+            });
+            return;
+        }
+
+        if (fechaEventoDate.getTime() === fechaFinEventoDate.getTime() && horaEvento >= horaFinEvento) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La hora de fin del evento debe ser mayor que la hora de inicio cuando las fechas son iguales.',
             });
             return;
         }
@@ -389,7 +465,11 @@ const CreateEventF = () => {
                                         className="form-control"
                                         id="fechaEvento"
                                         value={fechaEvento}
-                                        onChange={(e) => setFechaEvento(e.target.value)}
+                                        onChange={(e) => {
+                                            setFechaEvento(e.target.value);
+                                            setFechaFinEvento(e.target.value);
+                                        }}
+                                        required
                                     />
                                 </div>
 
@@ -401,6 +481,7 @@ const CreateEventF = () => {
                                         id="horaEvento"
                                         value={horaEvento}
                                         onChange={(e) => setHoraEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
@@ -411,6 +492,7 @@ const CreateEventF = () => {
                                         id="hostEvento"
                                         value={hostEvento}
                                         onChange={(e) => setHostEvento(e.target.value)}
+                                        required
                                     >
                                         <option value="">Selecciona un host</option>
                                         <option value="Cucei">Cucei</option>
@@ -428,6 +510,7 @@ const CreateEventF = () => {
                                         id="fechaFinEvento"
                                         value={fechaFinEvento}
                                         onChange={(e) => setFechaFinEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
@@ -439,6 +522,7 @@ const CreateEventF = () => {
                                         id="horaFinEvento"
                                         value={horaFinEvento}
                                         onChange={(e) => setHoraFinEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
@@ -450,6 +534,7 @@ const CreateEventF = () => {
                                         id="lugarEvento"
                                         value={lugarEvento}
                                         onChange={(e) => setLugarEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 

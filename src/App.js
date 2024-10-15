@@ -47,6 +47,7 @@ import RecoverPassword from './components/RecoverPassword/RecoverPassword';
 import ManageUsers from './components/ManageUsers/ManageUsers';
 import ShowAllPublicEvents from './components/ShowAllPublicEvents/ShowAllPublicEvents';
 import ShowPublicEvent from './components/ShowPublicEvent/ShowPublicEvent';
+import NotFound from './components/NotFound/NotFound';
 
 const App = () =>{
   return (
@@ -102,6 +103,7 @@ const App = () =>{
                 { path: '/practica/:id', element: <ShowPractica /> },
                 { path: '/updatePractica/:id', element: <UpdatePractica /> },
                 { path: '/administrarUsuarios', element: <ManageUsers /> },
+                { path: '*', element: <NotFound/> },
                 
               ]}
             />
@@ -109,6 +111,7 @@ const App = () =>{
         />
 
           {/* <Route path='*' element={<404page/>}/> */}
+          
         </Routes>
         <Footer/>
       </main>

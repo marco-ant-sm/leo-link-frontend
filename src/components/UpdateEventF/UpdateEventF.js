@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import './UpdateEventF.css';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import Swal from 'sweetalert2';
+import { format, parseISO} from 'date-fns';
+import es from 'date-fns/locale/es';
 
 function UpdateEventF() {
     const { id } = useParams();
@@ -181,17 +183,17 @@ function UpdateEventF() {
         }
 
         // Validación de campos distintivoa
-        if (!fechaEvento.trim() || !horaEvento.trim() || !hostEvento.trim() || !fechaFinEvento.trim() || !horaFinEvento.trim() || !lugarEvento.trim() || !accesoEvento.trim()) {
+        if (!fechaEvento || !horaEvento || !hostEvento || !fechaFinEvento || !horaFinEvento || !lugarEvento || !accesoEvento) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Todos los campos son obligatorios',
+                text: 'Todos los campos en rojo son obligatorios',
             });
             return;
         }
     
         // Validación de nombre y descripción
-        if (!nombre.trim() || !descripcion.trim()) {
+        if (!nombre || !descripcion) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -208,6 +210,39 @@ function UpdateEventF() {
             });
             return;
         }
+        
+        // Validación de fechas
+        const hoy = new Date();
+        const fechaEventoDate = new Date(fechaEvento);
+        const fechaFinEventoDate = new Date(fechaFinEvento);
+
+        if (fechaEventoDate <= hoy || fechaFinEventoDate <= hoy) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Las fechas deben ser mayores a la fecha actual.',
+            });
+            return;
+        }
+
+        if (fechaEventoDate > fechaFinEventoDate) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La fecha de fin del evento debe ser mayor o igual que la fecha de inicio.',
+            });
+            return;
+        }
+
+        if (fechaEventoDate.getTime() === fechaFinEventoDate.getTime() && horaEvento >= horaFinEvento) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'La hora de fin del evento debe ser mayor que la hora de inicio cuando las fechas son iguales.',
+            });
+            return;
+        }
+
     
         const token = localStorage.getItem('access');
         if (!token) {
@@ -302,6 +337,99 @@ function UpdateEventF() {
         }
       };
 
+
+    
+    //Hacer predicción de asistencia
+    const handleAttendancePrediction = async () => {
+        // Validar campos requeridos
+        if (!categoriaPrincipal || !fechaEvento || !hostEvento || !horaEvento) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Los campos en verde son obligatorios para realizar la predicción.',
+            });
+            return;
+        }
+    
+        // Obtener los parámetros
+        const categoriaMap = {
+            'Deportivo': 'deportivo',
+            'Salud': 'salud',
+            'Recreativo': 'recreativo',
+            'Académico': 'academico',
+            'Laboral': 'laboral',
+            'Informática': 'informatica',
+            'Ocio': 'ocio',
+            'Comercio': 'comercio',
+            'Química': 'quimica',
+            'Industrial': 'industrial',
+            'Mecánica Eléctrica': 'meca-elec',
+            'Electrónica': 'electronica',
+            'Temático': 'tematico'
+        };
+    
+        const quienMap = {
+            'Cucei': 'cucei',
+            'Empresa': 'empresa',
+            'Consejo estudiantil': 'consejo estudiantil',
+            'Docente': 'docente'
+        };
+    
+        const categoria = categoriaMap[categoriaPrincipal];
+        const quienLoRealiza = quienMap[hostEvento];
+        const date = parseISO(fechaEvento);
+        const mes = format(date, 'MMMM', { locale: es }).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const dia = format(date, 'EEEE', { locale: es }).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const hora = horaEvento.split(':')[0];
+    
+        const data = { categoria, mes, dia, quienLoRealiza, hora };
+        
+        Swal.fire({
+            title: 'Realizando predicción...',
+            html: '<style>.swal2-html { max-height: 150px; overflow-y: hidden; }</style>' +
+                  '<div class="d-flex justify-content-center">' +
+                  '<div class="spinner-border text-success" role="status">' +
+                  '<span class="visually-hidden">Cargando...</span>' +
+                  '</div></div>',
+            allowOutsideClick: false,
+            onBeforeOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Realizar la petición
+        try {
+            const res = await fetch('http://localhost:5000/predecir', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+    
+            if (!res.ok) {
+                throw new Error('Error en la petición');
+            }
+    
+            const result = await res.json();
+    
+            // Mostrar el resultado con Swal.fire
+            Swal.fire({
+                icon: 'success',
+                title: 'Predicción realizada',
+                text: `Predicción: ${result.prediccion} personas`,
+                confirmButtonText: 'OK',
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al hacer la predicción.',
+            });
+            console.error('Error:', error);
+        }
+    };
+
     return (
         <div>
             {/* <UserNavbar/> */}
@@ -316,7 +444,7 @@ function UpdateEventF() {
                             {/* Formulario */}
                             <form className="m-auto p-5" onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label htmlFor="nombre" className="form-label">Nombre</label>
+                                    <label htmlFor="nombre" className="form-label">Nombre <span className='text-danger'>*</span></label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -328,7 +456,7 @@ function UpdateEventF() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                    <label htmlFor="descripcion" className="form-label">Descripción <span className='text-danger'>*</span></label>
                                     <textarea
                                         className="form-control"
                                         id="descripcion"
@@ -364,7 +492,7 @@ function UpdateEventF() {
                                 )}
 
                                 <div className="mb-3">
-                                    <label htmlFor="categoriaPrincipal" className="form-label">Categoría Principal</label>
+                                    <label htmlFor="categoriaPrincipal" className="form-label">Categoría Principal <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <select
                                         className="form-select"
                                         id="categoriaPrincipal"
@@ -403,68 +531,77 @@ function UpdateEventF() {
                                 {/* Campos distintivos */}
 
                                 <div className="mb-3">
-                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento</label>
+                                    <label htmlFor="fechaEvento" className="form-label">Fecha del Evento <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <input
                                         type="date"
                                         className="form-control"
                                         id="fechaEvento"
                                         value={fechaEvento}
-                                        onChange={(e) => setFechaEvento(e.target.value)}
+                                        onChange={(e) => {
+                                            setFechaEvento(e.target.value);
+                                            setFechaFinEvento(e.target.value);
+                                        }}
+                                        required
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento</label>
+                                    <label htmlFor="horaEvento" className="form-label">Hora del Evento <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <input
                                         type="time"
                                         className="form-control"
                                         id="horaEvento"
                                         value={horaEvento}
                                         onChange={(e) => setHoraEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="hostEvento" className="form-label">Host del Evento</label>
+                                    <label htmlFor="hostEvento" className="form-label">Host del Evento <span className='text-danger'>*</span> <span className='text-success'>*</span></label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         id="hostEvento"
                                         value={hostEvento}
                                         onChange={(e) => setHostEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="fechaFinEvento" className="form-label">Fecha de Fin del Evento</label>
+                                    <label htmlFor="fechaFinEvento" className="form-label">Fecha de Fin del Evento <span className='text-danger'>*</span></label>
                                     <input
                                         type="date"
                                         className="form-control"
                                         id="fechaFinEvento"
                                         value={fechaFinEvento}
                                         onChange={(e) => setFechaFinEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="horaFinEvento" className="form-label">Hora de Fin del Evento</label>
+                                    <label htmlFor="horaFinEvento" className="form-label">Hora de Fin del Evento <span className='text-danger'>*</span></label>
                                     <input
                                         type="time"
                                         className="form-control"
                                         id="horaFinEvento"
                                         value={horaFinEvento}
                                         onChange={(e) => setHoraFinEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="lugarEvento" className="form-label">Lugar del Evento</label>
+                                    <label htmlFor="lugarEvento" className="form-label">Lugar del Evento <span className='text-danger'>*</span></label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         id="lugarEvento"
                                         value={lugarEvento}
                                         onChange={(e) => setLugarEvento(e.target.value)}
+                                        required
                                     />
                                 </div>
 
@@ -482,7 +619,8 @@ function UpdateEventF() {
                                     </select>
                                 </div>
 
-                                <button type="submit" className="btn btn-primary mt-3">Actualizar Evento</button>
+                                <button type="submit" className="btn btn-primary mt-3 me-2">Actualizar Evento</button>
+                                <div className="btn btn-success mt-3" onClick={handleAttendancePrediction}>Predicción de Asistencia</div>
 
                                 {error && <div className="mt-3 text-danger">{error}</div>}
                                 {success && <div className="mt-3 text-success">{success}</div>}

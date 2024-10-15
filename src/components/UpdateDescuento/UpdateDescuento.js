@@ -167,7 +167,7 @@ function UpdateDescuento() {
     }
     
         // Validación de nombre y descripción
-        if (!nombre.trim() || !descripcion.trim()) {
+        if (!nombre || !descripcion) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -290,7 +290,7 @@ function UpdateDescuento() {
                             {/* Formulario */}
                             <form className="m-auto p-5" onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label htmlFor="nombre" className="form-label">Nombre</label>
+                                    <label htmlFor="nombre" className="form-label">Nombre <span className='text-danger'>*</span></label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -302,7 +302,7 @@ function UpdateDescuento() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                    <label htmlFor="descripcion" className="form-label">Descripción <span className='text-danger'>*</span></label>
                                     <textarea
                                         className="form-control"
                                         id="descripcion"
@@ -338,7 +338,7 @@ function UpdateDescuento() {
                                 )}
 
                                 <div className="mb-3">
-                                    <label htmlFor="categoriaPrincipal" className="form-label">Categoría Principal</label>
+                                    <label htmlFor="categoriaPrincipal" className="form-label">Categoría Principal <span className='text-danger'>*</span></label>
                                     <select
                                         className="form-select"
                                         id="categoriaPrincipal"
@@ -356,7 +356,7 @@ function UpdateDescuento() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label htmlFor="categoriasAsociadas" className="form-label">Categorías Asociadas</label>
+                                    <label htmlFor="categoriasAsociadas" className="form-label">Categorías Asociadas (Opcionales)</label>
                                     <select
                                         className="form-select"
                                         id="categoriasAsociadas"

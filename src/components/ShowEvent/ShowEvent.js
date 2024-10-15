@@ -273,26 +273,73 @@ function ShowEvent() {
     // Confirmar asistencia
     const handleAsistir = async () => {
         try {
-          await axios.post(`http://localhost:8000/api/events/${id}/asistencia/`, {}, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('access')}`,
-              'Content-Type': 'application/json'
+            await axios.post(`http://localhost:8000/api/events/${id}/asistencia/`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            setAsistido(true);
+            setTotalAsistentes(prev => prev + 1);
+            toast.success('Asistencia confirmada', { position: 'bottom-right', style: { background: "#101010", color: "#fff", borderRadius: "5px" } });
+    
+            // Mostrar SweetAlert2
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Agregar a Google Calendar?',
+                text: "¿Quieres agregar este evento a tu calendario de Google?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'No'
+            });
+    
+            // Si el usuario confirma, redirigir a Google Calendar
+            if (isConfirmed) {
+                // Crear objetos Date
+                const startDateTime = new Date(`${eventData.fecha_evento}T${eventData.hora_evento}`);
+                const endDateTime = new Date(`${eventData.fecha_fin_evento}T${eventData.hora_fin_evento}`);
+    
+                // Formatear las fechas en el formato correcto para Google Calendar
+                const start = format(startDateTime, "yyyyMMdd'T'HHmmss");
+                const end = format(endDateTime, "yyyyMMdd'T'HHmmss");
+    
+                // Incluir el lugar del evento
+                const location = encodeURIComponent(eventData.lugar_evento || '');  // Asegúrate de que el campo exista
+    
+                const eventUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventData.nombre)}&details=${encodeURIComponent(eventData.descripcion)}&dates=${start}/${end}&location=${location}&sf=true&output=xml`;
+    
+                window.open(eventUrl, '_blank');  // Abre el enlace en una nueva ventana
             }
-          });
-          setAsistido(true);
-          setTotalAsistentes(prev => prev + 1);
-          toast.success('Asistencia confirmada', { position: 'bottom-right',style: {
-            background:"#101010",
-            color:"#fff",
-            bordeRadius:"5px"
-        }
-        });
-
+    
         } catch (error) {
-          setError('Error confirming attendance');
-          console.error(error.response.data);
+            setError('Error confirming attendance');
+            console.error(error.response.data);
         }
-      }
+    };
+    
+    // const handleAsistir = async () => {
+    //     try {
+    //       await axios.post(`http://localhost:8000/api/events/${id}/asistencia/`, {}, {
+    //         headers: {
+    //           'Authorization': `Bearer ${localStorage.getItem('access')}`,
+    //           'Content-Type': 'application/json'
+    //         }
+    //       });
+    //       setAsistido(true);
+    //       setTotalAsistentes(prev => prev + 1);
+    //       toast.success('Asistencia confirmada', { position: 'bottom-right',style: {
+    //         background:"#101010",
+    //         color:"#fff",
+    //         bordeRadius:"5px"
+    //     }
+    //     });
+
+    //     } catch (error) {
+    //       setError('Error confirming attendance');
+    //       console.error(error.response.data);
+    //     }
+    //   }
     
     
     // Quitar asistencia

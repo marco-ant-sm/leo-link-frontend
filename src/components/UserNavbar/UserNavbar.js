@@ -422,148 +422,148 @@ function UserNavbar() {
     const isUnmounted = useRef(false);
     
     //Conectar con el socket de notificaciones
-    useEffect(() => {
-        isUnmounted.current = false;
+    // useEffect(() => {
+    //     isUnmounted.current = false;
 
-        const connectWebSocket = () => {
-            const token = localStorage.getItem('access');
-            socketRef.current = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+    //     const connectWebSocket = () => {
+    //         const token = localStorage.getItem('access');
+    //         socketRef.current = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
 
-            socketRef.current.onopen = () => {
-                console.log('WebSocket conectado');
-                setIsConnected(true);
-            };
+    //         socketRef.current.onopen = () => {
+    //             console.log('WebSocket conectado');
+    //             setIsConnected(true);
+    //         };
 
-            socketRef.current.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                toast.custom((t) => (
-                    <div
-                        style={{
-                            background: '#000', // Fondo negro
-                            color: '#fff', // Texto blanco
-                            padding: '16px',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: '16px',
-                        }}
-                    >
-                        📅 {data.message} {/* Emoji de calendario */}
-                    </div>
-                ), {
-                    duration: 3000, // Duración en milisegundos
-                });
-                fetchNotificaciones(); 
-            };
+    //         socketRef.current.onmessage = (event) => {
+    //             const data = JSON.parse(event.data);
+    //             toast.custom((t) => (
+    //                 <div
+    //                     style={{
+    //                         background: '#000', // Fondo negro
+    //                         color: '#fff', // Texto blanco
+    //                         padding: '16px',
+    //                         borderRadius: '8px',
+    //                         display: 'flex',
+    //                         alignItems: 'center',
+    //                         fontSize: '16px',
+    //                     }}
+    //                 >
+    //                     📅 {data.message} {/* Emoji de calendario */}
+    //                 </div>
+    //             ), {
+    //                 duration: 3000, // Duración en milisegundos
+    //             });
+    //             fetchNotificaciones(); 
+    //         };
 
-            socketRef.current.onerror = () => {
-                console.error('Error en WebSocket:');
-            };
+    //         socketRef.current.onerror = () => {
+    //             console.error('Error en WebSocket:');
+    //         };
 
-            socketRef.current.onclose = () => {
-                console.log('WebSocket desconectado. Intentando reconectar...');
-                setIsConnected(false);
-                if (!isUnmounted.current) {
-                    setTimeout(connectWebSocket, 3000);
-                }
-            };
-        };
+    //         socketRef.current.onclose = () => {
+    //             console.log('WebSocket desconectado. Intentando reconectar...');
+    //             setIsConnected(false);
+    //             if (!isUnmounted.current) {
+    //                 setTimeout(connectWebSocket, 3000);
+    //             }
+    //         };
+    //     };
 
-        connectWebSocket();
+    //     connectWebSocket();
 
-        return () => {
-            isUnmounted.current = true;
-            if (socketRef.current) {
-                socketRef.current.close();
-                socketRef.current = null;
-            }
-        };
-    }, []);
+    //     return () => {
+    //         isUnmounted.current = true;
+    //         if (socketRef.current) {
+    //             socketRef.current.close();
+    //             socketRef.current = null;
+    //         }
+    //     };
+    // }, []);
 
 
     //Socket tolerante a fallos
-    useEffect(() => {
-        let heartbeatSocket = null;
-        let heartbeatTimeout = null;
-        let reconnectTimeout = null;
+    // useEffect(() => {
+    //     let heartbeatSocket = null;
+    //     let heartbeatTimeout = null;
+    //     let reconnectTimeout = null;
     
-        const resetHeartbeatTimeout = () => {
-          if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
-          heartbeatTimeout = setTimeout(() => {
-            console.log("No se recibió heartbeat en 10 segundos, cerrando sesión...");
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Error de conexion, por favor intente iniciar sesión más tarde.',
-            });
-            closeSessionAndRedirect();
-          }, 20000);
-        };
+    //     const resetHeartbeatTimeout = () => {
+    //       if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
+    //       heartbeatTimeout = setTimeout(() => {
+    //         console.log("No se recibió heartbeat en 10 segundos, cerrando sesión...");
+    //         Swal.fire({
+    //             icon: 'error',
+    //             title: 'Error',
+    //             text: 'Error de conexion, por favor intente iniciar sesión más tarde.',
+    //         });
+    //         closeSessionAndRedirect();
+    //       }, 20000);
+    //     };
     
-        const closeSessionAndRedirect = () => {
-          console.log("Cerrando sesión y redirigiendo...");
-          localStorage.removeItem('access');
-          if (heartbeatSocket) {
-            heartbeatSocket.close();
-          }
-          localStorage.removeItem('access'); // Elimina el token del localStorage
-          localStorage.removeItem('refresh');
-          localStorage.removeItem('user'); // Elimina el usuario
-          navigate('/');
-        };
+    //     const closeSessionAndRedirect = () => {
+    //       console.log("Cerrando sesión y redirigiendo...");
+    //       localStorage.removeItem('access');
+    //       if (heartbeatSocket) {
+    //         heartbeatSocket.close();
+    //       }
+    //       localStorage.removeItem('access'); // Elimina el token del localStorage
+    //       localStorage.removeItem('refresh');
+    //       localStorage.removeItem('user'); // Elimina el usuario
+    //       navigate('/');
+    //     };
     
-        const connectWebSocket = () => {
-          const token = localStorage.getItem('access');
-          if (!token) {
-            console.log("No hay token, no se intenta conexión");
-            return;
-          }
+    //     const connectWebSocket = () => {
+    //       const token = localStorage.getItem('access');
+    //       if (!token) {
+    //         console.log("No hay token, no se intenta conexión");
+    //         return;
+    //       }
     
-          heartbeatSocket = new WebSocket(`ws://localhost:8000/ws/heartbeat/?token=${token}`);
+    //       heartbeatSocket = new WebSocket(`ws://localhost:8000/ws/heartbeat/?token=${token}`);
     
-          heartbeatSocket.onopen = () => {
-            console.log('Heartbeat WebSocket conectado');
-            resetHeartbeatTimeout();
-          };
+    //       heartbeatSocket.onopen = () => {
+    //         console.log('Heartbeat WebSocket conectado');
+    //         resetHeartbeatTimeout();
+    //       };
     
-          heartbeatSocket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'ping') {
-              console.log('Ping recibido de Django');
-              heartbeatSocket.send(JSON.stringify({type: 'pong'}));
-              resetHeartbeatTimeout();
-            }
-          };
+    //       heartbeatSocket.onmessage = (event) => {
+    //         const data = JSON.parse(event.data);
+    //         if (data.type === 'ping') {
+    //           console.log('Ping recibido de Django');
+    //           heartbeatSocket.send(JSON.stringify({type: 'pong'}));
+    //           resetHeartbeatTimeout();
+    //         }
+    //       };
     
-          heartbeatSocket.onerror = (error) => {
-            console.error('Error en Heartbeat WebSocket:', error);
-          };
+    //       heartbeatSocket.onerror = (error) => {
+    //         console.error('Error en Heartbeat WebSocket:', error);
+    //       };
     
-          heartbeatSocket.onclose = () => {
-            console.log('Heartbeat WebSocket desconectado');
-            if (reconnectTimeout) clearTimeout(reconnectTimeout);
-            reconnectTimeout = setTimeout(connectWebSocket, 5000);
-          };
-        };
+    //       heartbeatSocket.onclose = () => {
+    //         console.log('Heartbeat WebSocket desconectado');
+    //         if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    //         reconnectTimeout = setTimeout(connectWebSocket, 5000);
+    //       };
+    //     };
     
-        connectWebSocket();
+    //     connectWebSocket();
     
-        const checkConnectionStatus = setInterval(() => {
-          if (heartbeatSocket && heartbeatSocket.readyState !== WebSocket.OPEN) {
-            console.log("WebSocket no está abierto, intentando reconectar...");
-            connectWebSocket();
-          }
-        }, 10000);
+    //     const checkConnectionStatus = setInterval(() => {
+    //       if (heartbeatSocket && heartbeatSocket.readyState !== WebSocket.OPEN) {
+    //         console.log("WebSocket no está abierto, intentando reconectar...");
+    //         connectWebSocket();
+    //       }
+    //     }, 10000);
     
-        return () => {
-          if (heartbeatSocket) {
-            heartbeatSocket.close();
-          }
-          if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
-          if (reconnectTimeout) clearTimeout(reconnectTimeout);
-          clearInterval(checkConnectionStatus);
-        };
-      }, []); 
+    //     return () => {
+    //       if (heartbeatSocket) {
+    //         heartbeatSocket.close();
+    //       }
+    //       if (heartbeatTimeout) clearTimeout(heartbeatTimeout);
+    //       if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    //       clearInterval(checkConnectionStatus);
+    //     };
+    //   }, []); 
 
     const goCreateEvent = () => {
         navigate('/crearEvento');
@@ -987,6 +987,13 @@ function UserNavbar() {
                                             <li className="nav-item">
                                                 <a className="nav-link active" onClick={goAdminUsers} style={{ cursor: 'pointer' }}>
                                                     <span><i className="fa-solid fa-users"></i></span> Administrar Usuarios
+                                                </a>
+                                            </li>
+
+                                            <li className="nav-item">
+                                                <a className="nav-link active position-relative" onClick={goAdminUsers} style={{ cursor: 'pointer' }}>
+                                                    <span><i class="fa-regular fa-calendar-check"></i></span> Confirmar Eventos
+                                                    <span class="ms-2 badge bg-danger">+50</span>
                                                 </a>
                                             </li>
                                         </>

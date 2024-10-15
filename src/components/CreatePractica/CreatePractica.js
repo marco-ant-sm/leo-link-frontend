@@ -3,6 +3,7 @@ import axios from 'axios';
 import UserNavbar from '../UserNavbar/UserNavbar';
 import './CreatePractica.css';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 const CreatePractica = () => {
     const [nombre, setNombre] = useState('');
@@ -22,6 +23,11 @@ const CreatePractica = () => {
     const [fechaFinPractica, setFechaFinPractica] = useState('');
 
 
+    //Info del usuario para saber si tiene acceso a la funcion
+    const [currentUserData, setCurrentUserData] = useState({});
+
+    const navigate = useNavigate();
+
     useEffect(() => {
         // Fetch categories when the component mounts
         const fetchCategories = async () => {
@@ -34,9 +40,47 @@ const CreatePractica = () => {
                 setError('Error fetching categories');
             }
         };
+
+        //Cargar info del usuario
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('access');
+    
+            if (!token) {
+                setError('No se encontró token de autenticación');
+                return;
+            }
+    
+            try {
+                const response = await axios.get('http://localhost:8000/api/user/profile/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setCurrentUserData(response.data);
+                
+                const permisosPermitidos = ['admin', 'empresa'];
+
+                if (!permisosPermitidos.includes(response.data.permiso_u)) {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'No tienes permiso para crear practicas.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+
+                    // Redirigir al menú principal
+                    navigate('/home');
+                }
+    
+            } catch (error) {
+                setError('Error al obtener el perfil del usuario');
+                console.error(error);
+            }
+        };
         
         fetchCategories();
-    }, []);
+        fetchUserProfile();
+    }, [navigate]);
     
 
 
@@ -110,7 +154,7 @@ const CreatePractica = () => {
             }
         }
 
-        if (!horasPractica.trim() || !direccionPractica.trim() || !telefonoPractica.trim()) {
+        if (!horasPractica || !direccionPractica || !telefonoPractica) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -119,7 +163,7 @@ const CreatePractica = () => {
             return;
         }
 
-        if (!nombre.trim()) {
+        if (!nombre) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -128,7 +172,7 @@ const CreatePractica = () => {
             return;
         }
     
-        if (!descripcion.trim()) {
+        if (!descripcion) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',

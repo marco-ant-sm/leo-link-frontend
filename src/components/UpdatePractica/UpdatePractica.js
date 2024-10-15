@@ -177,24 +177,35 @@ function UpdatePractica() {
         }
     }
 
-        // Validación de nombre y descripción
-        if (!nombre.trim() || !descripcion.trim()) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Nombre y descripción son obligatorios',
-            });
-            return;
-        }
-    
-        if (!categoriaPrincipal) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'La categoría principal es obligatoria',
-            });
-            return;
-        }
+
+    if (!horasPractica || !direccionPractica || !telefonoPractica) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Los Campos en rojo son obligatorios',
+        });
+        return;
+    }
+
+
+    // Validación de nombre y descripción
+    if (!nombre || !descripcion) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Nombre y descripción son obligatorios',
+        });
+        return;
+    }
+
+    if (!categoriaPrincipal) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'La categoría principal es obligatoria',
+        });
+        return;
+    }
     
         const token = localStorage.getItem('access');
         if (!token) {

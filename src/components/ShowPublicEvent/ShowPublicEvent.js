@@ -41,6 +41,16 @@ function ShowPublicEvent() {
                 setTotalAsistentes(response.data.numero_asistentes || 0);
                 setCategoriaPrincipal(response.data.categoria_p || '');
                 setCategoriasAsociadas(response.data.categorias || []);
+                if (response.data.acceso_e === 'red-universitaria')
+                {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Este evento es privado, Inicia Sesión para verlo.',
+                      });
+                      
+                    navigate('/verEventosPublicos');
+                }
             } catch (error) {
                 setError('Error fetching event');
                 console.error(error.response.data);
