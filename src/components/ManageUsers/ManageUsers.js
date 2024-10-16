@@ -180,7 +180,7 @@ const ManageUsers = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Buscar..."
+                                placeholder="Buscar por correo"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />

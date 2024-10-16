@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import {toast} from 'react-hot-toast';
 import { format, isSameDay } from 'date-fns';
 import es from 'date-fns/locale/es';
+import { Helmet } from 'react-helmet';
 
 function ShowEvent() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
@@ -494,7 +495,7 @@ function ShowEvent() {
                 const excludedId = id;
     
                 response.data.forEach(evento => {
-                    if (evento.tipo_e === 'evento' && evento.id !== parseInt(excludedId)) {
+                    if (evento.tipo_e === 'evento' && evento.id !== parseInt(excludedId) && evento.disponible) {
                         const fechaEvento = new Date(evento.fecha_fin_evento);
                         const horaEvento = new Date(`${evento.fecha_fin_evento}T${evento.hora_fin_evento}`);
     
@@ -543,7 +544,12 @@ function ShowEvent() {
 
 
     return (
-        <>
+        <>  
+            <Helmet>
+                <title>{eventData.nombre}</title>
+            </Helmet>
+
+            
             {/* <UserNavbar/> */}
             <div className="general-color mb-5">
                 {/* Item */}
@@ -654,7 +660,7 @@ function ShowEvent() {
                                             <i className="fa-solid fa-trash"></i>
                                         </button>
                                     </>
-                                ) : currentUserData.permiso_u === 'admin' ? (
+                                ) : currentUserData.permiso_u === 'admin' && eventData.disponible ? (
                                     <button className="btn btn-danger btn-sm" onClick={handleDelete}>
                                         <i className="fa-solid fa-trash"></i>
                                     </button>

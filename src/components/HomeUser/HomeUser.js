@@ -73,7 +73,7 @@ function HomeUser() {
                 response.data.forEach(evento => {
                     const now = new Date();
                 
-                    if (evento.tipo_e === 'evento') {
+                    if (evento.tipo_e === 'evento' && evento.disponible) {
                         const fechaEvento = new Date(evento.fecha_fin_evento + 'T00:00:00');
                         const horaEvento = new Date(`${evento.fecha_fin_evento}T${evento.hora_fin_evento}`);
                 

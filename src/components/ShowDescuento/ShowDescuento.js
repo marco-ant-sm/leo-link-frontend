@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {toast} from 'react-hot-toast';
+import { Helmet } from 'react-helmet';
 
 function ShowDescuento() {
     const { id } = useParams();  // Captura el ID del evento desde la URL
@@ -441,6 +442,9 @@ function ShowDescuento() {
     return (
         <>
             {/* <UserNavbar/> */}
+            <Helmet>
+                <title>{eventData.nombre}</title>
+            </Helmet>
             <div className="general-color mb-5">
                 {/* Item */}
                 <section className='mt-5'>

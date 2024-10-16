@@ -29,6 +29,9 @@ function UserNavbar() {
     const [fileInputKey, setFileInputKey] = useState(0);
     const [telefono, setTelefono] = useState('');
 
+    //numero de eventos por confirmar
+    const [eventCount, setEventCount] = useState(0);
+
     const fetchUserProfile = async () => {
         const token = localStorage.getItem('access');
 
@@ -57,6 +60,28 @@ function UserNavbar() {
 
     useEffect(() => {
         fetchUserProfile();
+    }, []);
+
+
+    const fetchEventCount = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/events/', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access')}`
+                }
+            });
+
+            const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && !evento.disponible);
+            setEventCount(tiposEvento.length);
+        } catch (error) {
+            setError('Error fetching events');
+            console.error(error.response.data);
+        }
+    };
+
+    //Contar eventos por confirmar
+    useEffect(() => {
+        fetchEventCount();
     }, []);
 
 
@@ -422,63 +447,68 @@ function UserNavbar() {
     const isUnmounted = useRef(false);
     
     //Conectar con el socket de notificaciones
-    // useEffect(() => {
-    //     isUnmounted.current = false;
+    useEffect(() => {
+        isUnmounted.current = false;
 
-    //     const connectWebSocket = () => {
-    //         const token = localStorage.getItem('access');
-    //         socketRef.current = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+        const connectWebSocket = () => {
+            const token = localStorage.getItem('access');
+            socketRef.current = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
 
-    //         socketRef.current.onopen = () => {
-    //             console.log('WebSocket conectado');
-    //             setIsConnected(true);
-    //         };
+            socketRef.current.onopen = () => {
+                console.log('WebSocket conectado');
+                setIsConnected(true);
+            };
 
-    //         socketRef.current.onmessage = (event) => {
-    //             const data = JSON.parse(event.data);
-    //             toast.custom((t) => (
-    //                 <div
-    //                     style={{
-    //                         background: '#000', // Fondo negro
-    //                         color: '#fff', // Texto blanco
-    //                         padding: '16px',
-    //                         borderRadius: '8px',
-    //                         display: 'flex',
-    //                         alignItems: 'center',
-    //                         fontSize: '16px',
-    //                     }}
-    //                 >
-    //                     📅 {data.message} {/* Emoji de calendario */}
-    //                 </div>
-    //             ), {
-    //                 duration: 3000, // Duración en milisegundos
-    //             });
-    //             fetchNotificaciones(); 
-    //         };
+            socketRef.current.onmessage = (event) => {
+                const data = JSON.parse(event.data);
 
-    //         socketRef.current.onerror = () => {
-    //             console.error('Error en WebSocket:');
-    //         };
+                if (data.message === 'Change confirmation number'){
+                    fetchEventCount();
+                }else{
+                    toast.custom((t) => (
+                        <div
+                            style={{
+                                background: '#000', // Fondo negro
+                                color: '#fff', // Texto blanco
+                                padding: '16px',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                fontSize: '16px',
+                            }}
+                        >
+                            📅 {data.message} {/* Emoji de calendario */}
+                        </div>
+                    ), {
+                        duration: 3000, // Duración en milisegundos
+                    });
+                    fetchNotificaciones();
+                }
+            };
 
-    //         socketRef.current.onclose = () => {
-    //             console.log('WebSocket desconectado. Intentando reconectar...');
-    //             setIsConnected(false);
-    //             if (!isUnmounted.current) {
-    //                 setTimeout(connectWebSocket, 3000);
-    //             }
-    //         };
-    //     };
+            socketRef.current.onerror = () => {
+                console.error('Error en WebSocket:');
+            };
 
-    //     connectWebSocket();
+            socketRef.current.onclose = () => {
+                console.log('WebSocket desconectado. Intentando reconectar...');
+                setIsConnected(false);
+                if (!isUnmounted.current) {
+                    setTimeout(connectWebSocket, 3000);
+                }
+            };
+        };
 
-    //     return () => {
-    //         isUnmounted.current = true;
-    //         if (socketRef.current) {
-    //             socketRef.current.close();
-    //             socketRef.current = null;
-    //         }
-    //     };
-    // }, []);
+        connectWebSocket();
+
+        return () => {
+            isUnmounted.current = true;
+            if (socketRef.current) {
+                socketRef.current.close();
+                socketRef.current = null;
+            }
+        };
+    }, []);
 
 
     //Socket tolerante a fallos
@@ -588,6 +618,13 @@ function UserNavbar() {
         const closeButton = document.querySelector('.btn-close');
         closeButton?.click();
     }
+
+    const goConfirmEvents = () => {
+        navigate('/confirmarEventos');
+        const closeButton = document.querySelector('.btn-close');
+        closeButton?.click();
+    }
+
 
     const goCreateUser = () => {
         navigate('/crearUsuario');
@@ -991,9 +1028,11 @@ function UserNavbar() {
                                             </li>
 
                                             <li className="nav-item">
-                                                <a className="nav-link active position-relative" onClick={goAdminUsers} style={{ cursor: 'pointer' }}>
+                                                <a className="nav-link active position-relative" onClick={goConfirmEvents} style={{ cursor: 'pointer' }}>
                                                     <span><i class="fa-regular fa-calendar-check"></i></span> Confirmar Eventos
-                                                    <span class="ms-2 badge bg-danger">+50</span>
+                                                    {eventCount > 0 && (
+                                                        <span className="ms-2 badge bg-danger">{eventCount}</span>
+                                                    )}
                                                 </a>
                                             </li>
                                         </>

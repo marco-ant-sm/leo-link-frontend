@@ -35,7 +35,7 @@ function ShowAllPublicEvents() {
             try {
                 const response = await axios.get('http://localhost:8000/api/public-events/');
                 
-                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && evento.acceso_e === 'publico');
+                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && evento.acceso_e === 'publico' && evento.disponible);
                 setEvents(tiposEvento);
             } catch (error) {
                 setError('Error fetching events');

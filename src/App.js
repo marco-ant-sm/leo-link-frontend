@@ -48,6 +48,8 @@ import ManageUsers from './components/ManageUsers/ManageUsers';
 import ShowAllPublicEvents from './components/ShowAllPublicEvents/ShowAllPublicEvents';
 import ShowPublicEvent from './components/ShowPublicEvent/ShowPublicEvent';
 import NotFound from './components/NotFound/NotFound';
+import ConfirmEvent from './components/ConfirmEvent/ConfirmEvent';
+import ChatComponent from './components/ChatComponent/ChatComponent';
 
 const App = () =>{
   return (
@@ -103,6 +105,7 @@ const App = () =>{
                 { path: '/practica/:id', element: <ShowPractica /> },
                 { path: '/updatePractica/:id', element: <UpdatePractica /> },
                 { path: '/administrarUsuarios', element: <ManageUsers /> },
+                { path: '/confirmarEventos', element: <ConfirmEvent /> },
                 { path: '*', element: <NotFound/> },
                 
               ]}
@@ -113,6 +116,7 @@ const App = () =>{
           {/* <Route path='*' element={<404page/>}/> */}
           
         </Routes>
+        <ChatComponent/>
         <Footer/>
       </main>
       <Toaster/>

@@ -252,6 +252,14 @@ const CreateEventF = () => {
         formData.append('hora_fin_evento', horaFinEvento);
         formData.append('lugar_evento', lugarEvento);
         formData.append('acceso_e', accesoEvento);
+
+        //Si no es admin disponible es false
+        if(currentUserData.permiso_u !== 'admin'){
+            formData.append('disponible', false);
+        }else{
+            formData.append('disponible', true);
+        }
+
         try {
             await axios.post('http://localhost:8000/api/events/', formData, {
                 headers: {
@@ -259,11 +267,20 @@ const CreateEventF = () => {
                     'Content-Type': 'multipart/form-data'
                 },
             });
-            Swal.fire({
-                icon: 'success',
-                title: 'Evento agregado',
-                text: 'Se ha acreado el Evento con éxito',
-            });
+
+            if(currentUserData.permiso_u !== 'admin'){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Evento creado',
+                    text: 'Se hará una revisión del mismo y de ser aprobado será visible para todos',
+                });
+            }else{
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Evento agregado',
+                    text: 'Se ha acreado el Evento con éxito',
+                });
+            }
             setNombre('');
             setDescripcion('');
             setImagen(null);

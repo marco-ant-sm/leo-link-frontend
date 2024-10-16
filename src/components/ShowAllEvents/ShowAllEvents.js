@@ -41,7 +41,7 @@ function ShowAllEvents() {
                     }
                 });
 
-                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento');
+                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && evento.disponible);
                 setEvents(tiposEvento);
             } catch (error) {
                 setError('Error fetching events');
@@ -133,8 +133,6 @@ function ShowAllEvents() {
     
         // Si la fecha del evento es igual a ahora, comprobamos la hora
         if (isSameDay(fechaEvento, now)) {
-            console.log('que onda hora', horaEvento);
-            console.log('que onda now', now);
             return horaEvento < now; // Solo válido si la hora de fin es mayor que ahora
         }
     
