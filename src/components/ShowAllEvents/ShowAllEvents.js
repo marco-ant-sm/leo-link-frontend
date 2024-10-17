@@ -16,6 +16,7 @@ function ShowAllEvents() {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [myEventsFilter, setMyEventsFilter] = useState(false);
     const [currentUserData, setCurrentUserData] = useState(null);
+    const userId = JSON.parse(localStorage.getItem('user'))?.evi || 0;
 
     useEffect(() => {
         document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
@@ -41,8 +42,9 @@ function ShowAllEvents() {
                     }
                 });
 
-                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && evento.disponible);
+                const tiposEvento = response.data.filter(evento => evento.tipo_e === 'evento' && evento.disponible || evento.tipo_e === 'evento' && evento.usuario.id === userId);
                 setEvents(tiposEvento);
+                
             } catch (error) {
                 setError('Error fetching events');
                 console.error(error.response.data);
@@ -253,7 +255,7 @@ function ShowAllEvents() {
                                             <img src={event.imagen ? event.imagen : defaultImage} alt="event" className="w-100 h-100 object-fit-cover" />
                                         </div>
                                         <div className="card-body">
-                                            <h5 className="card-title">{event.nombre} {hasEventEnded(event.fecha_fin_evento, event.hora_fin_evento) && <span className='text-danger'>(Finalizado)</span>}</h5>
+                                            <h5 className="card-title">{event.nombre} {hasEventEnded(event.fecha_fin_evento, event.hora_fin_evento) && <span className='text-danger'>(Finalizado)</span>} {!event.disponible && <span className='text-primary'>(No Confirmado)</span>}</h5>
                                             <p className="card-text">{truncateDescription(event.descripcion, 45)}</p>
                                         </div>
                                     </div>

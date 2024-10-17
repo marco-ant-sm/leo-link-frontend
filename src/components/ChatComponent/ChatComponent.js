@@ -3,10 +3,11 @@ import axios from 'axios';
 
 const ChatComponent = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([{ text: "Hola, soy Leo-Link AI. ¿Cómo puedo ayudarte hoy?", isUser: false, isNew: true }]);
     const [isBotTyping, setIsBotTyping] = useState(false);
     const messageInputRef = useRef(null);
     const chatMessagesRef = useRef(null);
+
 
     const handleChatButtonClick = () => {
         setIsChatOpen(prev => !prev);
@@ -104,7 +105,17 @@ const ChatComponent = () => {
             {isChatOpen && (
                 <div className="chat-box bg-dark text-white">
                     <div className="chat-header">
-                        <span>Leo-link AI</span>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span>Leo-link AI</span>
+                            <span style={{
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                backgroundColor: '#39ff14',
+                                display: 'inline-block',
+                                marginLeft: '0.5rem'
+                            }}></span>
+                        </div>
                         <button className="btn-close btn-close-white" onClick={handleCloseChat}></button>
                     </div>
                     <div className="chat-messages" ref={chatMessagesRef}>
@@ -133,7 +144,7 @@ const ChatComponent = () => {
                         <input
                             type="text"
                             ref={messageInputRef}
-                            placeholder="Escribe un mensaje..."
+                            placeholder="Escribe un mensaje"
                             onKeyDown={handleKeyDown}
                             disabled={isBotTyping}
                             className="form-control"
@@ -209,7 +220,7 @@ const ChatComponent = () => {
 
                     .chat-input input {
                         flex: 1;
-                        border-radius: 4px;
+                        border-radius: 6px;
                         margin-right: 10px;
                     }
 

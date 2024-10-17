@@ -91,6 +91,7 @@ function ShowEvent() {
                 },
             });
             setCurrentUserData(response.data);
+
         } catch (error) {
             setError('Error fetching user profile');
             console.error(error);
@@ -542,6 +543,22 @@ function ShowEvent() {
         return descripcion;
     };
 
+    //Validar que el evento sea un evento en espera
+    useEffect(() => {
+        // Verificar que ambas variables tengan información
+        if (eventData.usuario && currentUserData) {
+          if (!eventData.disponible && currentUserData.permiso_u !== 'admin' && currentUserData.id !== eventData.usuario.id) {
+            Swal.fire({
+              title: 'Error',
+              icon: 'error',
+              text: `No tienes permiso para ver este evento`,
+              confirmButtonText: 'OK'
+            });
+            navigate('/showAllEvents');
+          }
+        }
+      }, [eventData, currentUserData, navigate]);
+
 
     return (
         <>  
@@ -560,7 +577,7 @@ function ShowEvent() {
                     {/* Title */}
                     {/* Aqui en Nombre del evento va el nombre del evento*/}
                     <div className="col-12 pb-3 pb-lg-5">
-                        <h1 className="main-title-event">{eventData.nombre} {hasEventEnded(eventData.fecha_fin_evento, eventData.hora_fin_evento) && <span className='text-danger'>(Finalizado)</span>}</h1>
+                        <h1 className="main-title-event">{eventData.nombre} {hasEventEnded(eventData.fecha_fin_evento, eventData.hora_fin_evento) && <span className='text-danger'>(Finalizado)</span>} {!eventData.disponible && <span className='text-primary'>(No Visible)</span>}</h1>
                     </div>
                     {/* Item image */}
                     <div className="col-lg-8 col-xl-7 order-2 order-lg-1">

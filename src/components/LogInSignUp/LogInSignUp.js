@@ -59,6 +59,7 @@ function LogInSignUp() {
                 const decodedToken = jwtDecode(token);
                 localStorage.setItem('user', JSON.stringify({
                     nombre: decodedToken.nombre,
+                    evi: decodedToken.id,
                     apellidos: decodedToken.apellidos
                 }));
             }
