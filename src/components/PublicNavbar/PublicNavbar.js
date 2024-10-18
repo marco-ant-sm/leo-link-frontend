@@ -1,5 +1,6 @@
 import './PublicNavbar.css';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function PublicNavbar() {
 
@@ -14,14 +15,14 @@ function PublicNavbar() {
             {/* Start Navbar */}
             <nav className="navbar navbar-expand-lg bg-dark sticky-top">
                 <div className="container-fluid">
-                <a className="navbar-brand" href="#">
+                <Link className="navbar-brand" to={'/'}>
                     <img
                     src="../img/Logo-Universidad.png"
                     alt="logo universidad de guadalajara"
                     width={182}
                     height={84}
                     />
-                </a>
+                </Link>
                 <button
                     className="navbar-toggler btn-outline-light text-white"
                     type="button"

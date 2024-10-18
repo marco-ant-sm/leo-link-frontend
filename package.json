@@ -11,14 +11,17 @@
     "axios": "^1.7.3",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "date-fns": "^3.6.0",
     "gapi-script": "^1.2.0",
     "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-google-login": "^5.2.2",
     "react-helmet": "^6.1.0",
+    "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
+    "socket.io-client": "^4.7.5",
+    "sweetalert2": "^11.12.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

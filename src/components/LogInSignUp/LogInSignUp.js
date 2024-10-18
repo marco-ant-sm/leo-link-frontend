@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './LogInSignUp.css';
-import Footer from '../Footer/Footer';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 function LogInSignUp() {
 
     const navigate = useNavigate(); // Para redirigir después del inicio de sesión
 
-
+    useEffect(() => {
+        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        return () => {
+            document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
+        };
+    }, []);
+    
     //Var to show password
     const [showPassword, setShowPassword] = useState(false);
 
@@ -32,8 +38,8 @@ function LogInSignUp() {
     // standard login
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        //Empty fields validation
+    
+        // Validación de campos vacíos
         if (!formData.email || !formData.password) {
             setAlert({
                 show: true,
@@ -42,35 +48,82 @@ function LogInSignUp() {
             });
             return;
         }
-
+    
         try {
             const response = await axios.post('http://localhost:8000/api/token/', formData);
-            localStorage.setItem('access', response.data.access); // Almacenar el token
-            localStorage.setItem('refresh', response.data.refresh); // Almacenar el token de refresco
-
+            localStorage.setItem('access', response.data.access); 
+            localStorage.setItem('refresh', response.data.refresh);
+    
             const token = localStorage.getItem('access');
             if (token) {
-                try {
-                    const decodedToken = jwtDecode(token);
-                    localStorage.setItem('user', JSON.stringify({
-                        nombre: `${decodedToken.nombre}`,
-                        apellidos: `${decodedToken.apellidos}`
-                    }));
-                } catch (error) {
-                    console.error('Error decoding token:', error);
-                }
+                const decodedToken = jwtDecode(token);
+                localStorage.setItem('user', JSON.stringify({
+                    nombre: decodedToken.nombre,
+                    evi: decodedToken.id,
+                    apellidos: decodedToken.apellidos
+                }));
             }
-
-            navigate('/event'); 
+    
+            navigate('/home'); 
         } catch (error) {
-            console.error('Error al iniciar sesión:', error);
-            setAlert({
-                show: true,
-                message: 'Error al iniciar sesión, usuario o contraseña incorrectos.',
-                type: 'danger'
-            });
+            console.error('Error al iniciar sesión:', error.response);
+            if (error.response) {
+                const errorMessage = error.response.data.message || 'Error al iniciar sesión, usuario o contraseña incorrectos.';
+                setAlert({
+                    show: true,
+                    message: errorMessage,
+                    type: 'danger'
+                });
+            } else {
+                setAlert({
+                    show: true,
+                    message: 'Error en el servidor. Intente más tarde.',
+                    type: 'danger'
+                });
+            }
         }
     };
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     //Empty fields validation
+    //     if (!formData.email || !formData.password) {
+    //         setAlert({
+    //             show: true,
+    //             message: 'Por favor ingrese todos los campos.',
+    //             type: 'danger'
+    //         });
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await axios.post('http://localhost:8000/api/token/', formData);
+    //         localStorage.setItem('access', response.data.access); // Almacenar el token
+    //         localStorage.setItem('refresh', response.data.refresh); // Almacenar el token de refresco
+
+    //         const token = localStorage.getItem('access');
+    //         if (token) {
+    //             try {
+    //                 const decodedToken = jwtDecode(token);
+    //                 localStorage.setItem('user', JSON.stringify({
+    //                     nombre: `${decodedToken.nombre}`,
+    //                     apellidos: `${decodedToken.apellidos}`
+    //                 }));
+    //             } catch (error) {
+    //                 console.error('Error decoding token:', error);
+    //             }
+    //         }
+
+    //         navigate('/home'); 
+    //     } catch (error) {
+    //         console.error('Error al iniciar sesión:', error);
+    //         setAlert({
+    //             show: true,
+    //             message: 'Error al iniciar sesión, usuario o contraseña incorrectos.',
+    //             type: 'danger'
+    //         });
+    //     }
+    // };
 
 
     // login and register with google
@@ -92,7 +145,7 @@ function LogInSignUp() {
             response_type: 'code',
             client_id: CLIENT_ID,
             redirect_uri: REDIRECT_URI,
-            prompt: 'select_account',
+            prompt: 'consent',
             access_type: 'offline',
             scope
         };
@@ -116,6 +169,58 @@ function LogInSignUp() {
             });
         }
     }, [location.search]);
+
+    //Recuperar Contraseña
+    const [email, setEmail] = useState('');
+
+    const handlePasswordRecovery = async (e) => {
+        e.preventDefault();
+
+         // Validar si el correo pertenece a los dominios de Google institucionales
+         const forbiddenDomains = ['@alumnos.udg.mx', '@academicos.udg.mx'];
+         const emailDomain = email.substring(email.lastIndexOf("@"));
+ 
+         if (forbiddenDomains.includes(emailDomain)) {
+             Swal.fire({
+                 title: 'Correo no permitido',
+                 text: 'No se puede recuperar la contraseña para correos institucionales de Google. Por favor, utiliza otro correo.',
+                 icon: 'error',
+                 confirmButtonText: 'Aceptar'
+             });
+             return; // Evita que se haga la petición a la API
+         }
+
+        try {
+            const response = await axios.post('http://localhost:8000/api/recover-password/', { email });
+            
+            // Si el correo se envió exitosamente
+            Swal.fire({
+                title: 'Correo enviado',
+                text: 'Se ha enviado un correo para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            });
+        } catch (error) {
+            if (error.response && error.response.status === 400) {
+                // Si el correo no está registrado
+                Swal.fire({
+                    title: 'Correo no registrado',
+                    text: 'El correo electrónico no está asociado a ninguna cuenta. Por favor, verifica y prueba de nuevo.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            } else {
+                // Si hay un error en el servidor u otro tipo de error
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al intentar enviar el correo. Por favor, inténtalo nuevamente más tarde.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        }
+    };
+
 
     return (
         <div className="container-fluid single-section bg-dark d-flex">
@@ -186,6 +291,18 @@ function LogInSignUp() {
                                         )}
                                     </button>
                                 </div>
+
+                                <div className="text-end mt-1">
+                                    <button
+                                        type="button"
+                                        className="btn btn-link p-0"
+                                        style={{ textDecoration: 'none', color: 'white' }} // Añadir estilos aquí
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#recoverPassword"
+                                    >
+                                        <p className='main-info-title m-0'>Recuperar contraseña</p>
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" className="btn log-in me-2 mt-2 mt-md-0">
                                 Iniciar Sesión
@@ -236,7 +353,45 @@ function LogInSignUp() {
                     </div>
                 </div>
             </div>
-            <Footer/>
+           {/* Modal Recuperar Contraseña */}
+            <div className="modal fade" id="recoverPassword" tabIndex="-1" aria-labelledby="recoverPasswordModalLabel" aria-hidden="true">
+                <style>
+                    {`
+                        .custom-modal {
+                            border: 3px solid black; /* Borde negro alrededor del modal */
+                        }
+
+                        .modal-backdrop {
+                            background-color: rgba(66, 112, 140, 0.8) !important; /* Sombra más clara (blanca) */
+                        }
+                    `}
+                </style>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content custom-modal">
+                        <div className="modal-header border-0">
+                            <h5 className="modal-title" id="recoverPasswordModalLabel">Recuperar Contraseña</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handlePasswordRecovery}> 
+                                <div className="mb-3">
+                                    <label htmlFor="emailInput" className="form-label">Correo Electrónico</label>
+                                    <input 
+                                        type="email" 
+                                        className="form-control" 
+                                        id="emailInput" 
+                                        placeholder="Ingrese su correo electrónico" 
+                                        value={email} 
+                                        onChange={(e) => setEmail(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100 log-in">Recuperar Contraseña</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

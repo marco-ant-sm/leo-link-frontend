@@ -1,11 +1,19 @@
 import './Homep.css';
 import { useEffect, useRef } from 'react';
 import PublicNavbar from '../PublicNavbar/PublicNavbar';
-import Footer from '../Footer/Footer';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
 
 function Homep() {
     const carouselRef = useRef(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        return () => {
+            document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
+        };
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -18,6 +26,10 @@ function Homep() {
 
         return () => clearTimeout(timer);
         }, []);
+
+    const goPublicEvents = () =>{
+        navigate('/verEventosPublicos');
+    }
 
     return (
         <>
@@ -43,7 +55,7 @@ function Homep() {
                                     </p>
                                 </div>
                                 <div className="carousel-text">
-                                    <button type="button" className="btn custom-btn">
+                                    <button type="button" className="btn custom-btn" onClick={goPublicEvents}>
                                         Ver Eventos Públicos
                                     </button>
                                 </div>
@@ -58,8 +70,7 @@ function Homep() {
                             </div>
                             <div className="carousel-text">
                                 <p>
-                                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum
-                                inventore ullam cum consectetur laborum.
+                                Nuestra plataforma te conecta con recursos valiosos para maximizar tu experiencia universitaria y alcanzar tus metas.
                                 </p>
                             </div>
                             <div className="carousel-text">
@@ -78,8 +89,7 @@ function Homep() {
                             </div>
                             <div className="carousel-text">
                                 <p>
-                                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum
-                                inventore ullam cum consectetur laborum.
+                                Descubre cómo nuestra red puede enriquecer tu trayectoria profesional y aprovecha al máximo cada etapa de tu carrera.
                                 </p>
                             </div>
                             <div className="carousel-text">
@@ -193,15 +203,15 @@ function Homep() {
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
-                            <i className="fa-solid fa-music" />
+                            <i class="fa-solid fa-umbrella-beach"></i>
                         </div>
-                        <p>Música</p>
+                        <p>Ocio</p>
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
-                            <i className="fa-solid fa-lightbulb" />
+                            <i class="fa-solid fa-person-biking"></i>
                         </div>
-                        <p>Ideas</p>
+                        <p>Deportivo</p>
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
@@ -213,13 +223,13 @@ function Homep() {
                         <div className="logo-cat">
                             <i className="fa-solid fa-gamepad" />
                         </div>
-                        <p>Games</p>
+                        <p>Recreativo</p>
                         </div>
                         <div className="cir d-flex">
                         <div className="logo-cat">
                             <i className="fa-solid fa-code" />
                         </div>
-                        <p>Code</p>
+                        <p>Informática</p>
                         </div>
                     </div>
                     </div>
@@ -227,7 +237,6 @@ function Homep() {
                 </div>
                 {/* END About section */}
             </main>
-            <Footer/>
         </>
 
     );

@@ -9,6 +9,7 @@ const LoginSuccess = () => {
         const params = new URLSearchParams(location.search);
         const user = {
             nombre: params.get('nombre'),
+            id: params.get('id'),
             apellidos: params.get('apellidos'),
             access: params.get('access'),
             refresh: params.get('refresh')
@@ -18,12 +19,13 @@ const LoginSuccess = () => {
         if (user.nombre && user.apellidos && user.access && user.refresh) {
             localStorage.setItem('user', JSON.stringify({
                 nombre: user.nombre,
+                evi: user.id,
                 apellidos: user.apellidos
             }));
             localStorage.setItem('access', user.access);
             localStorage.setItem('refresh', user.refresh);
-            if (window.location.pathname !== '/event') {
-                navigate('/event');
+            if (window.location.pathname !== '/home') {
+                navigate('/home');
             }
         } else {
             if (window.location.pathname !== '/signUp') {
