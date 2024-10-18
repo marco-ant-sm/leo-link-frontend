@@ -24,3 +24,7 @@ yarn-error.log*
 
 #variables de entorno
 .env
+
+#Carpetas con imagenes para usuarios y eventos
+/public/img/fakeEvents/
+/public/img/fakeUsers/
