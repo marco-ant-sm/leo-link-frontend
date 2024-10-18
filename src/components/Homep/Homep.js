@@ -31,6 +31,10 @@ function Homep() {
         navigate('/verEventosPublicos');
     }
 
+    const handleLogInClick = () => {
+        navigate('/signUp'); // Reemplaza '/dashboard' con la ruta a la que deseas redirigir
+    };
+
     return (
         <>
             <main>
@@ -74,7 +78,7 @@ function Homep() {
                                 </p>
                             </div>
                             <div className="carousel-text">
-                                <button type="button" className="btn custom-btn">
+                                <button type="button" className="btn custom-btn" onClick={handleLogInClick}>
                                 Crea tu cuenta
                                 </button>
                             </div>
@@ -93,7 +97,7 @@ function Homep() {
                                 </p>
                             </div>
                             <div className="carousel-text">
-                                <button type="button" className="btn custom-btn">
+                                <button type="button" className="btn custom-btn" onClick={handleLogInClick}>
                                 Iniciar Sesión
                                 </button>
                             </div>
@@ -135,7 +139,7 @@ function Homep() {
                             oportunidades a las que puedes acceder por ser parte de la
                             universidad
                         </p>
-                        <button type="button" className="btn btn-danger button-about">
+                        <button type="button" className="btn btn-danger button-about" onClick={handleLogInClick}>
                             Unirse a Leo Link
                         </button>
                         </div>
