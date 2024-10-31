@@ -7,7 +7,7 @@ function PublicNavbar() {
     const navigate = useNavigate();
 
     const handleLogInClick = () => {
-        navigate('/signUp'); // Reemplaza '/dashboard' con la ruta a la que deseas redirigir
+        navigate('/signUp');
     };
 
     return (

@@ -23,6 +23,7 @@ const ChatComponent = () => {
 
     const handleSendMessage = async () => {
         const message = messageInputRef.current.value.trim();
+        //console.log(message);
         if (message && !isBotTyping) {
             setMessages(prev => [...prev, { text: message, isUser: true }]);
             messageInputRef.current.value = '';

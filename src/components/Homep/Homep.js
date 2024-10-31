@@ -9,7 +9,7 @@ function Homep() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        document.body.style.overflow = 'auto';
         return () => {
             document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
         };
@@ -32,7 +32,7 @@ function Homep() {
     }
 
     const handleLogInClick = () => {
-        navigate('/signUp'); // Reemplaza '/dashboard' con la ruta a la que deseas redirigir
+        navigate('/signUp');
     };
 
     return (

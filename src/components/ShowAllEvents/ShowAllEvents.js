@@ -19,7 +19,7 @@ function ShowAllEvents() {
     const userId = JSON.parse(localStorage.getItem('user'))?.evi || 0;
 
     useEffect(() => {
-        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        document.body.style.overflow = 'auto'; 
         return () => {
             document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
         };

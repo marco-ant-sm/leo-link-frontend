@@ -231,7 +231,7 @@ function HomeUser() {
     }, []);
 
     useEffect(() => {
-        document.body.style.overflow = 'auto'; // Asegúrate de que el overflow esté habilitado
+        document.body.style.overflow = 'auto';
         return () => {
             document.body.style.overflow = ''; // Limpia el estilo cuando el componente se desmonta
         };
@@ -340,7 +340,7 @@ function HomeUser() {
                     )
                 );
     
-                // Asegúrate de que los eventos no se repitan
+                // Asegura que los eventos no se repitan
                 categorizedDescuentos = Array.from(new Set(categorizedDescuentos.map(event => event.id)))
                     .map(id => categorizedDescuentos.find(event => event.id === id));
             }

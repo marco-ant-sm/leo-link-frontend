@@ -191,7 +191,7 @@ function UserNavbar() {
             setFileInputKey(prevKey => prevKey + 1);
     
             // Fetch the updated user profile
-            await fetchUserProfile(); // Asegúrate de que esta función esté definida en tu componente
+            await fetchUserProfile(); 
     
             Swal.fire({
                 icon: 'success',
