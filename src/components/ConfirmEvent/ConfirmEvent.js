@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { format, isSameDay } from 'date-fns';
 
 const ConfirmEvent = () => {
     const [events, setEvents] = useState([]);
@@ -46,15 +47,35 @@ const ConfirmEvent = () => {
         setSelectedEvent(null);
     };
 
+    const hasEventEnded = (fechaFin, horaFin) => {
+        const fechaEvento = new Date(fechaFin + 'T00:00:00'); // Asegurarse de que se interprete como medianoche en la zona horaria local
+        const horaEvento = new Date(`${fechaFin}T${horaFin}`);
+        const now = new Date();
+    
+        // Si la fecha del evento es mayor que ahora, es válido
+        if (fechaEvento > now) {
+            return false; // Evento válido
+        }
+    
+        // Si la fecha del evento es igual a ahora, comprobamos la hora
+        if (isSameDay(fechaEvento, now)) {
+            return horaEvento < now; // Solo válido si la hora de fin es mayor que ahora
+        }
+    
+        // Si la fecha del evento es menor que ahora, no es válido
+        return true; // Evento no válido
+    };
+
     const getSimilarEvents = () => {
         if (!selectedEvent) return [];
         const { fecha_evento, fecha_fin_evento } = selectedEvent;
 
         return allEvents.filter(evento => 
             evento.disponible && (
-                evento.fecha_evento === fecha_evento ||
-                (new Date(evento.fecha_evento) >= new Date(fecha_evento) && new Date(evento.fecha_evento) <= new Date(fecha_fin_evento)) ||
-                (new Date(evento.fecha_fin_evento) >= new Date(fecha_evento) && new Date(evento.fecha_fin_evento) <= new Date(fecha_fin_evento)))
+                evento.fecha_evento === fecha_evento || evento.fecha_fin_evento === fecha_fin_evento ||
+                ((new Date(evento.fecha_evento) <= new Date(fecha_evento) && new Date(evento.fecha_fin_evento) >= new Date(fecha_fin_evento)) && !hasEventEnded(evento.fecha_fin_evento, evento.hora_fin_evento))
+                //||(new Date(evento.fecha_fin_evento) >= new Date(fecha_evento) && new Date(evento.fecha_fin_evento) <= new Date(fecha_fin_evento))
+                )
             )
     };
 

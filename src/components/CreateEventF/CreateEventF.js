@@ -196,8 +196,8 @@ const CreateEventF = () => {
 
         // Validación de fechas
         const hoy = new Date();
-        const fechaEventoDate = new Date(fechaEvento);
-        const fechaFinEventoDate = new Date(fechaFinEvento);
+        const fechaEventoDate = new Date(fechaEvento + 'T00:00:00');
+        const fechaFinEventoDate = new Date(fechaFinEvento + 'T00:00:00');
 
         if (fechaEventoDate <= hoy || fechaFinEventoDate <= hoy) {
             Swal.fire({
